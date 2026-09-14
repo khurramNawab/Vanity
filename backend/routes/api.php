@@ -28,6 +28,15 @@ Route::post('/checkout/progress', [\App\Http\Controllers\AbandonedCartController
 Route::get('/checkout/cart-session', [\App\Http\Controllers\AbandonedCartController::class, 'getCartSession']);
 
 // Public Catalog routes
+Route::get('/seed-database', function() {
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    return response()->json([
+        'success' => true,
+        'message' => 'Database seeded successfully',
+        'products_count' => \App\Models\Product::count(),
+        'categories_count' => \App\Models\Category::count()
+    ]);
+});
 Route::get('/products', [PublicProductController::class, 'index']);
 Route::get('/products/{id}', [PublicProductController::class, 'show']);
 Route::get('/categories', [PublicProductController::class, 'categories']);

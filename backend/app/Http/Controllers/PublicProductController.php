@@ -22,6 +22,15 @@ class PublicProductController extends Controller
      */
     public function index(Request $request)
     {
+        // Auto-seed initial catalog if database is fresh/empty
+        if (Product::count() === 0) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Auto seed failed: ' . $e->getMessage());
+            }
+        }
+
         $query = Product::where('status', 'active')->with(['category', 'images']);
 
         // Search query parameter
