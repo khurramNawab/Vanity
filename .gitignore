@@ -1,0 +1,53 @@
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+.nova/
+.zed/
+*.pem
+*.key
+*.log
+
+# Environment Variables & Secrets (CRITICAL: NEVER COMMIT SECRETS)
+.env
+.env.*
+!.env.example
+*.env
+
+# Backend Dependencies & Cache
+backend/vendor/
+backend/node_modules/
+backend/public/storage
+backend/public/hot
+backend/public/build
+backend/storage/*.key
+backend/storage/pail/
+backend/storage/app/public/invoices/*
+backend/storage/app/public/products/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/logs/*
+backend/database/database.sqlite*
+backend/.phpunit.cache
+backend/.phpunit.result.cache
+
+# Frontend Dependencies & Build Output
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/*.tsbuildinfo
+frontend/.vercel/
+frontend/.pnp
+frontend/.pnp.*
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+# Design Mockups & Prompt Exports
+silver_jewellery/
+silver_jewellery_ui_ux/
