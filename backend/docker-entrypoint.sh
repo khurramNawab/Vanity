@@ -8,9 +8,10 @@ if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DB_CONNECTION" ]; then
     chown -R www-data:www-data /var/www/html/database
 fi
 
-# Run storage link and cache optimization
+# Run storage link, migrations, and seeds automatically on startup
 php artisan storage:link || true
 php artisan migrate --force || true
+php artisan db:seed --force || true
 php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
