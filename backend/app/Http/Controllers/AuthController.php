@@ -39,7 +39,7 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         try {
-            \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\WelcomeEmail($user, 'VANITY10'));
+            \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\WelcomeEmail($user, 'VANITY10'));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send welcome email: ' . $e->getMessage());
         }
