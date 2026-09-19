@@ -63,7 +63,13 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'sku' => 'required|string|max:255|unique:products,sku',
             'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'canonical_url' => 'nullable|string|max:255',
+            'og_image_url' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'silver_purity' => 'required|string|max:50',
             'silver_weight' => 'required|numeric|min:0.01',
@@ -76,6 +82,8 @@ class ProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'image_alt_text' => 'nullable|string',
+            'image_alt_texts.*' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'image_urls.*' => 'nullable|string'
         ]);
@@ -83,11 +91,13 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        $slug = Str::slug($request->name);
+        $rawSlug = !empty($request->slug) ? $request->slug : $request->name;
+        $slug = Str::slug($rawSlug);
         $originalSlug = $slug;
         $count = 1;
         while (Product::where('slug', $slug)->exists()) {
@@ -99,6 +109,11 @@ class ProductController extends Controller
             'name' => $request->name,
             'slug' => $slug,
             'description' => $request->description,
+            'meta_title' => $request->meta_title ?: ($request->name . ' | 925 Sterling Silver | Vanity'),
+            'meta_description' => $request->meta_description ?: (Str::limit(strip_tags($request->description ?: $request->name), 155)),
+            'meta_keywords' => $request->meta_keywords,
+            'canonical_url' => $request->canonical_url,
+            'og_image_url' => $request->og_image_url,
             'category_id' => $request->category_id,
             'silver_purity' => $request->silver_purity,
             'silver_weight' => $request->silver_weight,
@@ -113,16 +128,20 @@ class ProductController extends Controller
             'status' => $request->status,
         ]);
 
+        $defaultAlt = $request->image_alt_text ?: ($request->name . ' - Handcrafted 925 Sterling Silver Jewellery');
+        $altTexts = is_array($request->image_alt_texts) ? $request->image_alt_texts : [];
+
         // Process Uploaded Files
         $sortOrder = 0;
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $file) {
+            foreach ($request->file('images') as $i => $file) {
                 $path = $file->store('products', 'public');
                 $url = Storage::url($path);
 
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image_path' => asset($url),
+                    'alt_text' => isset($altTexts[$i]) && !empty($altTexts[$i]) ? $altTexts[$i] : $defaultAlt,
                     'is_primary' => $sortOrder === 0,
                     'sort_order' => $sortOrder++,
                 ]);
@@ -131,11 +150,12 @@ class ProductController extends Controller
 
         // Process Image URLs (helpful for seeds or linking external assets)
         if ($request->has('image_urls')) {
-            foreach ($request->image_urls as $url) {
+            foreach ($request->image_urls as $i => $url) {
                 if (!empty($url)) {
                     ProductImage::create([
                         'product_id' => $product->id,
                         'image_path' => $url,
+                        'alt_text' => isset($altTexts[$i]) && !empty($altTexts[$i]) ? $altTexts[$i] : $defaultAlt,
                         'is_primary' => $sortOrder === 0,
                         'sort_order' => $sortOrder++,
                     ]);
@@ -148,6 +168,7 @@ class ProductController extends Controller
             ProductImage::create([
                 'product_id' => $product->id,
                 'image_path' => 'https://placehold.co/600x600/FAF9F6/1A1A1A?text=No+Image',
+                'alt_text' => $defaultAlt,
                 'is_primary' => true,
                 'sort_order' => 0,
             ]);
@@ -155,7 +176,7 @@ class ProductController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Product created successfully',
+            'message' => 'Product created successfully with SEO metadata',
             'data' => $product->load('images')
         ], 201);
     }
@@ -197,7 +218,13 @@ class ProductController extends Controller
         $validator = Validator::make($request->all(), [
             'sku' => 'required|string|max:255|unique:products,sku,' . $id,
             'name' => 'required|string|max:255',
+            'slug' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string',
+            'meta_keywords' => 'nullable|string',
+            'canonical_url' => 'nullable|string|max:255',
+            'og_image_url' => 'nullable|string',
             'category_id' => 'required|exists:categories,id',
             'silver_purity' => 'required|string|max:50',
             'silver_weight' => 'required|numeric|min:0.01',
@@ -210,6 +237,8 @@ class ProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'image_alt_text' => 'nullable|string',
+            'image_alt_texts.*' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'image_urls.*' => 'nullable|string'
         ]);
@@ -217,11 +246,20 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
+                'message' => $validator->errors()->first(),
                 'errors' => $validator->errors()
             ], 422);
         }
 
-        if ($product->name !== $request->name) {
+        if (!empty($request->slug)) {
+            $slug = Str::slug($request->slug);
+            $originalSlug = $slug;
+            $count = 1;
+            while (Product::where('slug', $slug)->where('id', '!=', $id)->exists()) {
+                $slug = $originalSlug . '-' . $count++;
+            }
+            $product->slug = $slug;
+        } elseif ($product->name !== $request->name) {
             $slug = Str::slug($request->name);
             $originalSlug = $slug;
             $count = 1;
@@ -235,6 +273,11 @@ class ProductController extends Controller
             'sku' => $request->sku,
             'name' => $request->name,
             'description' => $request->description,
+            'meta_title' => $request->meta_title ?: ($request->name . ' | 925 Sterling Silver | Vanity'),
+            'meta_description' => $request->meta_description ?: (Str::limit(strip_tags($request->description ?: $request->name), 155)),
+            'meta_keywords' => $request->meta_keywords,
+            'canonical_url' => $request->canonical_url,
+            'og_image_url' => $request->og_image_url,
             'category_id' => $request->category_id,
             'silver_purity' => $request->silver_purity,
             'silver_weight' => $request->silver_weight,
@@ -248,6 +291,13 @@ class ProductController extends Controller
             'is_new_arrival' => $request->boolean('is_new_arrival', false),
             'status' => $request->status,
         ]);
+
+        if ($request->has('image_alt_text') && !empty($request->image_alt_text)) {
+            $primaryImg = ProductImage::where('product_id', $product->id)->where('is_primary', true)->first();
+            if ($primaryImg) {
+                $primaryImg->update(['alt_text' => $request->image_alt_text]);
+            }
+        }
 
         // If new images uploaded, handle them
         $sortOrder = ProductImage::where('product_id', $product->id)->max('sort_order') + 1;
@@ -346,6 +396,10 @@ class ProductController extends Controller
             'discount_percent',
             'stock_quantity',
             'image_url',
+            'image_alt_text',
+            'meta_title',
+            'meta_description',
+            'meta_keywords',
             'description'
         ];
 
@@ -362,6 +416,10 @@ class ProductController extends Controller
                 '10.00',
                 '15',
                 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
+                'Handcrafted 925 sterling silver emerald cut solitaire ring for women',
+                'Emerald Cut Solitaire Silver Ring | 925 Sterling Silver | Vanity',
+                'Buy handcrafted 925 sterling silver solitaire ring featuring premium emerald-cut cubic zirconia. BIS Hallmarked with lifetime authenticity.',
+                'silver ring, emerald cut ring, 925 silver solitaire, kolkata silver jewellery',
                 'Handcrafted sterling silver ring with emerald cut center CZ stone.'
             ],
             [
@@ -376,6 +434,10 @@ class ProductController extends Controller
                 '5.00',
                 '8',
                 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
+                'Traditional royal Kolkata oxidised 925 sterling silver statement haar necklace',
+                'Chandi Haar Statement Silver Necklace | Modern Heirlooms | Vanity',
+                'Explore the royal Kolkata oxidised silver statement necklace. Handcrafted in 925 sterling silver with BIS hallmark certified quality.',
+                'silver necklace, chandi haar, oxidised silver jewellery, bridal silver necklace',
                 'Traditional royal Kolkata oxidised silver statement necklace.'
             ]
         ];
@@ -512,6 +574,10 @@ class ProductController extends Controller
             $rowDiscount = isset($headerMap['discount_percent']) && isset($row[$headerMap['discount_percent']]) ? floatval($row[$headerMap['discount_percent']]) : 0;
             $rowStock = isset($headerMap['stock_quantity']) && isset($row[$headerMap['stock_quantity']]) ? intval($row[$headerMap['stock_quantity']]) : 0;
             $rowImageUrl = isset($headerMap['image_url']) && isset($row[$headerMap['image_url']]) ? trim($row[$headerMap['image_url']]) : null;
+            $rowAltText = isset($headerMap['image_alt_text']) && isset($row[$headerMap['image_alt_text']]) ? trim($row[$headerMap['image_alt_text']]) : null;
+            $rowMetaTitle = isset($headerMap['meta_title']) && isset($row[$headerMap['meta_title']]) ? trim($row[$headerMap['meta_title']]) : null;
+            $rowMetaDesc = isset($headerMap['meta_description']) && isset($row[$headerMap['meta_description']]) ? trim($row[$headerMap['meta_description']]) : null;
+            $rowMetaKeywords = isset($headerMap['meta_keywords']) && isset($row[$headerMap['meta_keywords']]) ? trim($row[$headerMap['meta_keywords']]) : null;
             $rowDesc = isset($headerMap['description']) && isset($row[$headerMap['description']]) ? trim($row[$headerMap['description']]) : null;
 
             if (empty($rowSku) || empty($rowName)) {
@@ -537,6 +603,9 @@ class ProductController extends Controller
                     'name' => $rowName,
                     'slug' => $productSlug,
                     'description' => $rowDesc,
+                    'meta_title' => $rowMetaTitle ?: ($rowName . ' | 925 Sterling Silver | Vanity'),
+                    'meta_description' => $rowMetaDesc ?: (Str::limit(strip_tags($rowDesc ?: $rowName), 155)),
+                    'meta_keywords' => $rowMetaKeywords,
                     'category_id' => $category->id,
                     'silver_purity' => $rowPurity,
                     'silver_weight' => $rowWeight,
@@ -563,7 +632,10 @@ class ProductController extends Controller
                 if ($rowImageUrl) {
                     ProductImage::updateOrCreate(
                         ['product_id' => $product->id, 'is_primary' => true],
-                        ['image_path' => $rowImageUrl]
+                        [
+                            'image_path' => $rowImageUrl,
+                            'alt_text' => $rowAltText ?: ($rowName . ' - Handcrafted 925 Sterling Silver Jewellery')
+                        ]
                     );
                 }
             } catch (\Exception $e) {

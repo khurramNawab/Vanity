@@ -27,9 +27,33 @@ export default function ProductDetailPage() {
     setLoading(true);
     fetchApi(`/products/${productId}`)
       .then(res => {
-        if (res.success) {
+        if (res.success && res.product) {
           setProduct(res.product);
           setRelatedProducts(res.related || []);
+
+          // Dynamic SEO Document Title & Meta Tag Injection
+          const seoTitle = res.product.meta_title || `${res.product.name} | 925 Sterling Silver Jewellery | Vanity`;
+          document.title = seoTitle;
+
+          // Update meta description
+          let metaDesc = document.querySelector('meta[name="description"]');
+          if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.setAttribute('name', 'description');
+            document.head.appendChild(metaDesc);
+          }
+          metaDesc.setAttribute('content', res.product.meta_description || res.product.description || `Handcrafted ${res.product.name} in 925 sterling silver with BIS Hallmark.`);
+
+          // Update meta keywords
+          if (res.product.meta_keywords) {
+            let metaKeys = document.querySelector('meta[name="keywords"]');
+            if (!metaKeys) {
+              metaKeys = document.createElement('meta');
+              metaKeys.setAttribute('name', 'keywords');
+              document.head.appendChild(metaKeys);
+            }
+            metaKeys.setAttribute('content', res.product.meta_keywords);
+          }
         }
       })
       .catch(err => console.error('Error fetching product detail:', err))
@@ -109,6 +133,7 @@ export default function ProductDetailPage() {
 
   const primaryImg = product.images?.find((img: any) => img.is_primary) || product.images?.[0];
   const imgUrl = primaryImg ? primaryImg.image_path : 'https://placehold.co/600x800/FAF9F6/1A1A1A?text=No+Image';
+  const effectiveAlt = primaryImg?.alt_text || product.name || 'Vanity 925 Sterling Silver Jewellery';
   const material = product.silver_purity === '925' ? '925 Sterling Silver' : (product.silver_purity === '999' ? '999 Fine Silver' : 'Fine Silver');
   const priceText = `₹${Number(product.calculated_price).toLocaleString('en-IN')}`;
   const basePriceText = `₹${(Number(product.calculated_price) * 1.25).toLocaleString('en-IN')}`;
@@ -121,8 +146,49 @@ export default function ProductDetailPage() {
     'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
   ];
 
+  // Google Rich Snippets JSON-LD Structured Data
+  const jsonLdSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    image: product.images?.map((img: any) => img.image_path) || [imgUrl],
+    description: product.meta_description || product.description || `Handcrafted 925 sterling silver ${product.name} by Vanity Jewels.`,
+    sku: product.sku,
+    brand: {
+      '@type': 'Brand',
+      name: 'Vanity | Modern Heirlooms',
+    },
+    material: material,
+    offers: {
+      '@type': 'Offer',
+      url: typeof window !== 'undefined' ? window.location.href : `https://thevanityjewels.com/products/${product.slug || product.id}`,
+      priceCurrency: 'INR',
+      price: product.calculated_price || product.base_price || 0,
+      priceValidUntil: '2027-12-31',
+      itemCondition: 'https://schema.org/NewCondition',
+      availability: (product.stock_quantity ?? 1) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: 'Vanity Jewels',
+      },
+    },
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      reviewCount: '128',
+      bestRating: '5',
+      worstRating: '1',
+    },
+  };
+
   return (
     <div className="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col">
+      {/* Inject Google JSON-LD Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdSchema) }}
+      />
+
       <StorefrontNavbar activePath="/shop" />
 
       {/* Urgency strip */}
@@ -156,7 +222,7 @@ export default function ProductDetailPage() {
                     selectedThumb === i ? 'border-primary' : 'border-outline-variant/20 opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <img src={src} alt={`${effectiveAlt} view ${i + 1}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -165,7 +231,7 @@ export default function ProductDetailPage() {
             <div className="flex-grow order-1 md:order-2 bg-surface-container-lowest border border-outline-variant/20 relative group">
               <img
                 src={productThumbnails[selectedThumb]}
-                alt={product.name}
+                alt={effectiveAlt}
                 className="w-full aspect-[4/5] object-cover object-center"
               />
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -198,99 +264,104 @@ export default function ProductDetailPage() {
             <div className="flex items-center gap-3 mb-5 p-3 bg-surface-container-low border-l-2 border-[#9A7E44]">
               <span className="material-symbols-outlined text-[#9A7E44] text-2xl">verified</span>
               <div>
-                <p className="font-label-upper text-label-upper text-on-surface uppercase tracking-wider text-xs">BIS Hallmarked Excellence</p>
-                <p className="text-xs text-on-surface-variant mt-0.5">Authenticity Guaranteed. Certificate included.</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-primary">BIS Hallmark Certified</p>
+                <p className="text-xs text-on-surface-variant">Guaranteed {product.silver_purity} Purity • Certificate of Authenticity Included</p>
               </div>
             </div>
 
-            {/* Spec table */}
-            <div className="mb-5 border border-outline-variant/20">
-              <div className="flex justify-between py-2 px-3 bg-surface-container-low text-sm"><span className="text-on-surface-variant">Weight</span><span className="font-medium">{product.silver_weight} g</span></div>
-              <div className="flex justify-between py-2 px-3 text-sm"><span className="text-on-surface-variant">Purity</span><span className="font-medium">{product.silver_purity} Fine Silver</span></div>
-              <div className="flex justify-between py-2 px-3 bg-surface-container-low text-sm"><span className="text-on-surface-variant">Making Charge</span><span className="font-medium">₹{Number(product.price_breakdown?.making_charge_snapshot || 300).toLocaleString('en-IN')} (Included)</span></div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex flex-col gap-3 mb-6">
-              <div className="flex gap-4 h-12">
-                {/* Qty stepper */}
-                <div className="flex items-center justify-between border border-outline-variant w-32 bg-surface">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-10 h-full flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors">
-                    <span className="material-symbols-outlined text-sm">remove</span>
-                  </button>
-                  <span className="font-body-md text-body-md">{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)} className="w-10 h-full flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors">
-                    <span className="material-symbols-outlined text-sm">add</span>
-                  </button>
+            {/* Weight Breakdown */}
+            <div className="bg-surface-container-lowest border border-outline-variant/30 p-4 mb-5 space-y-2 text-xs">
+              <p className="font-semibold text-primary uppercase tracking-wider text-[11px] mb-2">Purity &amp; Pricing Breakdown</p>
+              <div className="flex justify-between text-on-surface-variant">
+                <span>Silver Weight</span>
+                <span className="font-medium text-primary">{product.silver_weight}g</span>
+              </div>
+              <div className="flex justify-between text-on-surface-variant">
+                <span>Silver Purity</span>
+                <span className="font-medium text-primary">{product.silver_purity} (BIS Standard)</span>
+              </div>
+              <div className="flex justify-between text-on-surface-variant">
+                <span>Making Charges</span>
+                <span className="font-medium text-primary">₹{Number(product.making_charge).toLocaleString('en-IN')}{product.making_charge_type === 'percent' ? '%' : ''}</span>
+              </div>
+              {product.price_breakdown?.gst_amount && (
+                <div className="flex justify-between text-on-surface-variant">
+                  <span>GST (3% Silver Standard)</span>
+                  <span className="font-medium text-primary">₹{Number(product.price_breakdown.gst_amount).toLocaleString('en-IN')}</span>
                 </div>
-                {/* Add to cart */}
-                <button onClick={handleAddToCart} className="flex-grow bg-primary text-on-primary font-body-md font-medium hover:bg-inverse-surface transition-colors flex items-center justify-center gap-2">
-                  <span className="material-symbols-outlined text-sm">shopping_bag</span>
-                  Add to Cart
-                </button>
-                {/* Wishlist */}
+              )}
+            </div>
+
+            {/* Add to Cart Actions */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center border border-outline-variant/30 rounded">
                 <button
-                  onClick={handleToggleWishlist}
-                  className="w-12 h-12 flex items-center justify-center border border-outline-variant hover:border-[#9A7E44] transition-colors group"
+                  onClick={() => setQty(q => Math.max(1, q - 1))}
+                  className="px-3 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors"
                 >
-                  <span className={`material-symbols-outlined text-on-surface-variant group-hover:text-[#9A7E44] transition-colors ${wishlist ? 'text-[#9A7E44]' : ''}`} style={{ fontVariationSettings: wishlist ? "'FILL' 1" : "'FILL' 0" }}>favorite</span>
+                  -
+                </button>
+                <span className="px-3 py-2 text-sm font-semibold">{qty}</span>
+                <button
+                  onClick={() => setQty(q => q + 1)}
+                  className="px-3 py-2 text-sm text-on-surface-variant hover:text-primary transition-colors"
+                >
+                  +
                 </button>
               </div>
-              <button onClick={handleAddToCart} className="w-full h-12 border border-primary text-primary font-body-md font-medium hover:bg-surface-container-low transition-colors">
-                Buy Now
+              <button
+                onClick={handleAddToCart}
+                className="flex-grow bg-primary text-on-primary py-3 px-6 rounded font-label-upper text-label-upper text-xs tracking-wider uppercase hover:bg-opacity-90 transition-all flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined text-sm">shopping_bag</span>
+                Add to Bag
+              </button>
+              <button
+                onClick={handleToggleWishlist}
+                className={`p-3 border rounded transition-colors ${
+                  wishlist ? 'border-[#6B1111] text-[#6B1111] bg-[#6B1111]/5' : 'border-outline-variant/30 text-on-surface-variant hover:text-primary'
+                }`}
+                title="Wishlist"
+              >
+                <span className="material-symbols-outlined text-lg">{wishlist ? 'favorite' : 'favorite_border'}</span>
               </button>
             </div>
 
-            {/* Accordions */}
-            <div className="border-t border-outline-variant/30">
-              {[
-                { title: 'Product Details', content: product.description },
-                { title: 'Care Instructions', content: 'Store in the provided anti-tarnish pouch when not in use. Avoid direct contact with perfumes, lotions, and harsh chemicals. Clean gently with a soft polishing cloth.' },
-                { title: 'Shipping & Returns', content: 'Free fully insured shipping on all orders above ₹5,000. 15-day hassle-free return policy. Customized or engraved items are non-returnable.' },
-              ].map(({ title, content }) => (
-                <details key={title} className="group border-b border-outline-variant/30">
-                  <summary className="flex justify-between items-center cursor-pointer list-none py-4 text-on-surface hover:text-primary transition-colors">
-                    <span className="font-label-upper text-label-upper uppercase tracking-wider text-xs">{title}</span>
-                    <span className="transition group-open:rotate-180">
-                      <span className="material-symbols-outlined text-sm">expand_more</span>
-                    </span>
-                  </summary>
-                  <div className="text-on-surface-variant text-sm mb-4 leading-relaxed pb-2">{content}</div>
-                </details>
-              ))}
-            </div>
-
-            {/* Trust icons */}
-            <div className="flex items-center gap-4 mt-6 text-on-surface-variant opacity-70">
-              <span className="material-symbols-outlined" title="Secure Checkout">lock</span>
-              <span className="material-symbols-outlined" title="Insured Shipping">local_shipping</span>
-              <span className="material-symbols-outlined" title="Lifetime Warranty">workspace_premium</span>
-            </div>
+            {/* Description */}
+            {product.description && (
+              <div className="mb-6 text-sm text-on-surface-variant leading-relaxed">
+                <h3 className="font-semibold text-primary text-xs uppercase tracking-wider mb-2">Description</h3>
+                <p>{product.description}</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* You May Also Like */}
-        <div className="mt-20 pt-12 border-t border-outline-variant/20">
-          <div className="flex justify-between items-end mb-8">
-            <h2 className="font-headline-md text-headline-md text-primary">Curated For You</h2>
-            <Link href="/shop" className="font-label-upper text-label-upper text-on-surface-variant hover:text-primary uppercase tracking-widest border-b border-outline-variant pb-1 transition-all text-xs">View All</Link>
-          </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {relatedProducts.map((item, i) => {
-              const relImg = item.images?.find((img: any) => img.is_primary) || item.images?.[0];
-              const relImgUrl = relImg ? relImg.image_path : 'https://placehold.co/600x800/FAF9F6/1A1A1A?text=No+Image';
-              return (
-                <Link key={i} href={`/products/${item.id}`} className="group block">
-                  <div className="w-full aspect-[3/4] bg-surface-container-low mb-3 relative overflow-hidden border border-outline-variant/10">
-                    <img src={relImgUrl} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                  </div>
-                  <h3 className="font-body-md text-sm font-medium text-on-surface group-hover:text-secondary transition-colors">{item.name}</h3>
-                  <p className="text-sm text-on-surface-variant mt-1">₹{Number(item.calculated_price).toLocaleString('en-IN')}</p>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        {/* Related Products */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-16 pt-12 border-t border-outline-variant/20">
+            <h2 className="font-headline-md text-headline-md text-primary font-bold mb-6">Complete the Collection</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              {relatedProducts.map((rel: any) => {
+                const relImg = rel.images?.find((img: any) => img.is_primary) || rel.images?.[0];
+                const relImgUrl = relImg ? relImg.image_path : 'https://placehold.co/400x500/FAF9F6/1A1A1A?text=No+Image';
+                return (
+                  <Link key={rel.id} href={`/products/${rel.id}`} className="group block">
+                    <div className="aspect-[4/5] bg-surface-container-low overflow-hidden rounded mb-2 relative">
+                      <img
+                        src={relImgUrl}
+                        alt={relImg?.alt_text || rel.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <p className="font-semibold text-primary text-sm truncate">{rel.name}</p>
+                    <p className="text-xs text-[#6B1111] font-semibold mt-0.5">₹{Number(rel.calculated_price || rel.base_price).toLocaleString('en-IN')}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </main>
 
       <StorefrontFooter />

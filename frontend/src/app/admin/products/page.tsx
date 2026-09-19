@@ -6,6 +6,7 @@ import { fetchApi } from '@/lib/api';
 interface ProductImage {
   id: number;
   image_path: string;
+  alt_text?: string | null;
   is_primary: boolean;
 }
 
@@ -20,6 +21,11 @@ interface Product {
   name: string;
   slug: string;
   description: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
+  canonical_url?: string | null;
+  og_image_url?: string | null;
   category_id: number;
   silver_purity: string;
   silver_weight: string;
@@ -50,26 +56,39 @@ export default function AdminProductsPage() {
   const [total, setTotal] = useState(0);
 
   const [showFormModal, setShowFormModal] = useState(false);
+  const [modalTab, setModalTab] = useState<'details' | 'pricing' | 'seo'>('details');
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Form States - Details
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [purity, setPurity] = useState('925');
   const [weight, setWeight] = useState('');
-  const [makingCharge, setMakingCharge] = useState('');
-  const [makingChargeType, setMakingChargeType] = useState<'flat' | 'percent'>('flat');
-  const [basePrice, setBasePrice] = useState('');
-  const [discountPercent, setDiscountPercent] = useState('0');
   const [stock, setStock] = useState('0');
   const [isFeatured, setIsFeatured] = useState(false);
   const [isBestseller, setIsBestseller] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
+
+  // Form States - Pricing & Media
+  const [makingCharge, setMakingCharge] = useState('');
+  const [makingChargeType, setMakingChargeType] = useState<'flat' | 'percent'>('flat');
+  const [basePrice, setBasePrice] = useState('');
+  const [discountPercent, setDiscountPercent] = useState('0');
   const [imageUrl, setImageUrl] = useState('');
+  const [imageAltText, setImageAltText] = useState('');
+
+  // Form States - SEO Engine
+  const [slug, setSlug] = useState('');
+  const [metaTitle, setMetaTitle] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [metaKeywords, setMetaKeywords] = useState('');
+  const [canonicalUrl, setCanonicalUrl] = useState('');
+  const [serpPreviewDevice, setSerpPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
 
   // Bulk Import States
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -80,7 +99,6 @@ export default function AdminProductsPage() {
 
   // Cloudinary / Image Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const handleDownloadSampleCsv = () => {
     const a = document.createElement('a');
@@ -108,8 +126,11 @@ export default function AdminProductsPage() {
           callback(data.url);
         } else {
           setImageUrl(data.url);
+          if (!imageAltText && name) {
+            setImageAltText(`${name} - Handcrafted 925 Sterling Silver Jewellery`);
+          }
         }
-        alert(`Image uploaded successfully to Cloudinary/Storage! CDN URL generated.`);
+        alert(`Image uploaded successfully to Cloudinary! CDN URL generated.`);
       } else {
         alert(data.message || 'Image upload failed.');
       }
@@ -152,16 +173,19 @@ export default function AdminProductsPage() {
     }
   };
 
-  const loadProducts = async () => {
+  const loadProducts = async (page = 1) => {
     setLoading(true);
     try {
-      let endpoint = `/admin/products?page=${currentPage}&search=${searchTerm}`;
-      if (selectedCategory) endpoint += `&category_id=${selectedCategory}`;
-      const response = await fetchApi(endpoint);
-      if (response.success) {
-        setProducts(response.data.data);
-        setLastPage(response.data.last_page);
-        setTotal(response.data.total || response.data.data.length);
+      let url = `/admin/products?page=${page}`;
+      if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
+      if (selectedCategory) url += `&category_id=${selectedCategory}`;
+
+      const res = await fetchApi(url);
+      if (res.success && res.data) {
+        setProducts(res.data.data);
+        setCurrentPage(res.data.current_page);
+        setLastPage(res.data.last_page);
+        setTotal(res.data.total);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load products');
@@ -172,68 +196,140 @@ export default function AdminProductsPage() {
 
   const loadCategories = async () => {
     try {
-      const response = await fetchApi('/admin/categories');
-      if (response.success) setCategories(response.data);
-    } catch (err) {
-      console.error('Failed to load categories', err);
+      const res = await fetchApi('/admin/categories');
+      if (res.success && res.data) {
+        setCategories(res.data);
+        if (res.data.length > 0 && !categoryId) {
+          setCategoryId(res.data[0].id.toString());
+        }
+      }
+    } catch (err: any) {
+      console.error('Error loading categories:', err);
     }
   };
 
-  useEffect(() => { loadCategories(); }, []);
-  useEffect(() => { loadProducts(); }, [currentPage, selectedCategory]);
+  useEffect(() => {
+    loadProducts(currentPage);
+    loadCategories();
+  }, [currentPage, selectedCategory]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
-    loadProducts();
+    loadProducts(1);
   };
 
   const resetForm = () => {
-    setSku(''); setName(''); setDescription('');
-    setCategoryId(categories[0]?.id.toString() || '');
-    setPurity('925'); setWeight(''); setMakingCharge('');
-    setMakingChargeType('flat'); setBasePrice('');
-    setDiscountPercent('0'); setStock('0');
-    setIsFeatured(false); setIsBestseller(false); setIsNewArrival(false);
-    setStatus('active'); setImageUrl('');
+    setSku('');
+    setName('');
+    setDescription('');
+    setPurity('925');
+    setWeight('');
+    setMakingCharge('');
+    setMakingChargeType('flat');
+    setBasePrice('');
+    setDiscountPercent('0');
+    setStock('0');
+    setIsFeatured(false);
+    setIsBestseller(false);
+    setIsNewArrival(false);
+    setStatus('active');
+    setImageUrl('');
+    setImageAltText('');
+    setSlug('');
+    setMetaTitle('');
+    setMetaDescription('');
+    setMetaKeywords('');
+    setCanonicalUrl('');
+    setModalTab('details');
+  };
+
+  const autoGenerateSeoTitle = () => {
+    if (!name) return;
+    const cat = categories.find(c => c.id.toString() === categoryId)?.name || 'Jewellery';
+    setMetaTitle(`${name} | 925 Sterling Silver ${cat} | Vanity`);
+  };
+
+  const autoGenerateMetaDescription = () => {
+    if (!name) return;
+    const cat = categories.find(c => c.id.toString() === categoryId)?.name || 'Silver Jewellery';
+    const excerpt = description ? description.slice(0, 75).trim() + '. ' : '';
+    setMetaDescription(`Buy handcrafted ${name} in 925 sterling silver. ${excerpt}Certified BIS Hallmark with lifetime authenticity from Vanity.`);
+  };
+
+  const autoGenerateSlug = () => {
+    if (!name) return;
+    setSlug(name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
   };
 
   const handleOpenCreate = () => {
-    setIsEditing(false); setEditingId(null);
+    setIsEditing(false);
+    setEditingId(null);
     resetForm();
-    setShowFormModal(true); setError(null);
+    setShowFormModal(true);
+    setError(null);
   };
 
   const handleOpenEdit = (product: Product) => {
-    setIsEditing(true); setEditingId(product.id);
-    setSku(product.sku); setName(product.name);
+    setIsEditing(true);
+    setEditingId(product.id);
+    setSku(product.sku);
+    setName(product.name);
     setDescription(product.description || '');
     setCategoryId(product.category_id.toString());
-    setPurity(product.silver_purity); setWeight(product.silver_weight);
+    setPurity(product.silver_purity);
+    setWeight(product.silver_weight);
     setMakingCharge(product.making_charge);
     setMakingChargeType(product.making_charge_type);
     setBasePrice(product.base_price || '');
     setDiscountPercent(product.discount_percent);
     setStock(product.stock_quantity.toString());
-    setIsFeatured(product.is_featured); setIsBestseller(product.is_bestseller);
-    setIsNewArrival(product.is_new_arrival); setStatus(product.status);
+    setIsFeatured(product.is_featured);
+    setIsBestseller(product.is_bestseller);
+    setIsNewArrival(product.is_new_arrival);
+    setStatus(product.status);
     setImageUrl(product.images?.[0]?.image_path || '');
-    setShowFormModal(true); setError(null);
+    setImageAltText(product.images?.[0]?.alt_text || '');
+    setSlug(product.slug || '');
+    setMetaTitle(product.meta_title || '');
+    setMetaDescription(product.meta_description || '');
+    setMetaKeywords(product.meta_keywords || '');
+    setCanonicalUrl(product.canonical_url || '');
+    setModalTab('details');
+    setShowFormModal(true);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(null); setSubmitting(true);
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
     const payload = {
-      sku, name, description, category_id: parseInt(categoryId),
-      silver_purity: purity, silver_weight: parseFloat(weight),
-      making_charge: parseFloat(makingCharge), making_charge_type: makingChargeType,
+      sku,
+      name,
+      slug: slug || undefined,
+      description,
+      meta_title: metaTitle || undefined,
+      meta_description: metaDescription || undefined,
+      meta_keywords: metaKeywords || undefined,
+      canonical_url: canonicalUrl || undefined,
+      category_id: parseInt(categoryId),
+      silver_purity: purity,
+      silver_weight: parseFloat(weight),
+      making_charge: parseFloat(makingCharge),
+      making_charge_type: makingChargeType,
       base_price: basePrice ? parseFloat(basePrice) : null,
       discount_percent: parseFloat(discountPercent),
       stock_quantity: parseInt(stock),
-      is_featured: isFeatured, is_bestseller: isBestseller,
-      is_new_arrival: isNewArrival, status,
+      is_featured: isFeatured,
+      is_bestseller: isBestseller,
+      is_new_arrival: isNewArrival,
+      status,
       image_urls: imageUrl ? [imageUrl] : [],
+      image_alt_text: imageAltText || undefined,
     };
+
     try {
       if (isEditing && editingId) {
         await fetchApi(`/admin/products/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
@@ -241,7 +337,7 @@ export default function AdminProductsPage() {
         await fetchApi('/admin/products', { method: 'POST', body: JSON.stringify(payload) });
       }
       setShowFormModal(false);
-      loadProducts();
+      loadProducts(currentPage);
     } catch (err: any) {
       setError(err.message || 'Operation failed');
     } finally {
@@ -253,7 +349,7 @@ export default function AdminProductsPage() {
     if (!confirm('Delete this product?')) return;
     try {
       await fetchApi(`/admin/products/${id}`, { method: 'DELETE' });
-      loadProducts();
+      loadProducts(currentPage);
     } catch (err: any) {
       alert(err.message || 'Failed to delete product');
     }
@@ -274,14 +370,17 @@ export default function AdminProductsPage() {
     return { label: 'Active', cls: 'bg-[#E6F4EA] text-[#137333]' };
   };
 
+  const effectiveTitle = metaTitle || (name ? `${name} | 925 Sterling Silver | Vanity` : 'Product Title | Vanity Jewels');
+  const effectiveDesc = metaDescription || (description ? description.slice(0, 155) : 'Discover handcrafted 925 sterling silver jewellery with BIS hallmarking.');
+  const effectiveSlug = slug || (name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'product-slug');
+
   return (
     <div className="bg-surface min-h-screen">
-
       {/* Sticky Top Action Bar */}
       <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-outline-variant/30 px-5 md:px-12 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="font-headline-lg text-headline-lg font-bold text-primary">Products</h2>
-          <p className="text-on-surface-variant text-sm mt-1">Manage your jewellery catalog</p>
+          <p className="text-on-surface-variant text-sm mt-1">Manage catalog and customize SEO metadata per item</p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
           {/* Search */}
@@ -299,172 +398,154 @@ export default function AdminProductsPage() {
           <select
             className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-outline-variant/50 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors text-sm font-medium"
             value={selectedCategory}
-            onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => setSelectedCategory(e.target.value)}
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
-          {/* Bulk Import button */}
+          {/* Bulk Import Button */}
           <button
-            onClick={() => {
-              setShowBulkModal(true);
-              setImportFile(null);
-              setImportResult(null);
-              setImportError(null);
-            }}
-            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-primary text-primary bg-surface-container-lowest rounded hover:bg-surface-container-low transition-colors text-sm font-medium whitespace-nowrap"
+            onClick={() => setShowBulkModal(true)}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-secondary text-secondary hover:bg-secondary/10 rounded font-label-upper text-label-upper text-xs transition-colors"
           >
-            <span className="material-symbols-outlined mr-2 text-lg">upload_file</span>
-            Bulk Import CSV
+            <span className="material-symbols-outlined text-sm">upload_file</span>
+            Bulk CSV
           </button>
-          {/* Add button */}
+          {/* Add Product Button */}
           <button
             onClick={handleOpenCreate}
-            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 bg-primary text-on-primary rounded hover:bg-inverse-surface transition-colors text-sm font-medium whitespace-nowrap"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-on-primary hover:bg-inverse-surface rounded font-label-upper text-label-upper text-xs transition-colors"
           >
-            <span className="material-symbols-outlined mr-2 text-lg">add</span>
+            <span className="material-symbols-outlined text-sm">add</span>
             Add Product
           </button>
         </div>
       </header>
 
-      {/* Table */}
-      <div className="px-5 md:px-12 mt-6">
-        {error && !showFormModal && (
-          <div className="mb-4 p-3 bg-error-container/20 border border-error/20 text-error rounded text-sm">{error}</div>
-        )}
-
-        <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg shadow-sm overflow-hidden">
+      {/* Main Content */}
+      <main className="p-5 md:p-12 max-w-[1600px] mx-auto space-y-8">
+        {/* Products Table */}
+        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-outline-variant/30 bg-surface-container-low/50">
-                  <th className="py-3 px-4 w-12 text-center">
-                    <input className="rounded-sm border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox" />
-                  </th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px]">Product</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px]">SKU</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px]">Category</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px]">Purity / Weight</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px] text-right">Stock</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px] text-center">Status</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant whitespace-nowrap text-[10px] text-right">Actions</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">Product</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">SKU</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">Category</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">Weight / Purity</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">Stock</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">SEO Status</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold">Status</th>
+                  <th className="py-4 px-6 font-label-upper text-xs text-on-surface-variant font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/20 font-body-md text-sm text-on-surface">
+              <tbody className="divide-y divide-outline-variant/20 text-sm">
                 {loading ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-on-surface-variant">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-4 border-secondary border-t-transparent rounded-full animate-spin" />
-                        <span className="text-sm">Loading catalog...</span>
-                      </div>
+                    <td colSpan={8} className="py-12 text-center text-on-surface-variant">
+                      <div className="inline-block animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full mb-2"></div>
+                      <p>Loading products...</p>
                     </td>
                   </tr>
                 ) : products.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-16 text-center text-on-surface-variant text-sm">
-                      No products found. Add your first product.
+                    <td colSpan={8} className="py-12 text-center text-on-surface-variant">
+                      No products found. Click &quot;Add Product&quot; to create your first item.
                     </td>
                   </tr>
-                ) : products.map((product, idx) => {
-                  const imgSrc = getPrimaryImage(product);
-                  const badge = getStatusBadge(product);
-                  return (
-                    <tr key={product.id} className={`hover:bg-surface-container-lowest/80 transition-colors group ${idx % 2 === 1 ? 'bg-surface-container-low/20' : ''}`}>
-                      <td className="py-3 px-4 text-center">
-                        <input className="rounded-sm border-outline-variant text-primary focus:ring-primary w-4 h-4 cursor-pointer" type="checkbox" />
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded bg-surface-container overflow-hidden flex-shrink-0 border border-outline-variant/10">
-                            {imgSrc ? (
-                              <img className="w-full h-full object-cover" src={imgSrc} alt={product.name} />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-outline-variant">
-                                <span className="material-symbols-outlined text-2xl">image_not_supported</span>
-                              </div>
-                            )}
+                ) : (
+                  products.map((p) => {
+                    const img = getPrimaryImage(p);
+                    const badge = getStatusBadge(p);
+                    const hasSeo = Boolean(p.meta_title && p.meta_description);
+                    return (
+                      <tr key={p.id} className="hover:bg-surface-container-low/30 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded bg-surface-container-low overflow-hidden shrink-0 border border-outline-variant/30">
+                              {img ? (
+                                <img src={img} alt={p.images?.[0]?.alt_text || p.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-outline">
+                                  <span className="material-symbols-outlined text-lg">image</span>
+                                </div>
+                              )}
+                            </div>
+                            <div>
+                              <p className="font-semibold text-primary">{p.name}</p>
+                              <p className="text-xs text-on-surface-variant">₹{parseFloat(p.base_price || '0').toLocaleString('en-IN')}</p>
+                            </div>
                           </div>
-                          <div className="flex flex-col">
-                            <span className="font-medium text-on-surface">{product.name}</span>
-                            {product.base_price && (
-                              <span className="text-xs text-on-surface-variant mt-0.5">₹{parseFloat(product.base_price).toLocaleString('en-IN')}</span>
-                            )}
+                        </td>
+                        <td className="py-4 px-6 font-mono text-xs text-on-surface-variant">{p.sku}</td>
+                        <td className="py-4 px-6 text-on-surface-variant">{p.category?.name || '—'}</td>
+                        <td className="py-4 px-6 text-on-surface-variant">{p.silver_weight}g / {p.silver_purity}</td>
+                        <td className="py-4 px-6">
+                          <span className={`font-semibold ${p.stock_quantity === 0 ? 'text-error' : 'text-primary'}`}>
+                            {p.stock_quantity}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6">
+                          {hasSeo ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              <span className="material-symbols-outlined text-[14px]">check_circle</span> SEO Ready
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                              <span className="material-symbols-outlined text-[14px]">info</span> Auto SEO
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          <span className={`inline-block px-2.5 py-1 rounded text-xs font-semibold ${badge.cls}`}>
+                            {badge.label}
+                          </span>
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleOpenEdit(p)}
+                              title="Edit product & SEO"
+                              className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            <button
+                              onClick={() => handleDelete(p.id)}
+                              title="Delete product"
+                              className="p-1.5 text-on-surface-variant hover:text-error hover:bg-surface-container-low rounded transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-lg">delete</span>
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-on-surface-variant font-mono text-xs">{product.sku}</td>
-                      <td className="py-3 px-4">{product.category?.name || '—'}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col">
-                          <span>{product.silver_purity} Sterling</span>
-                          <span className="text-xs text-on-surface-variant">{product.silver_weight}g</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <span className={`font-medium ${product.stock_quantity === 0 ? 'text-outline' : product.stock_quantity <= 5 ? 'text-error' : ''}`}>
-                          {product.stock_quantity}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${badge.cls}`}>
-                          {badge.label}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            onClick={() => handleOpenEdit(product)}
-                            className="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product.id)}
-                            className="text-error/80 hover:text-error transition-colors text-sm font-medium"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
 
           {/* Pagination */}
-          {!loading && products.length > 0 && (
-            <div className="border-t border-outline-variant/30 px-4 py-3 flex items-center justify-between bg-surface-container-lowest">
-              <div className="text-sm text-on-surface-variant">
-                Page <span className="font-medium text-on-surface">{currentPage}</span> of{' '}
-                <span className="font-medium text-on-surface">{lastPage}</span>
-              </div>
-              <div className="flex items-center space-x-2">
+          {lastPage > 1 && (
+            <div className="p-4 border-t border-outline-variant/30 flex items-center justify-between text-xs text-on-surface-variant">
+              <span>Showing page {currentPage} of {lastPage} ({total} items)</span>
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 border border-outline-variant/50 rounded text-sm text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="px-3 py-1.5 border border-outline-variant/40 rounded disabled:opacity-40 hover:bg-surface-container-low"
                 >
                   Previous
                 </button>
-                {Array.from({ length: Math.min(lastPage, 5) }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === page ? 'bg-primary text-on-primary' : 'border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low'}`}
-                  >
-                    {page}
-                  </button>
-                ))}
                 <button
-                  onClick={() => setCurrentPage(p => Math.min(lastPage, p + 1))}
                   disabled={currentPage === lastPage}
-                  className="px-3 py-1 border border-outline-variant/50 rounded text-sm text-on-surface-variant hover:bg-surface-container-low transition-colors disabled:opacity-50"
+                  onClick={() => setCurrentPage(prev => Math.min(lastPage, prev + 1))}
+                  className="px-3 py-1.5 border border-outline-variant/40 rounded disabled:opacity-40 hover:bg-surface-container-low"
                 >
                   Next
                 </button>
@@ -472,153 +553,491 @@ export default function AdminProductsPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
-      {/* Form Modal */}
+      {/* Product Add / Edit Modal with SEO Engine */}
       {showFormModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-surface-container-lowest w-full max-w-2xl rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-surface-container-lowest border-b border-outline-variant/30 px-6 py-4 flex justify-between items-center">
-              <h3 className="font-headline-md text-headline-md text-primary">
-                {isEditing ? 'Edit Product' : 'Add New Product'}
-              </h3>
-              <button onClick={() => setShowFormModal(false)} className="text-on-surface-variant hover:text-primary transition-colors">
-                <span className="material-symbols-outlined text-[24px]">close</span>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-surface border border-outline-variant/30 rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto p-6 md:p-8">
+            <div className="flex justify-between items-center pb-4 border-b border-outline-variant/30 mb-6">
+              <div>
+                <h3 className="font-headline-md text-headline-md font-bold text-primary">
+                  {isEditing ? 'Edit Product & SEO' : 'Add New Product'}
+                </h3>
+                <p className="text-on-surface-variant text-xs mt-0.5">Customize specifications, media, and direct search engine metadata.</p>
+              </div>
+              <button onClick={() => setShowFormModal(false)} className="text-on-surface-variant hover:text-primary">
+                <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              {error && (
-                <div className="p-3 bg-error-container/20 border border-error/20 text-error rounded text-sm">{error}</div>
+            {error && (
+              <div className="mb-6 p-3.5 bg-error-container/20 border border-error/30 text-error rounded text-sm">
+                {error}
+              </div>
+            )}
+
+            {/* Modal Tabs Navigation */}
+            <div className="flex border-b border-outline-variant/30 mb-6">
+              {[
+                { id: 'details', label: '1. Basic Specifications', icon: 'info' },
+                { id: 'pricing', label: '2. Pricing & Media', icon: 'payments' },
+                { id: 'seo', label: '3. SEO & SERP Preview', icon: 'troubleshoot' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setModalTab(t.id as any)}
+                  className={`flex items-center gap-2 pb-3 px-4 text-xs font-label-upper font-semibold transition-all ${
+                    modalTab === t.id
+                      ? 'text-primary border-b-2 border-primary -mb-px'
+                      : 'text-on-surface-variant hover:text-primary'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[16px]">{t.icon}</span>
+                  {t.label}
+                  {t.id === 'seo' && (
+                    <span className="ml-1 text-[10px] bg-secondary/15 text-secondary px-1.5 py-0.2 rounded font-bold uppercase">Client SEO</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* TAB 1: Basic Specifications */}
+              {modalTab === 'details' && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Product Name *</label>
+                      <input
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                          if (!slug) setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+                        }}
+                        placeholder="e.g. Royal Peacock Silver Necklace"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">SKU (Unique Code) *</label>
+                      <input
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
+                        value={sku}
+                        onChange={(e) => setSku(e.target.value)}
+                        placeholder="VNT-NEC-001"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-on-surface-variant mb-1 font-medium">Product Description</label>
+                    <textarea
+                      className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest resize-none"
+                      rows={3}
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      placeholder="Detailed artisan description of the silver jewellery piece..."
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Category *</label>
+                      <select
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={categoryId}
+                        onChange={(e) => setCategoryId(e.target.value)}
+                        required
+                      >
+                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Catalog Status</label>
+                      <select
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
+                      >
+                        <option value="active">Active (Visible on Storefront)</option>
+                        <option value="inactive">Draft (Hidden)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Silver Purity *</label>
+                      <select
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={purity}
+                        onChange={(e) => setPurity(e.target.value)}
+                      >
+                        <option value="999">999 Fine Silver</option>
+                        <option value="925">925 Sterling Silver</option>
+                        <option value="916">916 Silver</option>
+                        <option value="835">835 Silver</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Net Weight (grams) *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={weight}
+                        onChange={(e) => setWeight(e.target.value)}
+                        placeholder="e.g. 14.50"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Stock Inventory *</label>
+                      <input
+                        type="number"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={stock}
+                        onChange={(e) => setStock(e.target.value)}
+                        placeholder="e.g. 10"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    {[
+                      { label: 'Featured Product', value: isFeatured, setter: setIsFeatured },
+                      { label: 'Bestseller Badge', value: isBestseller, setter: setIsBestseller },
+                      { label: 'New Arrival', value: isNewArrival, setter: setIsNewArrival },
+                    ].map(({ label, value, setter }) => (
+                      <label key={label} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary"
+                          checked={value}
+                          onChange={(e) => setter(e.target.checked)}
+                        />
+                        <span className="text-sm text-on-surface-variant font-medium">{label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Product Name *</label>
-                  <input className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={name} onChange={(e) => setName(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">SKU *</label>
-                  <input className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest font-mono" value={sku} onChange={(e) => setSku(e.target.value)} required />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-on-surface-variant mb-1">Description</label>
-                <textarea className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest resize-none" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Category *</label>
-                  <select className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Status</label>
-                  <select className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={status} onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}>
-                    <option value="active">Active</option>
-                    <option value="inactive">Draft</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Silver Purity *</label>
-                  <select className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={purity} onChange={(e) => setPurity(e.target.value)}>
-                    <option value="999">999 Fine</option>
-                    <option value="925">925 Sterling</option>
-                    <option value="916">916</option>
-                    <option value="835">835</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Weight (g) *</label>
-                  <input type="number" step="0.01" className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={weight} onChange={(e) => setWeight(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Stock Qty *</label>
-                  <input type="number" className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={stock} onChange={(e) => setStock(e.target.value)} required />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Making Charge *</label>
-                  <input type="number" step="0.01" className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={makingCharge} onChange={(e) => setMakingCharge(e.target.value)} required />
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Charge Type</label>
-                  <select className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={makingChargeType} onChange={(e) => setMakingChargeType(e.target.value as 'flat' | 'percent')}>
-                    <option value="flat">Flat (₹)</option>
-                    <option value="percent">Percent (%)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm text-on-surface-variant mb-1">Discount %</label>
-                  <input type="number" step="0.01" min="0" max="100" className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm text-on-surface-variant mb-1">Base Price Override (₹) — optional</label>
-                <input type="number" step="0.01" className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} placeholder="Leave blank to use live rate calculation" />
-              </div>
-
-              <div>
-                <label className="block text-sm text-on-surface-variant mb-1 font-medium">Product Image URL / Cloudinary Upload</label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="url"
-                    className="flex-1 border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://res.cloudinary.com/... or upload below"
-                  />
-                  <label className="cursor-pointer bg-secondary text-on-secondary px-3 py-2 rounded text-xs font-semibold hover:bg-primary hover:text-white transition-colors inline-flex items-center justify-center gap-1 shrink-0">
-                    <span className="material-symbols-outlined text-sm">cloud_upload</span>
-                    {uploadingImage ? 'Uploading...' : 'Upload Image'}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingImage}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleUploadProductImage(file);
-                      }}
-                    />
-                  </label>
-                </div>
-                {imageUrl && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img src={imageUrl} alt="Preview" className="w-12 h-12 object-cover rounded border border-outline-variant/30" />
-                    <span className="text-xs text-on-surface-variant truncate font-mono">{imageUrl}</span>
+              {/* TAB 2: Pricing & Media */}
+              {modalTab === 'pricing' && (
+                <div className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Making Charge *</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={makingCharge}
+                        onChange={(e) => setMakingCharge(e.target.value)}
+                        placeholder="e.g. 450.00"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Making Charge Type</label>
+                      <select
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={makingChargeType}
+                        onChange={(e) => setMakingChargeType(e.target.value as 'flat' | 'percent')}
+                      >
+                        <option value="flat">Flat Amount (₹)</option>
+                        <option value="percent">Percentage of Metal (%)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Discount Percent (%)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={discountPercent}
+                        onChange={(e) => setDiscountPercent(e.target.value)}
+                        placeholder="e.g. 10"
+                      />
+                    </div>
                   </div>
-                )}
-              </div>
 
-              <div className="flex flex-wrap gap-4 pt-2">
-                {[
-                  { label: 'Featured', value: isFeatured, setter: setIsFeatured },
-                  { label: 'Bestseller', value: isBestseller, setter: setIsBestseller },
-                  { label: 'New Arrival', value: isNewArrival, setter: setIsNewArrival },
-                ].map(({ label, value, setter }) => (
-                  <label key={label} className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" className="w-4 h-4 rounded text-primary border-outline-variant focus:ring-primary" checked={value} onChange={(e) => setter(e.target.checked)} />
-                    <span className="text-sm text-on-surface-variant">{label}</span>
-                  </label>
-                ))}
-              </div>
+                  <div>
+                    <label className="block text-sm text-on-surface-variant mb-1 font-medium">Base Price Override (₹) — optional</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                      value={basePrice}
+                      onChange={(e) => setBasePrice(e.target.value)}
+                      placeholder="Leave blank to use dynamic MCX daily live rate calculation"
+                    />
+                  </div>
 
-              <div className="flex gap-3 pt-2 border-t border-outline-variant/30">
-                <button type="button" onClick={() => setShowFormModal(false)} className="flex-1 border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low rounded px-4 py-2.5 text-sm transition-colors">
+                  {/* Primary Image Upload & Dedicated Alt Text */}
+                  <div className="p-4 bg-surface-container-low border border-outline-variant/30 rounded-lg space-y-3">
+                    <label className="block text-sm font-semibold text-primary">Primary Product Image & Google Images Alt-Tag</label>
+                    
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <input
+                        type="url"
+                        className="flex-1 border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
+                        value={imageUrl}
+                        onChange={(e) => setImageUrl(e.target.value)}
+                        placeholder="https://res.cloudinary.com/... or upload below"
+                      />
+                      <label className="cursor-pointer bg-secondary text-on-secondary px-4 py-2 rounded text-xs font-semibold hover:bg-primary hover:text-white transition-colors inline-flex items-center justify-center gap-1 shrink-0">
+                        <span className="material-symbols-outlined text-sm">cloud_upload</span>
+                        {uploadingImage ? 'Uploading...' : 'Upload Image'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingImage}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleUploadProductImage(file);
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Dedicated Image Alt-Text input */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-xs font-medium text-on-surface-variant flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[14px] text-secondary">image_search</span>
+                          Image Alt Text (SEO Alt Attribute)
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (name) setImageAltText(`${name} - Handcrafted 925 Sterling Silver Jewellery by Vanity`);
+                          }}
+                          className="text-[11px] text-secondary hover:underline"
+                        >
+                          Auto-fill
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-xs focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={imageAltText}
+                        onChange={(e) => setImageAltText(e.target.value)}
+                        placeholder="e.g. Handcrafted 925 sterling silver emerald cut solitaire ring top view"
+                      />
+                      <p className="text-[11px] text-on-surface-variant mt-1">
+                        Specific keyword-rich description for Google Images search engine indexing.
+                      </p>
+                    </div>
+
+                    {imageUrl && (
+                      <div className="mt-2 flex items-center gap-3 p-2 bg-surface rounded border border-outline-variant/30">
+                        <img src={imageUrl} alt={imageAltText || name} className="w-14 h-14 object-cover rounded border border-outline-variant/30" />
+                        <div className="overflow-hidden">
+                          <p className="text-xs font-medium text-primary truncate">{imageAltText || 'No Alt Text set yet'}</p>
+                          <span className="text-[11px] text-on-surface-variant truncate font-mono block">{imageUrl}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: Dynamic SEO Management & Live SERP Simulator */}
+              {modalTab === 'seo' && (
+                <div className="space-y-6">
+                  {/* Google SERP Live Simulator */}
+                  <div className="p-4 bg-white border border-outline-variant/40 rounded-xl shadow-sm space-y-2">
+                    <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20">
+                      <span className="text-xs font-bold text-[#202124] flex items-center gap-1.5 uppercase tracking-wider">
+                        <span className="material-symbols-outlined text-sm text-[#4285F4]">search</span>
+                        Google Search Live Simulator (SERP Preview)
+                      </span>
+                      <div className="flex gap-1 bg-[#F1F3F4] p-0.5 rounded text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => setSerpPreviewDevice('desktop')}
+                          className={`px-2 py-0.5 rounded font-medium ${serpPreviewDevice === 'desktop' ? 'bg-white text-primary shadow-xs font-semibold' : 'text-on-surface-variant'}`}
+                        >
+                          Desktop
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSerpPreviewDevice('mobile')}
+                          className={`px-2 py-0.5 rounded font-medium ${serpPreviewDevice === 'mobile' ? 'bg-white text-primary shadow-xs font-semibold' : 'text-on-surface-variant'}`}
+                        >
+                          Mobile
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Google Search Card Preview */}
+                    <div className={`pt-2 ${serpPreviewDevice === 'mobile' ? 'max-w-sm' : 'max-w-xl'}`}>
+                      <div className="flex items-center gap-2 text-xs text-[#202124] mb-1">
+                        <div className="w-4 h-4 rounded-full bg-[#1A1A1A] text-[#9A7E44] flex items-center justify-center text-[10px] font-bold">V</div>
+                        <span className="text-[12px] text-[#202124] font-medium truncate">thevanityjewels.com › products › {effectiveSlug}</span>
+                      </div>
+                      <h4 className="text-[#1a0dab] hover:underline text-[18px] font-normal leading-snug cursor-pointer line-clamp-1">
+                        {effectiveTitle}
+                      </h4>
+                      <p className="text-[13px] text-[#4d5156] leading-relaxed mt-1 line-clamp-2">
+                        {effectiveDesc}
+                      </p>
+                      {/* Rich Snippet Badges */}
+                      <div className="flex items-center gap-3 text-[12px] text-[#70757a] mt-2 pt-1.5 border-t border-[#f1f3f4]">
+                        <span className="flex items-center gap-0.5 text-[#e37400]">
+                          ★ ★ ★ ★ ★ <strong className="text-[#3c4043] ml-1">4.9</strong> (128)
+                        </span>
+                        <span>·</span>
+                        <span className="font-semibold text-[#3c4043]">₹{basePrice || '2,500'}</span>
+                        <span>·</span>
+                        <span className="text-[#137333] font-medium">In stock</span>
+                        <span>·</span>
+                        <span>BIS 925 Hallmark</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* SEO Input Fields */}
+                  <div className="space-y-4">
+                    {/* SEO Meta Title */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-xs font-semibold text-primary flex items-center gap-1">
+                          SEO Meta Title (Title Tag)
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[11px] font-mono ${metaTitle.length > 60 ? 'text-error font-bold' : metaTitle.length >= 45 ? 'text-emerald-700' : 'text-on-surface-variant'}`}>
+                            {metaTitle.length} / 60 chars
+                          </span>
+                          <button
+                            type="button"
+                            onClick={autoGenerateSeoTitle}
+                            className="text-[11px] text-secondary hover:underline font-medium"
+                          >
+                            Auto-Generate
+                          </button>
+                        </div>
+                      </div>
+                      <input
+                        type="text"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                        value={metaTitle}
+                        onChange={(e) => setMetaTitle(e.target.value)}
+                        placeholder="e.g. Royal Peacock Silver Necklace | BIS 925 Hallmark | Vanity"
+                      />
+                      <p className="text-[11px] text-on-surface-variant mt-1">Optimal length: 50–60 characters. Appears as the main clickable headline in search engines.</p>
+                    </div>
+
+                    {/* SEO Meta Description */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-xs font-semibold text-primary">
+                          SEO Meta Description
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[11px] font-mono ${metaDescription.length > 160 ? 'text-error font-bold' : metaDescription.length >= 130 ? 'text-emerald-700' : 'text-on-surface-variant'}`}>
+                            {metaDescription.length} / 160 chars
+                          </span>
+                          <button
+                            type="button"
+                            onClick={autoGenerateMetaDescription}
+                            className="text-[11px] text-secondary hover:underline font-medium"
+                          >
+                            Auto-Generate
+                          </button>
+                        </div>
+                      </div>
+                      <textarea
+                        rows={3}
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest resize-none"
+                        value={metaDescription}
+                        onChange={(e) => setMetaDescription(e.target.value)}
+                        placeholder="Compelling description summarizing the jewellery piece with target keywords to maximize search clicks..."
+                      />
+                      <p className="text-[11px] text-on-surface-variant mt-1">Optimal length: 140–160 characters. Displayed beneath the title in Google search results.</p>
+                    </div>
+
+                    {/* URL Handle / Slug */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-xs font-semibold text-primary">Custom URL Handle / Slug</label>
+                          <button
+                            type="button"
+                            onClick={autoGenerateSlug}
+                            className="text-[11px] text-secondary hover:underline font-medium"
+                          >
+                            Auto-Slugify
+                          </button>
+                        </div>
+                        <div className="flex items-center">
+                          <span className="bg-surface-container-low border border-r-0 border-outline-variant/50 rounded-l px-2.5 py-2 text-xs text-on-surface-variant select-none">
+                            /products/
+                          </span>
+                          <input
+                            type="text"
+                            className="w-full border border-outline-variant/50 rounded-r px-3 py-2 text-xs focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
+                            value={slug}
+                            onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]+/g, ''))}
+                            placeholder="royal-peacock-necklace"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Focus Keywords / Meta Tags */}
+                      <div>
+                        <label className="block text-xs font-semibold text-primary mb-1">Focus Keywords / Meta Tags</label>
+                        <input
+                          type="text"
+                          className="w-full border border-outline-variant/50 rounded px-3 py-2 text-xs focus:outline-none focus:border-primary bg-surface-container-lowest"
+                          value={metaKeywords}
+                          onChange={(e) => setMetaKeywords(e.target.value)}
+                          placeholder="silver necklace, handcrafted 925, kolkata jewellery"
+                        />
+                        <p className="text-[11px] text-on-surface-variant mt-1">Comma-separated target keywords for search queries.</p>
+                      </div>
+                    </div>
+
+                    {/* Canonical URL Override */}
+                    <div>
+                      <label className="block text-xs font-semibold text-primary mb-1">Canonical URL Override (Optional)</label>
+                      <input
+                        type="url"
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-xs focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
+                        value={canonicalUrl}
+                        onChange={(e) => setCanonicalUrl(e.target.value)}
+                        placeholder="https://thevanityjewels.com/products/... (Leave blank for default URL)"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Bottom Actions */}
+              <div className="flex gap-3 pt-4 border-t border-outline-variant/30">
+                <button
+                  type="button"
+                  onClick={() => setShowFormModal(false)}
+                  className="flex-1 border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low rounded px-4 py-2.5 text-sm transition-colors"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={submitting} className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50">
-                  {submitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Add Product'}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+                >
+                  {submitting ? 'Saving...' : isEditing ? 'Save Changes & SEO' : 'Add Product with SEO'}
                 </button>
               </div>
             </form>
@@ -634,9 +1053,9 @@ export default function AdminProductsPage() {
               <div>
                 <h3 className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
                   <span className="material-symbols-outlined text-secondary">upload_file</span>
-                  Bulk Products Excel / CSV Import
+                  Bulk Products & SEO CSV Import
                 </h3>
-                <p className="text-on-surface-variant text-sm mt-1">Upload a CSV file to create or update multiple products instantly.</p>
+                <p className="text-on-surface-variant text-sm mt-1">Upload a CSV file with SEO metadata and image alt-texts to create or update catalog instantly.</p>
               </div>
               <button onClick={() => setShowBulkModal(false)} className="text-on-surface-variant hover:text-primary">
                 <span className="material-symbols-outlined text-2xl">close</span>
@@ -648,232 +1067,65 @@ export default function AdminProductsPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <div>
                   <h4 className="font-semibold text-primary text-sm uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-lg text-secondary">grid_on</span>
-                    Required Excel / CSV Header Structure
+                    <span className="material-symbols-outlined text-sm text-secondary">table_view</span>
+                    Supported CSV & SEO Columns
                   </h4>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Your file must contain the exact column headers shown below.</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Download our verified sample template with complete SEO columns.</p>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <a
-                    href="/vanity_products_import_sample.xlsx"
-                    download="vanity_products_import_sample.xlsx"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1D6F42] text-white rounded text-xs font-semibold hover:bg-[#155231] transition-colors shadow-sm cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-sm">description</span>
-                    Download Excel Sample (.xlsx)
-                  </a>
-                  <a
-                    href="/vanity_products_import_sample.csv"
-                    download="vanity_products_import_sample.csv"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary text-on-primary rounded text-xs font-semibold hover:bg-secondary transition-colors shadow-sm cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-sm">download</span>
-                    Download CSV Sample (.csv)
-                  </a>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleDownloadSampleCsv}
+                  className="bg-primary text-on-primary hover:bg-inverse-surface px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+                >
+                  <span className="material-symbols-outlined text-sm">download</span>
+                  Download Sample CSV
+                </button>
               </div>
 
-              <div className="overflow-x-auto border border-outline-variant/20 rounded bg-surface">
-                <table className="w-full text-xs text-left">
+              <div className="overflow-x-auto text-xs">
+                <table className="w-full text-left border-collapse border border-outline-variant/30 bg-surface rounded">
                   <thead>
-                    <tr className="bg-surface-container-high border-b border-outline-variant/30 text-primary">
-                      <th className="py-2 px-3">Header Name</th>
-                      <th className="py-2 px-3">Required</th>
-                      <th className="py-2 px-3">Format / Values</th>
-                      <th className="py-2 px-3">Sample Value</th>
-                      <th className="py-2 px-3">Notes</th>
+                    <tr className="bg-surface-container-low/70 border-b border-outline-variant/30">
+                      <th className="p-2.5 font-semibold text-primary">Column Header</th>
+                      <th className="p-2.5 font-semibold text-primary">Type</th>
+                      <th className="p-2.5 font-semibold text-primary">Description & Example</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-outline-variant/20 text-on-surface-variant">
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">sku</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Text</td>
-                      <td className="py-2 px-3 font-mono">VNT-RNG-101</td>
-                      <td className="py-2 px-3">Unique Product SKU (upserts existing product if matched)</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">name</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Text</td>
-                      <td className="py-2 px-3 font-mono">Emerald Solitaire Ring</td>
-                      <td className="py-2 px-3">Product Title</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">category_name</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Text</td>
-                      <td className="py-2 px-3 font-mono">Rings</td>
-                      <td className="py-2 px-3">Category name (automatically created if missing)</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">silver_purity</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Choice</td>
-                      <td className="py-2 px-3 font-mono">925</td>
-                      <td className="py-2 px-3">`925` or `999`</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">silver_weight</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Decimal</td>
-                      <td className="py-2 px-3 font-mono">6.50</td>
-                      <td className="py-2 px-3">Weight in grams</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">making_charge</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Decimal</td>
-                      <td className="py-2 px-3 font-mono">450.00</td>
-                      <td className="py-2 px-3">Making charge amount</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">making_charge_type</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Choice</td>
-                      <td className="py-2 px-3 font-mono">flat</td>
-                      <td className="py-2 px-3">`flat` (₹) or `percent` (%)</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">stock_quantity</td>
-                      <td className="py-2 px-3 text-error font-semibold">Yes</td>
-                      <td className="py-2 px-3">Integer</td>
-                      <td className="py-2 px-3 font-mono">15</td>
-                      <td className="py-2 px-3">Available stock units</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">base_price</td>
-                      <td className="py-2 px-3 text-outline">Optional</td>
-                      <td className="py-2 px-3">Decimal</td>
-                      <td className="py-2 px-3 font-mono">2500.00</td>
-                      <td className="py-2 px-3">Manual price override (leave empty for live MCX calculation)</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">discount_percent</td>
-                      <td className="py-2 px-3 text-outline">Optional</td>
-                      <td className="py-2 px-3">Decimal</td>
-                      <td className="py-2 px-3 font-mono">10.00</td>
-                      <td className="py-2 px-3">Discount percentage (0–100)</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 px-3 font-mono font-bold text-primary">image_url</td>
-                      <td className="py-2 px-3 text-outline">Optional</td>
-                      <td className="py-2 px-3">URL</td>
-                      <td className="py-2 px-3 font-mono">https://.../img.jpg</td>
-                      <td className="py-2 px-3">Primary product image web link</td>
-                    </tr>
-                    <tr className="bg-surface-container-low/30">
-                      <td className="py-2 px-3 font-mono font-bold text-primary">description</td>
-                      <td className="py-2 px-3 text-outline">Optional</td>
-                      <td className="py-2 px-3">Text</td>
-                      <td className="py-2 px-3 font-mono">Handcrafted sterling...</td>
-                      <td className="py-2 px-3">Item details / features</td>
-                    </tr>
+                  <tbody className="divide-y divide-outline-variant/20 font-mono text-[11px]">
+                    <tr><td className="p-2 text-primary font-bold">sku</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Unique alphanumeric SKU code (e.g. VNT-RNG-101)</td></tr>
+                    <tr><td className="p-2 text-primary font-bold">name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Product display name (e.g. Emerald Cut Solitaire Ring)</td></tr>
+                    <tr><td className="p-2 text-primary font-bold">category_name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Rings, Necklaces, Bracelets, Earrings, etc.</td></tr>
+                    <tr><td className="p-2 text-primary font-bold">image_url</td><td className="p-2 text-on-surface-variant">Optional</td><td className="p-2 text-on-surface-variant font-sans">Direct Cloudinary or HTTPS image URL</td></tr>
+                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">image_alt_text</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Keyword-rich description for Google Images ranking</td></tr>
+                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_title</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Custom SEO Title tag (e.g. Solitaire Ring | 925 Silver | Vanity)</td></tr>
+                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_description</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Search snippet description (up to 160 characters)</td></tr>
+                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_keywords</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Comma-separated focus keywords</td></tr>
                   </tbody>
                 </table>
               </div>
             </div>
 
-            {/* Quick Cloudinary CDN Image Helper */}
-            <div className="mb-6 bg-surface-container-low/40 border border-outline-variant/30 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h5 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-base text-secondary">cloud_upload</span>
-                  Cloudinary Image CDN Helper
-                </h5>
-                <span className="text-[10px] text-on-surface-variant bg-surface px-2 py-0.5 rounded border border-outline-variant/20 font-mono">
-                  Cloudinary Powered
-                </span>
-              </div>
-              <p className="text-xs text-on-surface-variant mb-3">
-                Need Cloudinary CDN URLs for your Excel `image_url` column? Upload a photo here to copy its Cloudinary link instantly!
-              </p>
-              <div className="flex flex-col sm:flex-row items-center gap-2">
-                <input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploadingImage}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      handleUploadProductImage(file, (url) => {
-                        navigator.clipboard.writeText(url);
-                        setCopiedUrl(url);
-                        alert(`Copied Cloudinary CDN URL to clipboard:\n${url}`);
-                      });
-                    }
-                  }}
-                  className="w-full text-xs text-on-surface-variant file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-on-secondary hover:file:bg-primary cursor-pointer"
-                />
-                {copiedUrl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(copiedUrl);
-                      alert('Copied URL to clipboard!');
-                    }}
-                    className="w-full sm:w-auto text-xs bg-surface border border-outline-variant px-3 py-1.5 rounded font-mono text-primary truncate max-w-xs hover:border-primary transition-colors"
-                  >
-                    📋 Copy Last URL: {copiedUrl}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Step 2: Upload Input & Submit */}
+            {/* Upload Area */}
             <form onSubmit={handleBulkImportSubmit} className="space-y-4">
-              <div className="border-2 border-dashed border-outline-variant/50 hover:border-primary transition-colors rounded-lg p-6 text-center bg-surface-container-low/30">
-                <span className="material-symbols-outlined text-4xl text-secondary mb-2 block">cloud_upload</span>
-                <p className="text-sm font-semibold text-primary mb-1">Select or drag your CSV file here</p>
-                <p className="text-xs text-on-surface-variant mb-4">Supported formats: .csv, .txt (up to 5MB)</p>
+              <div className="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-xl p-8 text-center bg-surface-container-low transition-colors">
+                <span className="material-symbols-outlined text-4xl text-secondary mb-2">cloud_upload</span>
+                <p className="text-sm font-semibold text-primary mb-1">Select or drag CSV file here</p>
+                <p className="text-xs text-on-surface-variant mb-4">Supports .csv and .xlsx files up to 10MB</p>
                 <input
                   type="file"
-                  accept=".csv, text/csv, text/plain"
+                  accept=".csv,.xlsx"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                  className="text-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-secondary cursor-pointer"
+                  className="text-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-inverse-surface cursor-pointer"
                 />
               </div>
 
               {importError && (
-                <div className="p-4 bg-error-container/20 border border-error/20 text-error rounded-lg text-sm flex items-start gap-2">
-                  <span className="material-symbols-outlined text-lg mt-0.5">error</span>
-                  <div>
-                    <p className="font-semibold">Import Error</p>
-                    <p className="text-xs mt-0.5">{importError}</p>
-                  </div>
-                </div>
+                <div className="p-3 bg-error-container/20 border border-error/30 text-error rounded text-sm">{importError}</div>
               )}
 
               {importResult && (
-                <div className="p-5 bg-[#E6F4EA] border border-[#137333]/30 text-[#137333] rounded-lg text-sm space-y-2">
-                  <div className="flex items-center gap-2 font-bold text-base">
-                    <span className="material-symbols-outlined text-xl">check_circle</span>
-                    Import Results Summary
-                  </div>
-                  <div className="grid grid-cols-3 gap-3 text-center py-2 bg-white/70 rounded border border-[#137333]/20">
-                    <div>
-                      <p className="text-xs text-on-surface-variant uppercase font-semibold">Created</p>
-                      <p className="text-lg font-bold text-[#137333]">{importResult.summary?.created || 0}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-on-surface-variant uppercase font-semibold">Updated</p>
-                      <p className="text-lg font-bold text-primary">{importResult.summary?.updated || 0}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-on-surface-variant uppercase font-semibold">Failed</p>
-                      <p className="text-lg font-bold text-error">{importResult.summary?.failed || 0}</p>
-                    </div>
-                  </div>
-                  {importResult.summary?.errors && importResult.summary.errors.length > 0 && (
-                    <div className="mt-3 pt-3 border-t border-[#137333]/20">
-                      <p className="font-semibold text-xs text-error uppercase mb-1">Row Warning Messages:</p>
-                      <ul className="list-disc pl-5 text-xs text-error space-y-1 max-h-32 overflow-y-auto font-mono">
-                        {importResult.summary.errors.map((err: string, i: number) => (
-                          <li key={i}>{err}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-sm">
+                  <p className="font-semibold">{importResult.message}</p>
                 </div>
               )}
 
@@ -888,26 +1140,15 @@ export default function AdminProductsPage() {
                 <button
                   type="submit"
                   disabled={importing || !importFile}
-                  className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                  className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
                 >
-                  {importing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Uploading & Processing...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-lg">upload</span>
-                      Start Import Process
-                    </>
-                  )}
+                  {importing ? 'Importing Products...' : 'Start Bulk Import'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
     </div>
   );
 }
