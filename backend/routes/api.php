@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Public Auth routes (Priority 5: Rate limited to 5 attempts per minute per IP)
-Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:5,1');
-Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+// Public Auth routes (Rate limited)
+Route::post('/auth/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
+Route::post('/auth/register/send-otp', [AuthController::class, 'sendRegistrationOtp'])->middleware('throttle:10,1');
+Route::post('/auth/register/verify-otp', [AuthController::class, 'verifyRegistrationOtp'])->middleware('throttle:15,1');
+Route::post('/auth/register/resend-otp', [AuthController::class, 'resendRegistrationOtp'])->middleware('throttle:5,1');
+Route::post('/auth/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
 
 // Public Checkout routes
 Route::post('/checkout/initiate', [CheckoutController::class, 'initiate']);

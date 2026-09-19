@@ -8,6 +8,12 @@ interface User {
   name: string;
   email: string;
   role: 'admin' | 'customer';
+  phone?: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +21,9 @@ interface AuthContextType {
   token: string | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<User>;
+  sendRegistrationOtp: (name: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  verifyRegistrationOtp: (email: string, otp: string) => Promise<User>;
+  resendRegistrationOtp: (email: string) => Promise<{ success: boolean; message: string }>;
   register: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<User>;
   logout: () => Promise<void>;
   checkUserSession: () => Promise<void>;
@@ -33,8 +42,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const savedUser = localStorage.getItem('vanity_user');
 
     if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+      try {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        localStorage.removeItem('vanity_token');
+        localStorage.removeItem('vanity_user');
+      }
     }
     setLoading(false);
   }, []);
@@ -48,14 +62,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (!response.success || !response.access_token) {
-        throw new Error(response.message || 'Invalid email or password.');
+        throw new Error(response.message || 'Invalid credentials');
       }
 
       const { access_token, user: loggedUser } = response;
-      
+
       localStorage.setItem('vanity_token', access_token);
       localStorage.setItem('vanity_user', JSON.stringify(loggedUser));
-      
+
       setToken(access_token);
       setUser(loggedUser);
       return loggedUser;
@@ -66,26 +80,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (
+  const sendRegistrationOtp = async (
     name: string,
     email: string,
-    password: string,
-    passwordConfirmation: string
+    password: string
+  ): Promise<{ success: boolean; message: string }> => {
+    setLoading(true);
+    try {
+      const response = await fetchApi('/auth/register/send-otp', {
+        method: 'POST',
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to send verification code. Please check details.');
+      }
+
+      return {
+        success: true,
+        message: response.message || 'Verification code sent to your email.',
+      };
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyRegistrationOtp = async (
+    email: string,
+    otp: string
   ): Promise<User> => {
     setLoading(true);
     try {
-      const response = await fetchApi('/auth/register', {
+      const response = await fetchApi('/auth/register/verify-otp', {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          password_confirmation: passwordConfirmation,
-        }),
+        body: JSON.stringify({ email, otp }),
       });
 
       if (!response.success || !response.access_token) {
-        throw new Error(response.message || 'Registration failed. Please check your details.');
+        throw new Error(response.message || 'Verification failed. Please check the code.');
       }
 
       const { access_token, user: registeredUser } = response;
@@ -101,6 +135,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const resendRegistrationOtp = async (
+    email: string
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await fetchApi('/auth/register/resend-otp', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to resend verification code.');
+      }
+
+      return {
+        success: true,
+        message: response.message || 'New verification code sent.',
+      };
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string
+  ): Promise<User> => {
+    // Direct verification flow should be used
+    const res = await sendRegistrationOtp(name, email, password);
+    throw new Error(res.message);
   };
 
   const logout = async () => {
@@ -127,7 +194,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('vanity_user', JSON.stringify(response.user));
       }
     } catch (error) {
-      // If validation fails, clear local storage
       localStorage.removeItem('vanity_token');
       localStorage.removeItem('vanity_user');
       setToken(null);
@@ -142,6 +208,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token,
         loading,
         login,
+        sendRegistrationOtp,
+        verifyRegistrationOtp,
+        resendRegistrationOtp,
         register,
         logout,
         checkUserSession,
