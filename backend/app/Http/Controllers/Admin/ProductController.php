@@ -38,6 +38,11 @@ class ProductController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter by Occasion
+        if ($request->has('occasion') && !empty($request->occasion) && $request->occasion !== 'All') {
+            $query->where('occasion', $request->occasion);
+        }
+
         // Sorting
         $sortField = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
@@ -82,6 +87,7 @@ class ProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'occasion' => 'nullable|string|max:100',
             'image_alt_text' => 'nullable|string',
             'image_alt_texts.*' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -126,6 +132,7 @@ class ProductController extends Controller
             'is_bestseller' => $request->boolean('is_bestseller', false),
             'is_new_arrival' => $request->boolean('is_new_arrival', false),
             'status' => $request->status,
+            'occasion' => $request->occasion,
         ]);
 
         $defaultAlt = $request->image_alt_text ?: ($request->name . ' - Handcrafted 925 Sterling Silver Jewellery');
@@ -237,6 +244,7 @@ class ProductController extends Controller
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
             'status' => 'required|in:active,inactive',
+            'occasion' => 'nullable|string|max:100',
             'image_alt_text' => 'nullable|string',
             'image_alt_texts.*' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
@@ -290,6 +298,7 @@ class ProductController extends Controller
             'is_bestseller' => $request->boolean('is_bestseller', false),
             'is_new_arrival' => $request->boolean('is_new_arrival', false),
             'status' => $request->status,
+            'occasion' => $request->occasion,
         ]);
 
         if ($request->has('image_alt_text') && !empty($request->image_alt_text)) {
@@ -644,8 +653,6 @@ class ProductController extends Controller
             }
         }
 
-        fclose($handle);
-
         return response()->json([
             'success' => true,
             'message' => "Import complete. Created: {$createdCount}, Updated: {$updatedCount}, Failed: {$failedCount}",
@@ -659,7 +666,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Upload product image to Cloudinary / storage and return Cloudinary CDN URL.
+     * Upload a single product image to Cloudinary / storage and return CDN URL.
      */
     public function uploadImage(Request $request)
     {
@@ -669,70 +676,13 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-
-            // Check if Cloudinary credentials are configured in Settings or ENV
-            $cloudName = \App\Models\Setting::getValue('cloudinary_cloud_name', env('CLOUDINARY_CLOUD_NAME', ''));
-            $apiSecret = \App\Models\Setting::getValue('cloudinary_api_secret', env('CLOUDINARY_API_SECRET', ''));
-            $apiKey = \App\Models\Setting::getValue('cloudinary_api_key', env('CLOUDINARY_API_KEY', ''));
-            $uploadPreset = \App\Models\Setting::getValue('cloudinary_upload_preset', env('CLOUDINARY_UPLOAD_PRESET', ''));
-
-            if (!empty($cloudName)) {
-                try {
-                    $timestamp = time();
-                    $postData = [
-                        'folder' => 'vanity_products',
-                    ];
-
-                    if (!empty($apiSecret)) {
-                        // Signed Cloudinary upload
-                        $signature = sha1("folder=vanity_products&timestamp={$timestamp}" . $apiSecret);
-                        $postData['timestamp'] = $timestamp;
-                        $postData['signature'] = $signature;
-                        if (!empty($apiKey)) {
-                            $postData['api_key'] = $apiKey;
-                        }
-                    } elseif (!empty($uploadPreset)) {
-                        // Unsigned upload preset
-                        $postData['upload_preset'] = $uploadPreset;
-                    }
-
-                    $response = \Illuminate\Support\Facades\Http::attach(
-                        'file',
-                        file_get_contents($file->getRealPath()),
-                        $file->getClientOriginalName()
-                    )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", $postData);
-
-                    if ($response->successful()) {
-                        $data = $response->json();
-                        return response()->json([
-                            'success' => true,
-                            'url' => $data['secure_url'],
-                            'public_id' => $data['public_id'] ?? null,
-                            'source' => 'cloudinary',
-                            'message' => 'Image uploaded to Cloudinary CDN successfully.'
-                        ]);
-                    } else {
-                        \Illuminate\Support\Facades\Log::warning('Cloudinary upload responded with error', [
-                            'status' => $response->status(),
-                            'body' => $response->body()
-                        ]);
-                    }
-                } catch (\Exception $e) {
-                    \Illuminate\Support\Facades\Log::error('Cloudinary upload exception', [
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
-
-            // Fallback: Save to local public storage
-            $path = $file->store('products', 'public');
-            $url = asset('storage/' . $path);
+            $uploadResult = $this->storeProductImageFile($file);
 
             return response()->json([
                 'success' => true,
-                'url' => $url,
-                'source' => 'local',
-                'message' => 'Image stored locally.'
+                'url' => $uploadResult['url'],
+                'source' => $uploadResult['source'],
+                'message' => $uploadResult['message']
             ]);
         }
 
@@ -740,5 +690,120 @@ class ProductController extends Controller
             'success' => false,
             'message' => 'No image file uploaded.'
         ], 400);
+    }
+
+    /**
+     * Bulk upload multiple product images directly, auto-associating with SKUs if filename matches.
+     */
+    public function bulkUploadImages(Request $request)
+    {
+        $request->validate([
+            'images' => 'required|array|min:1',
+            'images.*' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:10240',
+        ]);
+
+        $uploaded = [];
+        $matchedCount = 0;
+
+        foreach ($request->file('images') as $file) {
+            $originalName = $file->getClientOriginalName();
+            $baseName = pathinfo($originalName, PATHINFO_FILENAME);
+            $uploadResult = $this->storeProductImageFile($file);
+            $url = $uploadResult['url'];
+
+            // Attempt to auto-match product by SKU or Slug from filename (e.g. VNT-RNG-001.jpg -> SKU: VNT-RNG-001)
+            $matchedProduct = Product::where('sku', 'like', $baseName)
+                ->orWhere('slug', 'like', $baseName)
+                ->first();
+
+            $autoLinked = false;
+            if ($matchedProduct) {
+                ProductImage::firstOrCreate(
+                    ['product_id' => $matchedProduct->id, 'image_path' => $url],
+                    [
+                        'alt_text' => $matchedProduct->name . ' - Handcrafted 925 Sterling Silver Jewellery',
+                        'is_primary' => ProductImage::where('product_id', $matchedProduct->id)->count() === 0,
+                        'sort_order' => ProductImage::where('product_id', $matchedProduct->id)->count(),
+                    ]
+                );
+                $autoLinked = true;
+                $matchedCount++;
+            }
+
+            $uploaded[] = [
+                'filename' => $originalName,
+                'url' => $url,
+                'matched_sku' => $matchedProduct ? $matchedProduct->sku : null,
+                'matched_product_name' => $matchedProduct ? $matchedProduct->name : null,
+                'auto_linked' => $autoLinked,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Successfully uploaded " . count($uploaded) . " image(s). {$matchedCount} auto-linked to catalog products.",
+            'total_uploaded' => count($uploaded),
+            'auto_linked_count' => $matchedCount,
+            'images' => $uploaded
+        ]);
+    }
+
+    /**
+     * Helper to store product image file to Cloudinary CDN or Local Storage.
+     */
+    private function storeProductImageFile($file)
+    {
+        // Check if Cloudinary credentials are configured in Settings or ENV
+        $cloudName = \App\Models\Setting::getValue('cloudinary_cloud_name', env('CLOUDINARY_CLOUD_NAME', ''));
+        $apiSecret = \App\Models\Setting::getValue('cloudinary_api_secret', env('CLOUDINARY_API_SECRET', ''));
+        $apiKey = \App\Models\Setting::getValue('cloudinary_api_key', env('CLOUDINARY_API_KEY', ''));
+        $uploadPreset = \App\Models\Setting::getValue('cloudinary_upload_preset', env('CLOUDINARY_UPLOAD_PRESET', ''));
+
+        if (!empty($cloudName)) {
+            try {
+                $timestamp = time();
+                $postData = [
+                    'folder' => 'vanity_products',
+                ];
+
+                if (!empty($apiSecret)) {
+                    $signature = sha1("folder=vanity_products&timestamp={$timestamp}" . $apiSecret);
+                    $postData['timestamp'] = $timestamp;
+                    $postData['signature'] = $signature;
+                    if (!empty($apiKey)) {
+                        $postData['api_key'] = $apiKey;
+                    }
+                } elseif (!empty($uploadPreset)) {
+                    $postData['upload_preset'] = $uploadPreset;
+                }
+
+                $response = \Illuminate\Support\Facades\Http::attach(
+                    'file',
+                    file_get_contents($file->getRealPath()),
+                    $file->getClientOriginalName()
+                )->post("https://api.cloudinary.com/v1_1/{$cloudName}/image/upload", $postData);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return [
+                        'url' => $data['secure_url'],
+                        'source' => 'cloudinary',
+                        'message' => 'Uploaded to Cloudinary CDN.'
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Cloudinary upload exception: ' . $e->getMessage());
+            }
+        }
+
+        // Local storage fallback
+        $path = $file->store('products', 'public');
+        $url = asset('storage/' . $path);
+
+        return [
+            'url' => $url,
+            'source' => 'local',
+            'message' => 'Stored in local storage.'
+        ];
     }
 }

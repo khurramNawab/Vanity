@@ -16,7 +16,7 @@ export interface StoreSettings {
 const DEFAULT_SETTINGS: StoreSettings = {
   store_address: 'Padmini Apartment 44/19 Durgapur Lane Kala Bagan, Chetla, Kolkata 700027',
   contact_address: 'Padmini Apartment 44/19 Durgapur Lane Kala Bagan, Chetla, Kolkata 700027',
-  contact_email: 'thevanityjewels@gmail.com',
+  contact_email: 'info@thevanityjewels.com',
   contact_phone: '+91 98765 43210',
   whatsapp_number: '919876543210',
 };

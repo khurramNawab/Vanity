@@ -53,7 +53,7 @@ Route::get('/hero-slides', [HeroSlideController::class, 'publicIndex']);
 // Public Settings (social links, whatsapp, store address, and active campaigns)
 Route::get('/settings/public', function () {
     $keys = [
-        'social_instagram', 'social_facebook', 'social_linkedin', 'social_email', 'whatsapp_number',
+        'social_instagram', 'social_facebook', 'social_pinterest', 'social_linkedin', 'social_email', 'whatsapp_number',
         'store_address', 'contact_address', 'contact_email', 'contact_phone',
         'campaign_active_festival', 'campaign_active_text', 'campaign_active_code',
         'campaign_active_product_id', 'campaign_active_video_url', 'campaign_active_image_url',
@@ -114,6 +114,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/products/import', [ProductController::class, 'import']);
         Route::get('/products/sample-csv', [ProductController::class, 'downloadSampleCsv']);
         Route::post('/products/upload-image', [ProductController::class, 'uploadImage']);
+        Route::post('/products/bulk-upload-images', [ProductController::class, 'bulkUploadImages']);
         Route::apiResource('products', ProductController::class);
         Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index']);
         Route::get('/customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);

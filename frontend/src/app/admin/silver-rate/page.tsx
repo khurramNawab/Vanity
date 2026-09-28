@@ -97,9 +97,10 @@ export default function AdminSilverRatePage() {
                 step="0.01"
                 required
                 min="0.01"
+                onWheel={(e) => (e.target as HTMLElement).blur()}
                 className="w-full p-3 border border-outline-variant/30 focus:border-primary focus:outline-none bg-white rounded text-sm font-mono font-bold"
                 value={rate}
-                onChange={e => setRate(Number(e.target.value))}
+                onChange={e => setRate(Math.max(0, parseFloat(e.target.value) || 0))}
               />
               <p className="text-[10px] text-on-surface-variant mt-1">Equivalent to ₹{(rate * 1000).toLocaleString('en-IN')}/kg for 999 Fine Silver.</p>
             </div>

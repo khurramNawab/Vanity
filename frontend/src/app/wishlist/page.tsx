@@ -144,7 +144,7 @@ export default function WishlistPage() {
                     <span className="material-symbols-outlined text-sm">delete</span>
                   </button>
 
-                  <Link href={`/products/${product.id}`} className="block flex-grow">
+                  <Link href={`/products/${product.slug || product.id}`} className="block flex-grow">
                     <div className="w-full aspect-[3/4] bg-surface-container-low mb-3 relative overflow-hidden border border-outline-variant/10">
                       <img src={imgUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>

@@ -231,6 +231,19 @@ export default function AdminSettingsPage() {
                 />
               </div>
               <div>
+                <label className="block text-xs text-on-surface-variant mb-1 font-medium" htmlFor="social_pinterest">
+                  Pinterest Link
+                </label>
+                <input
+                  id="social_pinterest"
+                  type="url"
+                  className="w-full p-3 border border-outline-variant/30 focus:border-primary focus:outline-none bg-white rounded text-sm"
+                  value={settings.social_pinterest || ''}
+                  onChange={e => handleChange('social_pinterest', e.target.value)}
+                  placeholder="https://pin.it/Cnrv2arp6 or https://pinterest.com/your-brand"
+                />
+              </div>
+              <div>
                 <label className="block text-xs text-on-surface-variant mb-1 font-medium" htmlFor="social_linkedin">
                   LinkedIn Link
                 </label>
@@ -288,7 +301,7 @@ export default function AdminSettingsPage() {
                   className="w-full p-3 border border-outline-variant/30 focus:border-primary focus:outline-none bg-white rounded text-sm"
                   value={settings.contact_email || ''}
                   onChange={e => handleChange('contact_email', e.target.value)}
-                  placeholder="thevanityjewels@gmail.com"
+                  placeholder="info@thevanityjewels.com"
                 />
               </div>
               <div>

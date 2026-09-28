@@ -100,7 +100,7 @@ export default function SearchPage() {
                   const priceText = `₹${Number(product.calculated_price).toLocaleString('en-IN')}`;
 
                   return (
-                    <Link key={product.id} href={`/products/${product.id}`} className="group block">
+                    <Link key={product.id} href={`/products/${product.slug || product.id}`} className="group block">
                       <div className="w-full aspect-[3/4] bg-surface-container-low mb-3 relative overflow-hidden border border-outline-variant/10">
                         <img src={imgUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       </div>

@@ -38,6 +38,7 @@ interface Product {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   status: 'active' | 'inactive';
+  occasion?: string | null;
   category?: Category;
   images?: ProductImage[];
   primary_image?: ProductImage;
@@ -51,6 +52,7 @@ export default function AdminProductsPage() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedOccasionFilter, setSelectedOccasionFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -73,6 +75,7 @@ export default function AdminProductsPage() {
   const [isBestseller, setIsBestseller] = useState(false);
   const [isNewArrival, setIsNewArrival] = useState(false);
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
+  const [occasion, setOccasion] = useState('everyday');
 
   // Form States - Pricing & Media
   const [makingCharge, setMakingCharge] = useState('');
@@ -92,10 +95,23 @@ export default function AdminProductsPage() {
 
   // Bulk Import States
   const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkTab, setBulkTab] = useState<'csv' | 'images'>('csv');
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<any | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  // Bulk Multi-Image Direct Upload States
+  const [bulkImages, setBulkImages] = useState<File[]>([]);
+  const [bulkImageUploading, setBulkImageUploading] = useState(false);
+  const [bulkImageResults, setBulkImageResults] = useState<Array<{
+    filename: string;
+    url: string;
+    matched_sku: string | null;
+    matched_product_name: string | null;
+    auto_linked: boolean;
+  }>>([]);
+  const [bulkImageMessage, setBulkImageMessage] = useState<string | null>(null);
 
   // Cloudinary / Image Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -130,7 +146,7 @@ export default function AdminProductsPage() {
             setImageAltText(`${name} - Handcrafted 925 Sterling Silver Jewellery`);
           }
         }
-        alert(`Image uploaded successfully to Cloudinary! CDN URL generated.`);
+        alert(`Image uploaded successfully! CDN URL generated.`);
       } else {
         alert(data.message || 'Image upload failed.');
       }
@@ -138,6 +154,40 @@ export default function AdminProductsPage() {
       alert(err.message || 'Error uploading image.');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleBulkUploadImages = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (bulkImages.length === 0) {
+      alert('Please select one or more image files to upload.');
+      return;
+    }
+    setBulkImageUploading(true);
+    setBulkImageMessage(null);
+
+    try {
+      const formData = new FormData();
+      bulkImages.forEach(file => {
+        formData.append('images[]', file);
+      });
+
+      const res = await fetchApi('/admin/products/bulk-upload-images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.success) {
+        setBulkImageResults(res.images || []);
+        setBulkImageMessage(res.message);
+        loadProducts(currentPage);
+      } else {
+        alert(res.message || 'Bulk image upload failed.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Network error while uploading batch images.');
+    } finally {
+      setBulkImageUploading(false);
     }
   };
 
@@ -179,6 +229,7 @@ export default function AdminProductsPage() {
       let url = `/admin/products?page=${page}`;
       if (searchTerm) url += `&search=${encodeURIComponent(searchTerm)}`;
       if (selectedCategory) url += `&category_id=${selectedCategory}`;
+      if (selectedOccasionFilter) url += `&occasion=${encodeURIComponent(selectedOccasionFilter)}`;
 
       const res = await fetchApi(url);
       if (res.success && res.data) {
@@ -211,7 +262,7 @@ export default function AdminProductsPage() {
   useEffect(() => {
     loadProducts(currentPage);
     loadCategories();
-  }, [currentPage, selectedCategory]);
+  }, [currentPage, selectedCategory, selectedOccasionFilter]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -234,6 +285,7 @@ export default function AdminProductsPage() {
     setIsBestseller(false);
     setIsNewArrival(false);
     setStatus('active');
+    setOccasion('everyday');
     setImageUrl('');
     setImageAltText('');
     setSlug('');
@@ -288,6 +340,7 @@ export default function AdminProductsPage() {
     setIsBestseller(product.is_bestseller);
     setIsNewArrival(product.is_new_arrival);
     setStatus(product.status);
+    setOccasion(product.occasion || 'everyday');
     setImageUrl(product.images?.[0]?.image_path || '');
     setImageAltText(product.images?.[0]?.alt_text || '');
     setSlug(product.slug || '');
@@ -316,16 +369,17 @@ export default function AdminProductsPage() {
       canonical_url: canonicalUrl || undefined,
       category_id: parseInt(categoryId),
       silver_purity: purity,
-      silver_weight: parseFloat(weight),
-      making_charge: parseFloat(makingCharge),
+      silver_weight: Math.max(0.01, parseFloat(weight) || 0.01),
+      making_charge: Math.max(0, parseFloat(makingCharge) || 0),
       making_charge_type: makingChargeType,
-      base_price: basePrice ? parseFloat(basePrice) : null,
-      discount_percent: parseFloat(discountPercent),
-      stock_quantity: parseInt(stock),
+      base_price: basePrice !== '' && !isNaN(parseFloat(basePrice)) && parseFloat(basePrice) >= 0 ? Math.max(0, parseFloat(basePrice)) : null,
+      discount_percent: Math.min(100, Math.max(0, parseFloat(discountPercent) || 0)),
+      stock_quantity: Math.max(0, parseInt(stock) || 0),
       is_featured: isFeatured,
       is_bestseller: isBestseller,
       is_new_arrival: isNewArrival,
       status,
+      occasion: occasion || null,
       image_urls: imageUrl ? [imageUrl] : [],
       image_alt_text: imageAltText || undefined,
     };
@@ -398,12 +452,32 @@ export default function AdminProductsPage() {
           <select
             className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-outline-variant/50 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors text-sm font-medium"
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCurrentPage(1);
+            }}
           >
             <option value="">All Categories</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
+          </select>
+          {/* Occasion filter */}
+          <select
+            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-outline-variant/50 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors text-sm font-medium"
+            value={selectedOccasionFilter}
+            onChange={(e) => {
+              setSelectedOccasionFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">All Occasions</option>
+            <option value="festive">Festive Shopping</option>
+            <option value="wedding">Wedding Season</option>
+            <option value="everyday">Everyday Elegance</option>
+            <option value="gifting">Gifting</option>
+            <option value="party">Party & Galas</option>
+            <option value="puja">Puja & Devotional</option>
           </select>
           {/* Bulk Import Button */}
           <button
@@ -481,7 +555,14 @@ export default function AdminProductsPage() {
                           </div>
                         </td>
                         <td className="py-4 px-6 font-mono text-xs text-on-surface-variant">{p.sku}</td>
-                        <td className="py-4 px-6 text-on-surface-variant">{p.category?.name || '—'}</td>
+                        <td className="py-4 px-6 text-on-surface-variant">
+                          <div>{p.category?.name || '—'}</div>
+                          {p.occasion && (
+                            <span className="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-[#9A7E44]/15 text-[#9A7E44] border border-[#9A7E44]/30">
+                              {p.occasion}
+                            </span>
+                          )}
+                        </td>
                         <td className="py-4 px-6 text-on-surface-variant">{p.silver_weight}g / {p.silver_purity}</td>
                         <td className="py-4 px-6">
                           <span className={`font-semibold ${p.stock_quantity === 0 ? 'text-error' : 'text-primary'}`}>
@@ -644,7 +725,7 @@ export default function AdminProductsPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm text-on-surface-variant mb-1 font-medium">Category *</label>
                       <select
@@ -654,6 +735,21 @@ export default function AdminProductsPage() {
                         required
                       >
                         {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Occasion Group *</label>
+                      <select
+                        className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest font-medium text-secondary"
+                        value={occasion}
+                        onChange={(e) => setOccasion(e.target.value)}
+                      >
+                        <option value="festive">Festive Shopping (Durga Puja, Diwali, Poila Boishakh)</option>
+                        <option value="wedding">Wedding Season (Bridal, Reception, Engagement)</option>
+                        <option value="everyday">Everyday Elegance (Work, College, Daily Wear)</option>
+                        <option value="gifting">Gifting (Birthdays, Anniversaries, Milestones)</option>
+                        <option value="party">Party & Galas (Cocktails, CZ Glam)</option>
+                        <option value="puja">Puja & Devotional (Auspicious Silver & Mala)</option>
                       </select>
                     </div>
                     <div>
@@ -688,9 +784,14 @@ export default function AdminProductsPage() {
                       <input
                         type="number"
                         step="0.01"
+                        min="0.01"
+                        onWheel={(e) => (e.target as HTMLElement).blur()}
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={weight}
-                        onChange={(e) => setWeight(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWeight(val === '' ? '' : Math.max(0, parseFloat(val) || 0).toString());
+                        }}
                         placeholder="e.g. 14.50"
                         required
                       />
@@ -699,9 +800,14 @@ export default function AdminProductsPage() {
                       <label className="block text-sm text-on-surface-variant mb-1 font-medium">Stock Inventory *</label>
                       <input
                         type="number"
+                        min="0"
+                        onWheel={(e) => (e.target as HTMLElement).blur()}
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={stock}
-                        onChange={(e) => setStock(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setStock(val === '' ? '0' : Math.max(0, parseInt(val) || 0).toString());
+                        }}
                         placeholder="e.g. 10"
                         required
                       />
@@ -737,9 +843,14 @@ export default function AdminProductsPage() {
                       <input
                         type="number"
                         step="0.01"
+                        min="0"
+                        onWheel={(e) => (e.target as HTMLElement).blur()}
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={makingCharge}
-                        onChange={(e) => setMakingCharge(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setMakingCharge(val === '' ? '' : Math.max(0, parseFloat(val) || 0).toString());
+                        }}
                         placeholder="e.g. 450.00"
                         required
                       />
@@ -762,9 +873,13 @@ export default function AdminProductsPage() {
                         step="0.01"
                         min="0"
                         max="100"
+                        onWheel={(e) => (e.target as HTMLElement).blur()}
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={discountPercent}
-                        onChange={(e) => setDiscountPercent(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setDiscountPercent(val === '' ? '0' : Math.min(100, Math.max(0, parseFloat(val) || 0)).toString());
+                        }}
                         placeholder="e.g. 10"
                       />
                     </div>
@@ -775,9 +890,14 @@ export default function AdminProductsPage() {
                     <input
                       type="number"
                       step="0.01"
+                      min="0"
+                      onWheel={(e) => (e.target as HTMLElement).blur()}
                       className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                       value={basePrice}
-                      onChange={(e) => setBasePrice(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setBasePrice(val === '' ? '' : Math.max(0, parseFloat(val) || 0).toString());
+                      }}
                       placeholder="Leave blank to use dynamic MCX daily live rate calculation"
                     />
                   </div>
@@ -1045,107 +1165,254 @@ export default function AdminProductsPage() {
         </div>
       )}
 
-      {/* Bulk Import Modal */}
+      {/* Bulk Import & Multi-Image Upload Modal */}
       {showBulkModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-surface border border-outline-variant/30 rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 md:p-8">
+          <div className="bg-surface border border-outline-variant/30 rounded-xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto p-6 md:p-8">
             <div className="flex justify-between items-center pb-4 border-b border-outline-variant/30 mb-6">
               <div>
                 <h3 className="font-headline-md text-headline-md font-bold text-primary flex items-center gap-2">
-                  <span className="material-symbols-outlined text-secondary">upload_file</span>
-                  Bulk Products & SEO CSV Import
+                  <span className="material-symbols-outlined text-secondary">inventory_2</span>
+                  Bulk Catalog &amp; Media Management
                 </h3>
-                <p className="text-on-surface-variant text-sm mt-1">Upload a CSV file with SEO metadata and image alt-texts to create or update catalog instantly.</p>
+                <p className="text-on-surface-variant text-xs mt-1">Import product catalogs via CSV or batch upload product images directly to Cloudinary CDN.</p>
               </div>
               <button onClick={() => setShowBulkModal(false)} className="text-on-surface-variant hover:text-primary">
                 <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
 
-            {/* Step 1: Excel / CSV Format Reference Table */}
-            <div className="mb-6 bg-surface-container-low border border-outline-variant/30 rounded-lg p-5">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <div>
-                  <h4 className="font-semibold text-primary text-sm uppercase tracking-wider flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-sm text-secondary">table_view</span>
-                    Supported CSV & SEO Columns
-                  </h4>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Download our verified sample template with complete SEO columns.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleDownloadSampleCsv}
-                  className="bg-primary text-on-primary hover:bg-inverse-surface px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
-                >
-                  <span className="material-symbols-outlined text-sm">download</span>
-                  Download Sample CSV
-                </button>
-              </div>
-
-              <div className="overflow-x-auto text-xs">
-                <table className="w-full text-left border-collapse border border-outline-variant/30 bg-surface rounded">
-                  <thead>
-                    <tr className="bg-surface-container-low/70 border-b border-outline-variant/30">
-                      <th className="p-2.5 font-semibold text-primary">Column Header</th>
-                      <th className="p-2.5 font-semibold text-primary">Type</th>
-                      <th className="p-2.5 font-semibold text-primary">Description & Example</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-outline-variant/20 font-mono text-[11px]">
-                    <tr><td className="p-2 text-primary font-bold">sku</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Unique alphanumeric SKU code (e.g. VNT-RNG-101)</td></tr>
-                    <tr><td className="p-2 text-primary font-bold">name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Product display name (e.g. Emerald Cut Solitaire Ring)</td></tr>
-                    <tr><td className="p-2 text-primary font-bold">category_name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Rings, Necklaces, Bracelets, Earrings, etc.</td></tr>
-                    <tr><td className="p-2 text-primary font-bold">image_url</td><td className="p-2 text-on-surface-variant">Optional</td><td className="p-2 text-on-surface-variant font-sans">Direct Cloudinary or HTTPS image URL</td></tr>
-                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">image_alt_text</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Keyword-rich description for Google Images ranking</td></tr>
-                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_title</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Custom SEO Title tag (e.g. Solitaire Ring | 925 Silver | Vanity)</td></tr>
-                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_description</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Search snippet description (up to 160 characters)</td></tr>
-                    <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_keywords</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Comma-separated focus keywords</td></tr>
-                  </tbody>
-                </table>
-              </div>
+            {/* Bulk Tabs */}
+            <div className="flex border-b border-outline-variant/30 mb-6 gap-2">
+              <button
+                type="button"
+                onClick={() => setBulkTab('csv')}
+                className={`flex items-center gap-2 pb-3 px-4 text-xs font-label-upper font-semibold transition-all ${
+                  bulkTab === 'csv'
+                    ? 'text-primary border-b-2 border-primary -mb-px'
+                    : 'text-on-surface-variant hover:text-primary'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                1. CSV / Spreadsheet Catalog Import
+              </button>
+              <button
+                type="button"
+                onClick={() => setBulkTab('images')}
+                className={`flex items-center gap-2 pb-3 px-4 text-xs font-label-upper font-semibold transition-all ${
+                  bulkTab === 'images'
+                    ? 'text-primary border-b-2 border-primary -mb-px'
+                    : 'text-on-surface-variant hover:text-primary'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[16px]">collections</span>
+                2. Direct Multi-Image Bulk Upload
+                <span className="ml-1 text-[10px] bg-secondary/15 text-secondary px-1.5 py-0.5 rounded font-bold uppercase">Cloudinary CDN</span>
+              </button>
             </div>
 
-            {/* Upload Area */}
-            <form onSubmit={handleBulkImportSubmit} className="space-y-4">
-              <div className="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-xl p-8 text-center bg-surface-container-low transition-colors">
-                <span className="material-symbols-outlined text-4xl text-secondary mb-2">cloud_upload</span>
-                <p className="text-sm font-semibold text-primary mb-1">Select or drag CSV file here</p>
-                <p className="text-xs text-on-surface-variant mb-4">Supports .csv and .xlsx files up to 10MB</p>
-                <input
-                  type="file"
-                  accept=".csv,.xlsx"
-                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
-                  className="text-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-inverse-surface cursor-pointer"
-                />
-              </div>
+            {bulkTab === 'csv' ? (
+              <div className="space-y-6">
+                {/* Step 1: Excel / CSV Format Reference Table */}
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-5">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                    <div>
+                      <h4 className="font-semibold text-primary text-sm uppercase tracking-wider flex items-center gap-1.5">
+                        <span className="material-symbols-outlined text-sm text-secondary">table_view</span>
+                        Supported CSV &amp; SEO Columns
+                      </h4>
+                      <p className="text-xs text-on-surface-variant mt-0.5">Download our verified sample template with complete SEO columns.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleDownloadSampleCsv}
+                      className="bg-primary text-on-primary hover:bg-inverse-surface px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
+                    >
+                      <span className="material-symbols-outlined text-sm">download</span>
+                      Download Sample CSV
+                    </button>
+                  </div>
 
-              {importError && (
-                <div className="p-3 bg-error-container/20 border border-error/30 text-error rounded text-sm">{importError}</div>
-              )}
-
-              {importResult && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-sm">
-                  <p className="font-semibold">{importResult.message}</p>
+                  <div className="overflow-x-auto text-xs">
+                    <table className="w-full text-left border-collapse border border-outline-variant/30 bg-surface rounded">
+                      <thead>
+                        <tr className="bg-surface-container-low/70 border-b border-outline-variant/30">
+                          <th className="p-2.5 font-semibold text-primary">Column Header</th>
+                          <th className="p-2.5 font-semibold text-primary">Type</th>
+                          <th className="p-2.5 font-semibold text-primary">Description &amp; Example</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20 font-mono text-[11px]">
+                        <tr><td className="p-2 text-primary font-bold">sku</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Unique alphanumeric SKU code (e.g. VNT-RNG-101)</td></tr>
+                        <tr><td className="p-2 text-primary font-bold">name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Product display name (e.g. Emerald Cut Solitaire Ring)</td></tr>
+                        <tr><td className="p-2 text-primary font-bold">category_name</td><td className="p-2 text-secondary">Required</td><td className="p-2 text-on-surface-variant font-sans">Rings, Necklaces, Bracelets, Earrings, etc.</td></tr>
+                        <tr><td className="p-2 text-primary font-bold">image_url</td><td className="p-2 text-on-surface-variant">Optional</td><td className="p-2 text-on-surface-variant font-sans">Direct Cloudinary or HTTPS image URL</td></tr>
+                        <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">image_alt_text</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Keyword-rich description for Google Images ranking</td></tr>
+                        <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_title</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Custom SEO Title tag (e.g. Solitaire Ring | 925 Silver | Vanity)</td></tr>
+                        <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_description</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Search snippet description (up to 160 characters)</td></tr>
+                        <tr className="bg-secondary/5"><td className="p-2 text-secondary font-bold">meta_keywords</td><td className="p-2 text-secondary">SEO</td><td className="p-2 text-on-surface-variant font-sans">Comma-separated focus keywords</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              )}
 
-              <div className="flex gap-3 pt-4 border-t border-outline-variant/30">
-                <button
-                  type="button"
-                  onClick={() => setShowBulkModal(false)}
-                  className="flex-1 border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low rounded px-4 py-2.5 text-sm transition-colors"
-                >
-                  Close
-                </button>
-                <button
-                  type="submit"
-                  disabled={importing || !importFile}
-                  className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  {importing ? 'Importing Products...' : 'Start Bulk Import'}
-                </button>
+                {/* Upload Form */}
+                <form onSubmit={handleBulkImportSubmit} className="space-y-4">
+                  <div className="border-2 border-dashed border-outline-variant/50 hover:border-primary rounded-xl p-8 text-center bg-surface-container-low transition-colors">
+                    <span className="material-symbols-outlined text-4xl text-secondary mb-2">cloud_upload</span>
+                    <p className="text-sm font-semibold text-primary mb-1">Select or drag CSV file here</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Supports .csv and .xlsx files up to 10MB</p>
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
+                      onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                      className="text-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-on-primary hover:file:bg-inverse-surface cursor-pointer"
+                    />
+                  </div>
+
+                  {importError && (
+                    <div className="p-3 bg-error-container/20 border border-error/30 text-error rounded text-sm">{importError}</div>
+                  )}
+
+                  {importResult && (
+                    <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-sm">
+                      <p className="font-semibold">{importResult.message}</p>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4 border-t border-outline-variant/30">
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkModal(false)}
+                      className="flex-1 border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low rounded px-4 py-2.5 text-sm transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={importing || !importFile}
+                      className="flex-1 bg-primary text-on-primary hover:bg-inverse-surface rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {importing ? 'Importing Products...' : 'Start Bulk Import'}
+                    </button>
+                  </div>
+                </form>
               </div>
-            </form>
+            ) : (
+              /* Direct Multi-Image Bulk Uploader */
+              <div className="space-y-6">
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-lg p-5">
+                  <h4 className="font-semibold text-primary text-sm uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                    <span className="material-symbols-outlined text-sm text-secondary">cloud_done</span>
+                    Direct Image Upload &amp; SKU Auto-Linking
+                  </h4>
+                  <p className="text-xs text-on-surface-variant leading-relaxed">
+                    Upload multiple product photos at once. If an image file name matches a product SKU (e.g. <span className="font-mono font-bold text-primary">VNT-RNG-001.jpg</span> or <span className="font-mono font-bold text-primary">classic-solitaire-ring.webp</span>), it will be <span className="font-semibold text-secondary">automatically linked</span> directly to that product! You will also get CDN URLs ready to copy.
+                  </p>
+                </div>
+
+                <form onSubmit={handleBulkUploadImages} className="space-y-4">
+                  <div className="border-2 border-dashed border-secondary/50 hover:border-secondary rounded-xl p-8 text-center bg-surface-container-low transition-colors">
+                    <span className="material-symbols-outlined text-4xl text-secondary mb-2">add_photo_alternate</span>
+                    <p className="text-sm font-semibold text-primary mb-1">Select Multiple Product Images</p>
+                    <p className="text-xs text-on-surface-variant mb-4">Select JPEG, PNG, WEBP files (Multiple selection supported)</p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setBulkImages(files);
+                      }}
+                      className="text-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-on-secondary hover:bg-primary cursor-pointer"
+                    />
+                    {bulkImages.length > 0 && (
+                      <p className="text-xs font-semibold text-secondary mt-3">
+                        ✓ {bulkImages.length} image file(s) selected ready to upload
+                      </p>
+                    )}
+                  </div>
+
+                  {bulkImageMessage && (
+                    <div className="p-3.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded text-sm font-medium">
+                      {bulkImageMessage}
+                    </div>
+                  )}
+
+                  {bulkImageResults.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <h5 className="text-xs font-bold text-primary uppercase tracking-wider">Uploaded CDN Images ({bulkImageResults.length})</h5>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const urls = bulkImageResults.map(r => `${r.matched_sku || r.filename}: ${r.url}`).join('\n');
+                            navigator.clipboard.writeText(urls);
+                            alert('All image URLs copied to clipboard!');
+                          }}
+                          className="text-xs text-secondary hover:underline font-semibold flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">content_copy</span>
+                          Copy All URLs
+                        </button>
+                      </div>
+                      <div className="max-h-60 overflow-y-auto border border-outline-variant/30 rounded bg-white divide-y divide-outline-variant/20 text-xs">
+                        {bulkImageResults.map((r, idx) => (
+                          <div key={idx} className="p-2.5 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                              <img src={r.url} alt={r.filename} className="w-8 h-8 rounded object-cover border shrink-0" />
+                              <div className="overflow-hidden">
+                                <p className="font-semibold text-primary truncate">{r.filename}</p>
+                                <p className="font-mono text-[10px] text-on-surface-variant truncate">{r.url}</p>
+                              </div>
+                            </div>
+                            <div className="shrink-0 flex items-center gap-2">
+                              {r.auto_linked ? (
+                                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">
+                                  Linked to {r.matched_sku}
+                                </span>
+                              ) : (
+                                <span className="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">
+                                  Uploaded
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(r.url);
+                                  alert(`Copied: ${r.url}`);
+                                }}
+                                className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-primary"
+                                title="Copy URL"
+                              >
+                                <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-4 border-t border-outline-variant/30">
+                    <button
+                      type="button"
+                      onClick={() => setShowBulkModal(false)}
+                      className="flex-1 border border-outline-variant/50 text-on-surface-variant hover:bg-surface-container-low rounded px-4 py-2.5 text-sm transition-colors"
+                    >
+                      Close
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={bulkImageUploading || bulkImages.length === 0}
+                      className="flex-1 bg-secondary text-on-secondary hover:bg-primary hover:text-white rounded px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {bulkImageUploading ? 'Uploading Batch Images...' : `Upload ${bulkImages.length > 0 ? bulkImages.length : ''} Images`}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       )}

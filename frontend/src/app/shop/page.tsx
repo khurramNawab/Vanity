@@ -10,13 +10,14 @@ import { fetchApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { getLocalWishlist, toggleWishlistItem } from '@/lib/wishlist';
 
-const CATEGORIES = ['All', 'Silver', 'Brass', 'CZ Embellished', 'Stones'];
+const CATEGORIES = ['All', 'Necklaces', 'Earrings', 'Bracelets', 'Bangles', 'Pendants', 'Tops', 'Mala', 'Rings'];
 const STYLES = ['Choker', 'Pendant', 'Layered', 'Mangalsutra', 'Statement'];
 
 function ShopPageContent() {
   const { token } = useAuth();
   const searchParams = useSearchParams();
   const [selectedCat, setSelectedCat] = useState('All');
+  const [selectedOccasion, setSelectedOccasion] = useState('All');
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('featured');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -55,6 +56,13 @@ function ShopPageContent() {
       setSelectedCat('All');
     }
 
+    const occ = searchParams ? searchParams.get('occasion') : null;
+    if (occ) {
+      setSelectedOccasion(occ);
+    } else {
+      setSelectedOccasion('All');
+    }
+
     const style = searchParams ? searchParams.get('style') : null;
     if (style) {
       setSelectedStyles([style]);
@@ -84,19 +92,39 @@ function ShopPageContent() {
     // Category match
     if (selectedCat !== 'All') {
       const catLower = selectedCat.toLowerCase();
-      const productPurity = product.silver_purity || '';
-      const productCatSlug = product.category?.slug || '';
-      const productName = product.name?.toLowerCase() || '';
+      const productCatSlug = (product.category?.slug || '').toLowerCase();
+      const productCatName = (product.category?.name || '').toLowerCase();
+      const productName = (product.name || '').toLowerCase();
 
-      if (catLower === 'silver') {
-        if (productPurity !== '925') return false;
-      } else if (catLower === 'brass') {
-        if (productCatSlug !== 'bracelets' && !productName.includes('brass')) return false;
-      } else if (catLower === 'cz embellished') {
-        if (!productName.includes('cz')) return false;
-      } else if (catLower === 'stones') {
-        if (!productName.includes('stone') && !productName.includes('pearl') && !productName.includes('onyx')) return false;
-      }
+      const matchesCat = 
+        productCatSlug.includes(catLower) || 
+        productCatName.includes(catLower) || 
+        productName.includes(catLower) ||
+        (catLower === 'necklaces' && productCatSlug === 'necklaces') ||
+        (catLower === 'earrings' && productCatSlug === 'earrings') ||
+        (catLower === 'bracelets' && productCatSlug === 'bracelets') ||
+        (catLower === 'bangles' && productCatSlug === 'bangles') ||
+        (catLower === 'pendants' && productCatSlug === 'pendants') ||
+        (catLower === 'tops' && productCatSlug === 'tops') ||
+        (catLower === 'mala' && productCatSlug === 'mala');
+
+      if (!matchesCat) return false;
+    }
+
+    // Occasion match
+    if (selectedOccasion !== 'All') {
+      const occLower = selectedOccasion.toLowerCase();
+      const productOccasion = (product.occasion || '').toLowerCase();
+      const productName = (product.name || '').toLowerCase();
+      const productDesc = (product.description || '').toLowerCase();
+
+      const matchesOccasion = 
+        productOccasion === occLower || 
+        productOccasion.includes(occLower) || 
+        productName.includes(occLower) || 
+        productDesc.includes(occLower);
+
+      if (!matchesOccasion) return false;
     }
 
     // Style match
@@ -283,7 +311,7 @@ function ShopPageContent() {
                   }
 
                   return (
-                    <Link key={product.id} href={`/products/${product.id}`} className="group relative flex flex-col bg-surface hover:shadow-[0px_4px_20px_rgba(0,0,0,0.04)] transition-shadow duration-300 border border-transparent hover:border-outline-variant/10">
+                    <Link key={product.id} href={`/products/${product.slug || product.id}`} className="group relative flex flex-col bg-surface hover:shadow-[0px_4px_20px_rgba(0,0,0,0.04)] transition-shadow duration-300 border border-transparent hover:border-outline-variant/10">
                       {badge && (
                         <div className="absolute top-0 left-0 z-10">
                           <span className={`${badgeColor} text-[10px] font-semibold uppercase tracking-wider px-2 py-1`}>{badge}</span>

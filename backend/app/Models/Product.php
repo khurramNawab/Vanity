@@ -33,6 +33,7 @@ class Product extends Model
         'is_bestseller',
         'is_new_arrival',
         'status',
+        'occasion',
     ];
 
     protected $casts = [

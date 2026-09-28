@@ -42,14 +42,18 @@ class DatabaseSeeder extends Seeder
 
         // 2. Seed Categories
         $categories = [
+            ['name' => 'Necklaces', 'slug' => 'necklaces', 'description' => 'Exquisite silver neckpieces and chains for all occasions.'],
+            ['name' => 'Earrings', 'slug' => 'earrings', 'description' => 'Beautiful drop, stud, and hoop earrings in 925 sterling silver.'],
+            ['name' => 'Bracelets', 'slug' => 'bracelets', 'description' => 'Elegantly structured bracelets and cuffs.'],
+            ['name' => 'Bangles', 'slug' => 'bangles', 'description' => 'Handcrafted silver and oxidised bangles and kadas.'],
+            ['name' => 'Pendants', 'slug' => 'pendants', 'description' => 'Delicate and statement silver pendants with precious stones.'],
+            ['name' => 'Tops', 'slug' => 'tops', 'description' => 'Daily wear and festive silver tops and studs.'],
+            ['name' => 'Mala', 'slug' => 'mala', 'description' => 'Traditional artisan beaded and silver malas.'],
+            ['name' => 'Rings', 'slug' => 'rings', 'description' => 'Sophisticated and premium silver rings crafted to perfection.'],
             ['name' => 'Silver', 'slug' => 'silver', 'description' => 'Pure 925 sterling silver and fine silver jewellery.'],
             ['name' => 'Brass', 'slug' => 'brass', 'description' => 'Handcrafted brass and oxidised designer ornaments.'],
             ['name' => 'Stones', 'slug' => 'stones', 'description' => 'Precious & semi-precious stone embedded jewellery.'],
             ['name' => 'CZ Diamonds', 'slug' => 'cz-diamonds', 'description' => 'Brilliant cubic zirconia diamond embellished ornaments.'],
-            ['name' => 'Rings', 'slug' => 'rings', 'description' => 'Sophisticated and premium silver rings crafted to perfection.'],
-            ['name' => 'Necklaces', 'slug' => 'necklaces', 'description' => 'Exquisite silver neckpieces and chains for all occasions.'],
-            ['name' => 'Bracelets', 'slug' => 'bracelets', 'description' => 'Elegantly structured bracelets and cuffs.'],
-            ['name' => 'Earrings', 'slug' => 'earrings', 'description' => 'Beautiful drop, stud, and hoop earrings in 925 sterling silver.'],
         ];
 
         $categoryModels = [];
@@ -57,7 +61,7 @@ class DatabaseSeeder extends Seeder
             $categoryModels[$cat['slug']] = Category::firstOrCreate(['slug' => $cat['slug']], $cat);
         }
 
-        // 3. Seed Products
+        // 3. Seed Products with Occasions (Festive, Wedding, Everyday, Gifting, Party, Puja)
         $products = [
             [
                 'sku' => 'VNT-RNG-001',
@@ -76,13 +80,14 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => false,
                 'is_new_arrival' => true,
                 'status' => 'active',
+                'occasion' => 'everyday',
                 'images' => ['https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-NEC-002',
                 'name' => 'Royal Heritage Necklace',
                 'slug' => 'royal-heritage-necklace',
-                'description' => 'An editorial royal heritage necklace featuring intricate traditional carvings.',
+                'description' => 'An editorial royal heritage necklace featuring intricate traditional carvings for festive occasions and Durga Puja celebrations.',
                 'category_id' => $categoryModels['necklaces']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 22.00,
@@ -95,13 +100,14 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => true,
                 'is_new_arrival' => false,
                 'status' => 'active',
+                'occasion' => 'festive',
                 'images' => ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-BRC-003',
                 'name' => 'Infinity Silver Bracelet',
                 'slug' => 'infinity-silver-bracelet',
-                'description' => 'A clean and sleek infinity-themed silver cuff bracelet.',
+                'description' => 'A clean and sleek infinity-themed silver cuff bracelet ideal for work, college, and everyday wear.',
                 'category_id' => $categoryModels['bracelets']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 12.50,
@@ -114,13 +120,14 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => true,
                 'is_new_arrival' => false,
                 'status' => 'active',
+                'occasion' => 'everyday',
                 'images' => ['https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-EAR-004',
                 'name' => 'Elegant Pearl Drop Earrings',
                 'slug' => 'elegant-pearl-drop-earrings',
-                'description' => 'Graceful drop earrings utilizing AAA grade fresh water pearls in 925 silver.',
+                'description' => 'Graceful drop earrings utilizing AAA grade fresh water pearls in 925 silver, an unforgettable gift for birthdays and anniversaries.',
                 'category_id' => $categoryModels['earrings']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 8.20,
@@ -133,13 +140,14 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => false,
                 'is_new_arrival' => true,
                 'status' => 'active',
+                'occasion' => 'gifting',
                 'images' => ['https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-NEC-005',
-                'name' => 'Vintage Filigree Choker',
+                'name' => 'Vintage Filigree Bridal Choker',
                 'slug' => 'vintage-filigree-choker',
-                'description' => 'An exquisite filigree choker in antiqued sterling silver.',
+                'description' => 'An exquisite filigree choker in antiqued sterling silver, handcrafted for engagement and wedding reception wear.',
                 'category_id' => $categoryModels['necklaces']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 18.00,
@@ -152,14 +160,15 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => true,
                 'is_new_arrival' => true,
                 'status' => 'active',
+                'occasion' => 'wedding',
                 'images' => ['https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-EAR-006',
-                'name' => 'CZ Diamond Studs',
+                'name' => 'CZ Diamond Tops',
                 'slug' => 'cz-diamond-studs',
-                'description' => 'Brilliant CZ diamond studs set in polished sterling silver settings.',
-                'category_id' => $categoryModels['earrings']->id,
+                'description' => 'Brilliant CZ diamond tops set in polished sterling silver settings for effortless everyday elegance.',
+                'category_id' => $categoryModels['tops']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 3.50,
                 'making_charge' => 200.00,
@@ -171,14 +180,15 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => true,
                 'is_new_arrival' => true,
                 'status' => 'active',
+                'occasion' => 'everyday',
                 'images' => ['https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-BRC-007',
-                'name' => 'Silver Kada/Cuff',
+                'name' => 'Royal Silver Bangle Kada',
                 'slug' => 'silver-kada-cuff',
-                'description' => 'A traditional silver Kada/Cuff bracelet featuring detailed engravings.',
-                'category_id' => $categoryModels['bracelets']->id,
+                'description' => 'A traditional silver Kada and bangle featuring detailed engravings for festive and wedding grandeur.',
+                'category_id' => $categoryModels['bangles']->id,
                 'silver_purity' => '999',
                 'silver_weight' => 24.50,
                 'making_charge' => 1100.00,
@@ -190,13 +200,14 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => false,
                 'is_new_arrival' => false,
                 'status' => 'active',
+                'occasion' => 'wedding',
                 'images' => ['https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?auto=format&fit=crop&w=600&q=80'],
             ],
             [
                 'sku' => 'VNT-RNG-008',
                 'name' => 'Emerald Blossom Ring',
                 'slug' => 'emerald-blossom-ring',
-                'description' => 'An eye-catching ring featuring a green emerald stimulant stone.',
+                'description' => 'An eye-catching ring featuring a green emerald stimulant stone, a charming gift for someone special.',
                 'category_id' => $categoryModels['rings']->id,
                 'silver_purity' => '925',
                 'silver_weight' => 5.20,
@@ -209,17 +220,106 @@ class DatabaseSeeder extends Seeder
                 'is_bestseller' => true,
                 'is_new_arrival' => true,
                 'status' => 'active',
+                'occasion' => 'gifting',
                 'images' => ['https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=600&q=80'],
+            ],
+            [
+                'sku' => 'VNT-PND-009',
+                'name' => 'Sacred Lotus Silver Pendant',
+                'slug' => 'sacred-lotus-silver-pendant',
+                'description' => 'A handcrafted 925 sterling silver lotus pendant ideal for Durga Puja and auspicious celebrations.',
+                'category_id' => $categoryModels['pendants']->id,
+                'silver_purity' => '925',
+                'silver_weight' => 6.80,
+                'making_charge' => 350.00,
+                'making_charge_type' => 'flat',
+                'base_price' => 1800.00,
+                'discount_percent' => 10.00,
+                'stock_quantity' => 18,
+                'is_featured' => true,
+                'is_bestseller' => false,
+                'is_new_arrival' => true,
+                'status' => 'active',
+                'occasion' => 'festive',
+                'images' => ['https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=600&q=80'],
+            ],
+            [
+                'sku' => 'VNT-MLA-010',
+                'name' => 'Artisan Silver Bead Mala',
+                'slug' => 'artisan-silver-bead-mala',
+                'description' => 'Traditional crafted silver beaded mala strung with natural gemstones for festivals and devotional gatherings.',
+                'category_id' => $categoryModels['mala']->id,
+                'silver_purity' => '925',
+                'silver_weight' => 28.00,
+                'making_charge' => 1400.00,
+                'making_charge_type' => 'flat',
+                'base_price' => 7500.00,
+                'discount_percent' => 12.00,
+                'stock_quantity' => 14,
+                'is_featured' => true,
+                'is_bestseller' => true,
+                'is_new_arrival' => false,
+                'status' => 'active',
+                'occasion' => 'festive',
+                'images' => ['https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80'],
+            ],
+            [
+                'sku' => 'VNT-EAR-011',
+                'name' => 'Royal Chandbali Bridal Earrings',
+                'slug' => 'royal-chandbali-bridal-earrings',
+                'description' => 'Exquisite silver chandbalis with delicate hanging pearls crafted for the modern Bengali bride.',
+                'category_id' => $categoryModels['earrings']->id,
+                'silver_purity' => '925',
+                'silver_weight' => 16.50,
+                'making_charge' => 850.00,
+                'making_charge_type' => 'flat',
+                'base_price' => 4200.00,
+                'discount_percent' => 15.00,
+                'stock_quantity' => 10,
+                'is_featured' => true,
+                'is_bestseller' => true,
+                'is_new_arrival' => false,
+                'status' => 'active',
+                'occasion' => 'wedding',
+                'images' => ['https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80'],
+            ],
+            [
+                'sku' => 'VNT-PND-012',
+                'name' => 'Crystal Heart Pendant & Chain',
+                'slug' => 'crystal-heart-pendant-chain',
+                'description' => 'Sparkling heart pendant in fine 925 sterling silver, perfect for gifting to express love and appreciation.',
+                'category_id' => $categoryModels['pendants']->id,
+                'silver_purity' => '925',
+                'silver_weight' => 5.00,
+                'making_charge' => 250.00,
+                'making_charge_type' => 'flat',
+                'base_price' => 1650.00,
+                'discount_percent' => 5.00,
+                'stock_quantity' => 35,
+                'is_featured' => false,
+                'is_bestseller' => true,
+                'is_new_arrival' => true,
+                'status' => 'active',
+                'occasion' => 'gifting',
+                'images' => ['https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80'],
             ],
         ];
 
         foreach ($products as $prod) {
             $images = $prod['images'];
             unset($prod['images']);
-            $productModel = Product::firstOrCreate(['sku' => $prod['sku']], $prod);
+            $productModel = Product::withTrashed()->where('sku', $prod['sku'])->orWhere('slug', $prod['slug'])->first();
+            if ($productModel) {
+                if ($productModel->trashed()) {
+                    $productModel->restore();
+                }
+                $productModel->update($prod);
+            } else {
+                $productModel = Product::create($prod);
+            }
 
             foreach ($images as $index => $img) {
-                ProductImage::firstOrCreate(
+                ProductImage::updateOrCreate(
                     ['product_id' => $productModel->id, 'image_path' => $img],
                     ['is_primary' => $index === 0, 'sort_order' => $index]
                 );
@@ -249,6 +349,7 @@ class DatabaseSeeder extends Seeder
             'silver_rate_manual_value' => '120.00',
             'social_instagram' => 'https://www.instagram.com/thevanityjewelskol/',
             'social_facebook' => 'https://www.facebook.com/profile.php?id=6159373665164',
+            'social_pinterest' => 'https://pin.it/Cnrv2arp6',
             'social_linkedin' => 'https://www.linkedin.com/company/the-vanity-jewels',
             'social_email' => 'mailto:thevanityjewels@gmail.com',
             'whatsapp_number' => '919876543210',

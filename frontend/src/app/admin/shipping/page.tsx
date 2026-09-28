@@ -79,10 +79,12 @@ export default function AdminShippingPage() {
           <label className="block text-xs text-on-surface-variant mb-1 font-semibold uppercase tracking-wider">Flat Shipping Fee (₹) *</label>
           <input
             type="number"
+            min="0"
+            onWheel={(e) => (e.target as HTMLElement).blur()}
             required
             className="w-full p-3 border border-outline-variant/30 focus:border-primary focus:outline-none bg-white rounded text-sm text-primary font-mono"
             value={flatFee}
-            onChange={e => setFlatFee(Number(e.target.value))}
+            onChange={e => setFlatFee(Math.max(0, parseFloat(e.target.value) || 0))}
           />
           <p className="text-[10px] text-on-surface-variant mt-1.5">
             Default rate applied to orders falling below the free delivery threshold.
@@ -93,10 +95,12 @@ export default function AdminShippingPage() {
           <label className="block text-xs text-on-surface-variant mb-1 font-semibold uppercase tracking-wider">Free Shipping Threshold (₹) *</label>
           <input
             type="number"
+            min="0"
+            onWheel={(e) => (e.target as HTMLElement).blur()}
             required
             className="w-full p-3 border border-outline-variant/30 focus:border-primary focus:outline-none bg-white rounded text-sm text-primary font-mono"
             value={freeThreshold}
-            onChange={e => setFreeThreshold(Number(e.target.value))}
+            onChange={e => setFreeThreshold(Math.max(0, parseFloat(e.target.value) || 0))}
           />
           <p className="text-[10px] text-on-surface-variant mt-1.5">
             Minimum order subtotal qualifying a customer for free delivery (₹0 shipping fee).

@@ -49,6 +49,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
   };
 
   const isAboutActive = 
+    pathname === '/about' ||
     pathname === '/shipping' || 
     pathname === '/returns' || 
     pathname === '/exchange' || 
@@ -104,14 +105,17 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
   }, []);
 
   const navLinks = [
-    { label: 'Silver', href: '/shop?category=Silver' },
-    { label: 'Brass', href: '/shop?category=Brass' },
-    { label: 'Stones', href: '/shop?category=Stones' },
-    { label: 'CZ Diamonds', href: '/shop?category=CZ Embellished' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Necklace', href: '/shop?category=Necklaces' },
+    { label: 'Earrings', href: '/shop?category=Earrings' },
+    { label: 'Bracelet', href: '/shop?category=Bracelets' },
+    { label: 'Bangle', href: '/shop?category=Bangles' },
+    { label: 'Pendant', href: '/shop?category=Pendants' },
+    { label: 'Tops', href: '/shop?category=Tops' },
+    { label: 'Mala', href: '/shop?category=Mala' },
   ];
 
   const aboutDropdownLinks = [
+    { label: 'About Us', href: '/about' },
     { label: 'Shipping', href: '/shipping' },
     { label: 'Returns', href: '/returns' },
     { label: 'Exchange', href: '/exchange' },
@@ -134,7 +138,9 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
       {/* Admin Mode Top Banner */}
       {user?.role === 'admin' && (
         <div className="bg-[#1A1A1A] text-white w-full py-1.5 px-5 text-center text-xs font-semibold flex flex-wrap items-center justify-center gap-2 border-b border-[#9A7E44]/40 z-50 relative">
-          <span className="material-symbols-outlined text-[16px] text-[#9A7E44]">admin_panel_settings</span>
+          <svg className="w-4 h-4 text-[#9A7E44]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
           <span>ADMINISTRATOR MODE ACTIVE — Logged in as {user.email}</span>
           <Link href="/admin" className="ml-2 bg-[#9A7E44] text-white px-3 py-0.5 rounded text-[11px] font-bold hover:bg-white hover:text-black transition-colors uppercase tracking-wider">
             Go to Admin Dashboard &rarr;
@@ -202,11 +208,14 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
                 onClick={() => setAboutOpen(!aboutOpen)}
               >
                 About
-                <span
-                  className={`material-symbols-outlined text-[16px] transition-transform duration-200 ${aboutOpen ? 'rotate-180' : ''}`}
+                <svg
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${aboutOpen ? 'rotate-180' : ''}`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  expand_more
-                </span>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
 
               {/* Dropdown Panel */}
@@ -237,38 +246,55 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
             <button
               className="md:hidden text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
-              <span className="material-symbols-outlined text-[24px]">
-                {mobileMenuOpen ? 'close' : 'menu'}
-              </span>
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
 
             {user?.role === 'admin' && (
-              <Link href="/admin" className="hidden sm:inline-flex items-center gap-1 text-xs font-bold bg-[#1A1A1A] text-[#9A7E44] px-2.5 py-1 rounded border border-[#9A7E44]/40 hover:bg-[#9A7E44] hover:text-white transition-colors">
-                <span className="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+              <Link href="/admin" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-[#1A1A1A] text-[#9A7E44] px-2.5 py-1 rounded border border-[#9A7E44]/40 hover:bg-[#9A7E44] hover:text-white transition-colors">
+                <svg className="w-3.5 h-3.5 text-[#9A7E44]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
                 ADMIN PORTAL
               </Link>
             )}
 
-            <Link href="/search" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:block">
-              <span className="material-symbols-outlined text-[24px]">search</span>
+            <Link href="/search" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:flex items-center justify-center w-8 h-8" title="Search">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
             </Link>
-            <Link href={profilePath} className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:block" title={user?.role === 'admin' ? 'Admin Dashboard' : 'Account'}>
-              <span className="material-symbols-outlined text-[24px]">person</span>
+            <Link href={profilePath} className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:flex items-center justify-center w-8 h-8" title={user?.role === 'admin' ? 'Admin Dashboard' : 'Account'}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
             </Link>
             {/* Wishlist */}
-            <Link href="/wishlist" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative" title="Wishlist">
-              <span className="material-symbols-outlined text-[24px]">favorite_border</span>
+            <Link href="/wishlist" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Wishlist">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
               {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+                <span className="absolute -top-0.5 -right-0.5 bg-secondary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
                   {wishlistCount > 99 ? '99+' : wishlistCount}
                 </span>
               )}
             </Link>
-            <Link href="/cart" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative" title="Cart">
-              <span className="material-symbols-outlined text-[24px]">shopping_bag</span>
+            <Link href="/cart" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Cart">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
               {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
+                <span className="absolute -top-0.5 -right-0.5 bg-primary text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full font-semibold">
                   {cartCount > 99 ? '99+' : cartCount}
                 </span>
               )}

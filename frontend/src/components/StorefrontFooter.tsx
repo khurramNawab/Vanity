@@ -19,7 +19,6 @@ export default function StorefrontFooter() {
 
   const footerLinks = [
     { label: 'About Us', href: '/about' },
-    { label: 'Blog & Heritage Guides', href: '/blog' },
     { label: 'Shipping', href: '/shipping' },
     { label: 'Returns', href: '/returns' },
     { label: 'Exchange', href: '/exchange' },
@@ -30,17 +29,7 @@ export default function StorefrontFooter() {
 
   return (
     <footer className="bg-surface-container-highest border-t border-outline-variant mt-auto">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-5 md:px-12 py-12 w-full max-w-[1280px] mx-auto">
-        {/* Brand */}
-        <div className="flex flex-col gap-4">
-          <Link href="/" className="font-headline-md text-headline-md text-primary font-bold">Vanity</Link>
-          <p className="text-on-surface font-body-md text-body-md">Modern Heirlooms. BIS Hallmarked Excellence.</p>
-          <div className="mt-2 inline-flex items-center gap-2 border border-[#9A7E44] px-3 py-2 bg-surface max-w-max">
-            <span className="material-symbols-outlined text-[#9A7E44] text-[20px]">verified</span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9A7E44]">BIS Hallmarked</span>
-          </div>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-5 md:px-12 py-12 w-full max-w-[1280px] mx-auto">
         {/* Quick Links */}
         <div className="flex flex-col gap-3">
           <h4 className="font-label-upper text-label-upper text-primary font-semibold mb-2 text-xs">Quick Links</h4>
@@ -72,7 +61,7 @@ export default function StorefrontFooter() {
           </div>
         </div>
 
-        {/* Social Icons */}
+        {/* Social Icons & Email */}
         <div className="flex flex-col gap-3">
           <h4 className="font-label-upper text-label-upper text-primary font-semibold mb-2 text-xs">Connect</h4>
           <div className="flex items-center flex-wrap gap-3 mt-1">
@@ -118,13 +107,25 @@ export default function StorefrontFooter() {
               </svg>
             </a>
 
+            {/* Pinterest */}
+            <a
+              href={socialLinks.social_pinterest || 'https://pin.it/Cnrv2arp6'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-10 h-10 border border-outline-variant/30 rounded-full flex items-center justify-center text-on-surface-variant hover:text-[#E60023] hover:border-[#E60023] hover:bg-[#E60023]/5 transition-all shadow-sm"
+              aria-label="Pinterest"
+              title="Follow us on Pinterest"
+            >
+              <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"/>
+              </svg>
+            </a>
+
             {/* Email */}
             <a
-              href={
-                socialLinks.social_email
-                  ? (socialLinks.social_email.startsWith('mailto:') ? socialLinks.social_email : `mailto:${socialLinks.social_email}`)
-                  : 'mailto:thevanityjewels@gmail.com'
-              }
+              href="mailto:info@thevanityjewels.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-10 h-10 border border-outline-variant/30 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary hover:bg-primary/5 transition-all shadow-sm"
               aria-label="Email"
               title="Email us"
@@ -134,38 +135,16 @@ export default function StorefrontFooter() {
           </div>
 
           <a
-            href="mailto:thevanityjewels@gmail.com"
+            href="mailto:info@thevanityjewels.com"
             className="text-on-surface-variant hover:text-primary transition-colors text-xs mt-2 inline-flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-[14px]">alternate_email</span>
-            thevanityjewels@gmail.com
+            info@thevanityjewels.com
           </a>
         </div>
       </div>
       <div className="border-t border-outline-variant/30 py-6 text-center flex flex-col items-center gap-2 bg-surface-container-high/25">
-        <p className="text-on-surface-variant text-sm font-body-md">© {new Date().getFullYear()} Vanity. BIS Hallmarked Excellence.</p>
-        
-        {/* Developer credits */}
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-on-surface-variant/80 font-medium">
-          <span>Made with</span>
-          <span className="material-symbols-outlined text-[16px] text-red-500 animate-pulse font-bold" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
-          <span>by</span>
-          <a 
-            href="https://www.linkedin.com/in/khurram-nawab30/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="relative group overflow-hidden bg-gradient-to-r from-[#9A7E44] to-[#c5a85c] text-white px-3 py-1 rounded-full font-semibold inline-flex items-center gap-1 shadow-sm hover:shadow-md transition-all hover:scale-105"
-          >
-            {/* Glossy overlay effect */}
-            <span className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="relative z-10 flex items-center gap-1">
-              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/>
-              </svg>
-              Khurram
-            </span>
-          </a>
-        </div>
+        <p className="text-on-surface-variant text-sm font-body-md">© {new Date().getFullYear()} Vanity. All rights reserved.</p>
       </div>
     </footer>
   );

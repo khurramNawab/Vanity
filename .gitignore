@@ -51,3 +51,10 @@ frontend/.pnpm-debug.log*
 # Design Mockups & Prompt Exports
 silver_jewellery/
 silver_jewellery_ui_ux/
+
+# Local archives and scratch
+scratch/
+vanity_backend/
+vanity_frontend/
+*.zip
+

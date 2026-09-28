@@ -77,6 +77,17 @@ class PublicProductController extends Controller
             }
         }
 
+        // Filter by occasion (Festive, Wedding, Everyday, Gifting, Party, Puja)
+        if ($request->has('occasion') && $request->query('occasion') !== 'All' && !empty($request->query('occasion'))) {
+            $occ = strtolower(trim($request->query('occasion')));
+            $query->where(function ($q) use ($occ) {
+                $q->whereRaw('LOWER(occasion) = ?', [$occ])
+                  ->orWhereRaw('LOWER(occasion) LIKE ?', ["%{$occ}%"])
+                  ->orWhere('name', 'like', "%{$occ}%")
+                  ->orWhere('description', 'like', "%{$occ}%");
+            });
+        }
+
         // Search text
         if ($request->has('q')) {
             $search = $request->query('q');
