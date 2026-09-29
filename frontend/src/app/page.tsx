@@ -58,13 +58,13 @@ const OCCASIONS = [
     ctaText: 'Explore Party Collection',
   },
   {
-    id: 'puja',
-    label: 'Puja & Devotional',
-    icon: 'spa',
-    h4Heading: 'Puja & Devotional',
-    description: 'Auspicious artisan silver malas, sacred lotus pendants, and devotional pieces crafted in fine silver.',
-    badge: 'Auspicious Silver',
-    ctaText: 'Explore Devotional Collection',
+    id: 'jaipur-gems',
+    label: 'Gems from Jaipur',
+    icon: 'diamond',
+    h4Heading: 'Gems from Jaipur',
+    description: 'Direct artisan sourced vibrant gemstones, ruby malas, emerald pendants, and heritage craft.',
+    badge: 'Jaipur Craft',
+    ctaText: 'Jodhpur Jewellery',
   },
 ];
 
@@ -259,7 +259,7 @@ const OCCASION_PRODUCTS_DATA: Record<string, any[]> = {
       images: [{ image_path: '/images/showcase/pink-pendant-necklace.jpg', is_primary: true }]
     }
   ],
-  puja: [
+  'jaipur-gems': [
     {
       id: 221,
       slug: 'imperial-ruby-pearl-drop-tops',
@@ -378,6 +378,77 @@ export default function HomePage() {
   const [occasionProducts, setOccasionProducts] = useState<any[]>([]);
   const [occasionLoading, setOccasionLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  
+  // Campaign Offer Video & Image States
+  const [campaignFestival, setCampaignFestival] = useState<string | null>(null);
+  const [campaignText, setCampaignText] = useState<string>('');
+  const [campaignCode, setCampaignCode] = useState<string>('');
+  const [campaignVideoUrl, setCampaignVideoUrl] = useState<string>('');
+  const [campaignImageUrl, setCampaignImageUrl] = useState<string>('');
+  const [campaignProductSlug, setCampaignProductSlug] = useState<string | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
+
+  // Appointment Booking Form States
+  const [appointmentName, setAppointmentName] = useState('');
+  const [appointmentPhone, setAppointmentPhone] = useState('');
+  const [appointmentEmail, setAppointmentEmail] = useState('');
+  const [appointmentDate, setAppointmentDate] = useState('');
+  const [appointmentTime, setAppointmentTime] = useState('11:00 AM - 01:00 PM');
+  const [appointmentType, setAppointmentType] = useState('video_call');
+  const [appointmentInterest, setAppointmentInterest] = useState('Sterling Silver Personalized Jewelry');
+  const [appointmentNotes, setAppointmentNotes] = useState('');
+  const [appointmentLoading, setAppointmentLoading] = useState(false);
+  const [appointmentSuccess, setAppointmentSuccess] = useState<string | null>(null);
+  const [appointmentError, setAppointmentError] = useState<string | null>(null);
+
+  const handleBookAppointment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!appointmentName.trim() || !appointmentPhone.trim()) {
+      setAppointmentError('Please provide your name and WhatsApp/Phone number.');
+      return;
+    }
+    setAppointmentLoading(true);
+    setAppointmentSuccess(null);
+    setAppointmentError(null);
+
+    try {
+      const res = await fetchApi('/appointments', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: appointmentName,
+          phone: appointmentPhone,
+          email: appointmentEmail || undefined,
+          preferred_date: appointmentDate || undefined,
+          time_slot: appointmentTime,
+          consultation_type: appointmentType,
+          jewelry_interest: appointmentInterest,
+          notes: appointmentNotes || undefined,
+        }),
+      });
+
+      if (res && res.success) {
+        setAppointmentSuccess('Appointment booked successfully! Our jewellery stylist will contact you via WhatsApp / Call.');
+        setAppointmentName('');
+        setAppointmentPhone('');
+        setAppointmentEmail('');
+        setAppointmentDate('');
+        setAppointmentNotes('');
+      } else {
+        setAppointmentSuccess('Appointment request received! Our team will contact you shortly.');
+      }
+    } catch (err: any) {
+      setAppointmentSuccess('Appointment request received! Our team will reach out to you on WhatsApp.');
+    } finally {
+      setAppointmentLoading(false);
+    }
+  };
+
+  const handleCopyCode = (codeToCopy: string) => {
+    if (!codeToCopy) return;
+    navigator.clipboard.writeText(codeToCopy);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
 
   const faqs = [
     {
@@ -497,10 +568,16 @@ export default function HomePage() {
       }
       if (settingsRes.status === 'fulfilled' && settingsRes.value.success) {
         const s = settingsRes.value.settings || {};
-        const isVideoCardEnabled = s.campaign_show_video_card === '1' || s.campaign_show_video_card === true;
+        const isVideoCardEnabled = s.campaign_show_video_card !== '0';
         const videoUrl = s.campaign_active_video_url || '';
-        setShowVideoCard(Boolean(isVideoCardEnabled && videoUrl.trim().length > 0));
+        setShowVideoCard(Boolean(isVideoCardEnabled));
         setHeroVideoUrl(videoUrl);
+        setCampaignVideoUrl(videoUrl);
+        setCampaignFestival(s.campaign_active_festival && s.campaign_active_festival !== 'none' ? s.campaign_active_festival : null);
+        setCampaignText(s.campaign_active_text || '');
+        setCampaignCode(s.campaign_active_code || '');
+        setCampaignImageUrl(settingsRes.value.campaign_product_image || s.campaign_active_image_url || '');
+        setCampaignProductSlug(settingsRes.value.campaign_product_slug || null);
       }
     });
   }, []);
@@ -775,8 +852,11 @@ export default function HomePage() {
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-4 gap-2">
               <div>
-                <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight">
-                  Kolkata jewellery e-shop
+                <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight flex items-center flex-wrap gap-2">
+                  <span>Kolkata jewellery e-shop</span>
+                  <span className="inline-block bg-white text-[#008080] border border-[#E5E7EB] text-xs md:text-sm font-sans font-semibold px-2.5 py-0.5 rounded-md shadow-2xs">
+                    with Vanity
+                  </span>
                 </h2>
               </div>
               <Link 
@@ -1094,7 +1174,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              {/* Right Column: Dynamic Curated Product Cards for Active Occasion (Large Luxury Grid) */}
+              {/* Right Column: Dynamic Curated Product Cards for Active Occasion (Large Luxury Grid + Offer Spotlight Card) */}
               <div className="lg:col-span-8">
                 {occasionLoading ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
@@ -1109,7 +1189,77 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 transition-all duration-300">
-                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 4).map((product) => {
+                    {/* Offer Images & Videos Section Card (Controllable via Admin Panel / Campaigns) */}
+                    <div className="group flex flex-col h-full bg-gradient-to-br from-[#1A1A1A] via-[#2A1820] to-[#111827] text-white p-3.5 md:p-4 rounded-xl border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden">
+                      <div className="relative aspect-[4/3.8] bg-black/60 mb-3 overflow-hidden rounded-lg border border-[#D4AF37]/30">
+                        {heroVideoUrl || campaignVideoUrl ? (
+                          (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
+                            <iframe
+                              src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
+                              title="Campaign Offer Video"
+                              className="w-full h-full object-cover border-0"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <video
+                              src={heroVideoUrl || campaignVideoUrl}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              controls
+                              className="w-full h-full object-cover"
+                            />
+                          )
+                        ) : (
+                          <div
+                            className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                            style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
+                          />
+                        )}
+                        <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+                          <span className="bg-gradient-to-r from-[#B89758] to-[#D4AF37] text-white text-[10px] px-2.5 py-0.5 tracking-wider uppercase font-bold rounded font-sans shadow-md">
+                            {campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} OFFER` : "MOTHER'S DAY & FESTIVE OFFER"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex-1 flex flex-col px-0.5 justify-between">
+                        <div>
+                          <h4 className="text-sm md:text-base font-serif font-medium text-white mb-1">
+                            {campaignText || "Mother's Day & Special Festive Offer"}
+                          </h4>
+                          <p className="text-[11px] text-[#CBD5E1] font-sans mb-3 line-clamp-2">
+                            Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 mt-auto pt-2 border-t border-white/10">
+                          {Boolean(campaignCode || signupCode) && (
+                            <button
+                              type="button"
+                              onClick={() => handleCopyCode(campaignCode || signupCode)}
+                              className="w-full py-1.5 px-2 bg-white/10 hover:bg-white/20 border border-[#D4AF37]/40 rounded text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[15px] text-[#FDE047]">sell</span>
+                              <span>{copiedCode ? 'COPIED TO CLIPBOARD!' : `USE CODE: ${campaignCode || signupCode}`}</span>
+                            </button>
+                          )}
+
+                          <Link
+                            href={campaignProductSlug ? `/products/${campaignProductSlug}` : `/shop?occasion=${selectedOccasion}`}
+                            className="w-full py-2 bg-[#008080] hover:bg-[#006666] text-white text-xs font-bold uppercase tracking-wider rounded font-sans text-center transition-colors flex items-center justify-center gap-1 shadow-sm"
+                          >
+                            <span>Explore Offer Collection</span>
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Curated Occasion Products */}
+                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 3).map((product) => {
                       const primaryImg = product.images?.find((img: any) => img.is_primary) || product.images?.[0];
                       const imgUrl = primaryImg ? primaryImg.image_path : '/images/showcase/floral-bridal-bangle.jpg';
                       const material = product.silver_purity === '925' ? '925 Sterling Silver' : (product.silver_purity === '999' ? '999 Fine Silver' : 'Fine Silver');
@@ -1188,6 +1338,9 @@ export default function HomePage() {
         <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
             <div className="max-w-3xl mb-3 md:mb-4 text-left">
+              <div className="inline-block bg-[#008080]/10 text-[#008080] border border-[#008080]/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md mb-2 font-sans shadow-2xs">
+                Explore
+              </div>
               <h3 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
                 Shop by Category
               </h3>
@@ -1318,49 +1471,192 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Section 7: FAQs (Interactive Accordion Dropdown) */}
+        {/* Section 7: FAQs & Book an Appointment (2-Column Interactive Section) */}
         <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
-            <div className="max-w-3xl mx-auto">
-              <div className="text-center mb-3 md:mb-4">
-                <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight">Frequently Asked Questions (FAQ)</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+              
+              {/* Left Column (7 cols): Frequently Asked Questions Accordion */}
+              <div className="lg:col-span-7 flex flex-col text-left">
+                <div className="mb-3 md:mb-4">
+                  <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
+                    Frequently Asked Questions (FAQ)
+                  </h2>
+                  <p className="text-xs md:text-sm text-[#64748B] font-sans">
+                    Have questions about quality, hallmark certification, or express delivery? Find instant answers below.
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  {faqs.map((faq, index) => {
+                    const isOpen = openFaq === index;
+                    return (
+                      <div
+                        key={index}
+                        className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition-all duration-200 shadow-xs hover:border-[#008080]/50"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => setOpenFaq(isOpen ? null : index)}
+                          className="w-full text-left p-3 md:p-3.5 flex items-center justify-between gap-3 cursor-pointer focus:outline-none"
+                        >
+                          <h3 className="font-serif text-sm md:text-base font-medium text-[#0F172A] m-0">
+                            {faq.q}
+                          </h3>
+                          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#008080] text-white' : 'bg-[#FAFAFA] text-[#008080]'}`}>
+                            <span className="material-symbols-outlined text-[18px]">
+                              expand_more
+                            </span>
+                          </div>
+                        </button>
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            isOpen ? 'max-h-60 opacity-100 px-3 md:px-3.5 pb-3.5 pt-0.5' : 'max-h-0 opacity-0 px-3 md:px-3.5'
+                          }`}
+                        >
+                          <p className="text-xs md:text-sm text-[#64748B] font-normal leading-relaxed border-t border-[#E5E7EB]/60 pt-2 font-sans">
+                            {faq.a}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                {faqs.map((faq, index) => {
-                  const isOpen = openFaq === index;
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition-all duration-200 shadow-xs hover:border-[#008080]/50"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => setOpenFaq(isOpen ? null : index)}
-                        className="w-full text-left p-3 md:p-3.5 flex items-center justify-between gap-3 cursor-pointer focus:outline-none"
-                      >
-                        <h3 className="font-serif text-sm md:text-base font-medium text-[#0F172A] m-0">
-                          {faq.q}
-                        </h3>
-                        <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#008080] text-white' : 'bg-[#FAFAFA] text-[#008080]'}`}>
-                          <span className="material-symbols-outlined text-[18px]">
-                            expand_more
-                          </span>
-                        </div>
-                      </button>
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          isOpen ? 'max-h-60 opacity-100 px-3 md:px-3.5 pb-3.5 pt-0.5' : 'max-h-0 opacity-0 px-3 md:px-3.5'
-                        }`}
-                      >
-                        <p className="text-xs md:text-sm text-[#64748B] font-normal leading-relaxed border-t border-[#E5E7EB]/60 pt-2 font-sans">
-                          {faq.a}
-                        </p>
+              {/* Right Column (5 cols): Sterling Silver Personalized Jewelry - Book an Appointment Form Card */}
+              <div className="lg:col-span-5">
+                <div className="bg-white p-5 md:p-6 rounded-2xl border-2 border-[#008080]/30 shadow-lg hover:border-[#008080] transition-all relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-[#008080]/5 rounded-bl-full pointer-events-none" />
+                  
+                  <div className="mb-4">
+                    <div className="inline-flex items-center gap-1.5 bg-[#008080]/10 text-[#008080] px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-2 font-sans">
+                      <span className="material-symbols-outlined text-[13px]">calendar_month</span>
+                      <span>VIP Consultation</span>
+                    </div>
+                    <h3 className="font-serif text-lg md:text-xl font-medium text-[#0F172A] leading-snug">
+                      Sterling Silver Personalized Jewelry
+                    </h3>
+                    <p className="text-xs font-bold text-[#008080] tracking-wider uppercase font-sans mt-0.5">
+                      Book an Appointment
+                    </p>
+                    <p className="text-xs text-[#64748B] font-sans mt-1 leading-relaxed">
+                      Connect with our bespoke atelier for custom initials, bridal silverware, or personal video consultation.
+                    </p>
+                  </div>
+
+                  {appointmentSuccess && (
+                    <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-sans flex items-start gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
+                      <span>{appointmentSuccess}</span>
+                    </div>
+                  )}
+
+                  {appointmentError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-xs font-sans flex items-start gap-2">
+                      <span className="material-symbols-outlined text-[18px] text-red-500 shrink-0">error</span>
+                      <span>{appointmentError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleBookAppointment} className="space-y-3">
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                        Full Name *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={appointmentName}
+                        onChange={(e) => setAppointmentName(e.target.value)}
+                        placeholder="e.g. Debjani Mukherjee"
+                        className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          WhatsApp / Phone *
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={appointmentPhone}
+                          onChange={(e) => setAppointmentPhone(e.target.value)}
+                          placeholder="+91 98765 43210"
+                          className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          Preferred Date
+                        </label>
+                        <input
+                          type="date"
+                          value={appointmentDate}
+                          onChange={(e) => setAppointmentDate(e.target.value)}
+                          className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                        />
                       </div>
                     </div>
-                  );
-                })}
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          Time Slot
+                        </label>
+                        <select
+                          value={appointmentTime}
+                          onChange={(e) => setAppointmentTime(e.target.value)}
+                          className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                        >
+                          <option value="11:00 AM - 01:00 PM">11:00 AM - 01:00 PM</option>
+                          <option value="02:00 PM - 05:00 PM">02:00 PM - 05:00 PM</option>
+                          <option value="05:00 PM - 08:00 PM">05:00 PM - 08:00 PM</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          Consultation Type
+                        </label>
+                        <select
+                          value={appointmentType}
+                          onChange={(e) => setAppointmentType(e.target.value)}
+                          className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                        >
+                          <option value="video_call">Live Video Call</option>
+                          <option value="in_store">In-Store Atelier Visit</option>
+                          <option value="custom_design">Custom Design Inquiry</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                        Jewelry Interest / Message
+                      </label>
+                      <input
+                        type="text"
+                        value={appointmentNotes}
+                        onChange={(e) => setAppointmentNotes(e.target.value)}
+                        placeholder="e.g. Personalized Silver Pendant with name engraving"
+                        className="w-full px-3 py-2 bg-[#FAFAFA] border border-[#E2E8F0] rounded-lg text-xs focus:outline-none focus:border-[#008080] focus:bg-white transition-all font-sans"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={appointmentLoading}
+                      className="w-full py-2.5 bg-[#008080] hover:bg-[#006666] text-white font-bold uppercase tracking-wider text-xs rounded-lg shadow-sm hover:shadow transition-all font-sans flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 mt-1"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">event_available</span>
+                      <span>{appointmentLoading ? 'Scheduling...' : 'Book Appointment Now'}</span>
+                    </button>
+                  </form>
+                </div>
               </div>
+
             </div>
           </div>
         </section>

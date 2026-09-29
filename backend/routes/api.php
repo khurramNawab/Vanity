@@ -81,6 +81,8 @@ Route::get('/settings/public', function () {
 });
 
 Route::post('/support', [\App\Http\Controllers\SupportController::class, 'submit']);
+Route::post('/appointments', [\App\Http\Controllers\AppointmentController::class, 'store']);
+Route::post('/settings/upload-video', [\App\Http\Controllers\SettingController::class, 'uploadVideo']);
 
 // Protected routes (Logged in users only)
 Route::middleware('auth:sanctum')->group(function () {
@@ -149,5 +151,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/hero-slides', [HeroSlideController::class, 'store']);
         Route::put('/hero-slides/{id}', [HeroSlideController::class, 'update']);
         Route::delete('/hero-slides/{id}', [HeroSlideController::class, 'destroy']);
+
+        // Appointments
+        Route::get('/appointments', [\App\Http\Controllers\AppointmentController::class, 'index']);
+        Route::put('/appointments/{id}/status', [\App\Http\Controllers\AppointmentController::class, 'updateStatus']);
     });
 });

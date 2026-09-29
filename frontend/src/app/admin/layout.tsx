@@ -59,6 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Hero Slides', path: '/admin/hero-slides', icon: 'view_carousel' },
     { name: 'Silver Rate', path: '/admin/silver-rate', icon: 'trending_up' },
     { name: 'Campaigns', path: '/admin/campaigns', icon: 'campaign' },
+    { name: 'Appointments', path: '/admin/appointments', icon: 'calendar_month' },
     { name: 'Abandoned Carts', path: '/admin/abandoned-carts', icon: 'shopping_cart_checkout' },
     { name: 'Settings', path: '/admin/settings', icon: 'settings' },
   ];

@@ -11,6 +11,7 @@ const FESTIVALS = [
   { id: 'ganesh_puja', name: 'Ganesh Puja', desc: 'Marigold garland gold glow theme' },
   { id: 'republic_day', name: 'Republic Day', desc: 'Saffron-white-green tricolor theme' },
   { id: 'independence_day', name: 'Independence Day', desc: 'Patriotic tricolor glow theme' },
+  { id: 'mothers_day', name: 'Mother\'s Day', desc: 'Heartfelt appreciation & pink floral motif' },
   { id: 'womens_day', name: 'Women\'s Day', desc: 'Elegant floating floral theme' },
   { id: 'valentines_day', name: 'Valentine\'s Day', desc: 'Floating red hearts theme' },
   { id: 'raksha_bandhan', name: 'Raksha Bandhan', desc: 'Traditional thread and gold theme' },
