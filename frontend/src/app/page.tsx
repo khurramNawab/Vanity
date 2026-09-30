@@ -1221,77 +1221,167 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Section 5: H3 - Jewellery for Every Occasion (Left Vertical Tabs + Right Dynamic Grid) */}
+        {/* Section 5: H3 - Jewellery for Every Occasion (Perfect 2-Row Synchronized Grid) */}
         <section
           className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6"
           onMouseEnter={() => setIsOccasionPaused(true)}
           onMouseLeave={() => setIsOccasionPaused(false)}
         >
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-7 items-stretch">
               
-              {/* Left Column: Vertical Occasion Tabs & CTA */}
-              <div className="lg:col-span-4 flex flex-col text-left">
-                <h3 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
-                  Jewellery for Every Occasion
-                </h3>
-                <p className="text-xs md:text-sm text-[#64748B] font-sans leading-relaxed mb-3">
-                  {OCCASIONS.find(o => o.id === selectedOccasion)?.description || 'Curated 925 sterling silver designs crafted for life’s moments.'}
-                </p>
+              {/* Row 1 - Left Column: Vertical Occasion Tabs & CTA */}
+              <div className="lg:col-span-4 flex flex-col justify-between text-left">
+                <div>
+                  <h3 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
+                    Jewellery for Every Occasion
+                  </h3>
+                  <p className="text-xs md:text-sm text-[#64748B] font-sans leading-relaxed mb-3">
+                    {OCCASIONS.find(o => o.id === selectedOccasion)?.description || 'Curated 925 sterling silver designs crafted for life’s moments.'}
+                  </p>
 
-                {/* Vertical Occasion Navigation Buttons */}
-                <div className="space-y-1.5 mb-3">
-                  {OCCASIONS.map((occ) => {
-                    const isSelected = selectedOccasion === occ.id;
-                    return (
-                      <button
-                        key={occ.id}
-                        onClick={() => {
-                          setSelectedOccasion(occ.id);
-                          setIsOccasionPaused(true);
-                        }}
-                        type="button"
-                        className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 border font-sans cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#008080] text-white border-[#008080] shadow-sm translate-x-1'
-                            : 'bg-white text-[#475569] border-[#E5E7EB] hover:border-[#008080] hover:text-[#008080]'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isSelected ? "'FILL' 1" : "'FILL' 0" }}>
-                            {occ.icon}
+                  {/* Vertical Occasion Navigation Buttons */}
+                  <div className="space-y-1.5 mb-3">
+                    {OCCASIONS.map((occ) => {
+                      const isSelected = selectedOccasion === occ.id;
+                      return (
+                        <button
+                          key={occ.id}
+                          onClick={() => {
+                            setSelectedOccasion(occ.id);
+                            setIsOccasionPaused(true);
+                          }}
+                          type="button"
+                          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 border font-sans cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#008080] text-white border-[#008080] shadow-sm translate-x-1'
+                              : 'bg-white text-[#475569] border-[#E5E7EB] hover:border-[#008080] hover:text-[#008080]'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: isSelected ? "'FILL' 1" : "'FILL' 0" }}>
+                              {occ.icon}
+                            </span>
+                            <span>{occ.label}</span>
+                          </div>
+                          <span className={`material-symbols-outlined text-[16px] transition-transform ${isSelected ? 'translate-x-0.5 text-white' : 'text-slate-300'}`}>
+                            arrow_forward_ios
                           </span>
-                          <span>{occ.label}</span>
-                        </div>
-                        <span className={`material-symbols-outlined text-[16px] transition-transform ${isSelected ? 'translate-x-0.5 text-white' : 'text-slate-300'}`}>
-                          arrow_forward_ios
-                        </span>
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Explore Occasion CTA Button */}
                 <Link
                   href={`/shop/?occasion=${selectedOccasion}`}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] text-white hover:bg-[#006666] py-2.5 px-4 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow transition-all font-sans mb-3"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] text-white hover:bg-[#006666] py-3 px-4 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow transition-all font-sans"
                 >
                   <span>{OCCASIONS.find(o => o.id === selectedOccasion)?.ctaText || 'Jodhpur Jewellery'}</span>
                   <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </Link>
+              </div>
 
-                {/* Exclusive Festive / Mother's Day Offer Card (Clean luxury image with offer tag, perfectly aligned) */}
+              {/* Row 1 - Right Column: Top 2 Products (Cards 1 & 2) */}
+              <div className="lg:col-span-8">
+                {occasionLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 h-full">
+                    {Array.from({ length: 2 }).map((_, idx) => (
+                      <div key={idx} className="flex flex-col h-full animate-pulse bg-white p-3.5 rounded-xl border border-[#E5E7EB]">
+                        <div className="aspect-[4/3.8] bg-slate-100 rounded-lg mb-3" />
+                        <div className="h-4 bg-slate-100 w-3/4 rounded mb-2" />
+                        <div className="h-3 bg-slate-100 w-1/2 rounded mb-2" />
+                        <div className="h-5 bg-slate-100 w-1/3 rounded mt-auto" />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 h-full">
+                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 2).map((product) => {
+                      const primaryImg = product.images?.find((img: any) => img.is_primary) || product.images?.[0];
+                      const imgUrl = primaryImg ? primaryImg.image_path : '/images/showcase/floral-bridal-bangle.jpg';
+                      const material = product.silver_purity === '925' ? '925 Sterling Silver' : (product.silver_purity === '999' ? '999 Fine Silver' : 'Fine Silver');
+                      const priceText = product.calculated_price ? `₹${Number(product.calculated_price).toLocaleString('en-IN')}` : (product.base_price ? `₹${Number(product.base_price).toLocaleString('en-IN')}` : '₹4,499');
+                      const currentOccObj = OCCASIONS.find(o => o.id === selectedOccasion);
+                      const tag = product.is_new_arrival ? 'New In' : (product.is_bestseller ? 'Best Seller' : (currentOccObj ? currentOccObj.badge : 'Occasion Special'));
+                      const tagClass = product.is_new_arrival ? 'bg-[#008080] text-white' : (product.is_bestseller ? 'bg-gradient-to-r from-[#B89758] to-[#D4AF37] text-white shadow-xs' : 'bg-[#008080] text-white');
+
+                      return (
+                        <Link
+                          key={`${selectedOccasion}-${product.id}`}
+                          href={`/products/${product.slug || product.id}`}
+                          className="group cursor-pointer flex flex-col h-full bg-white p-3.5 md:p-4 rounded-xl border border-[#E5E7EB] shadow-xs hover:shadow-lg hover:border-[#008080] hover:-translate-y-1 transition-all duration-300"
+                        >
+                          <div className="relative aspect-[4/3.8] bg-[#F8F8F7] mb-3 overflow-hidden rounded-lg">
+                            {tag && (
+                              <div className="absolute top-2.5 left-2.5 z-10">
+                                <span className={`${tagClass} text-[10px] px-2.5 py-0.5 tracking-wider uppercase font-bold rounded font-sans shadow-xs`}>
+                                  {tag}
+                                </span>
+                              </div>
+                            )}
+                            <div
+                              className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                              style={{ backgroundImage: `url('${imgUrl}')` }}
+                            />
+                            <div className="absolute inset-x-0 bottom-0 p-2.5 translate-y-full group-hover:translate-y-0 transition-transform duration-200 ease-out bg-gradient-to-t from-[#0F172A]/75 to-transparent flex justify-center">
+                              <span className="bg-white text-[#008080] w-full py-1.5 tracking-wider hover:bg-[#008080] hover:text-white transition-colors text-[11px] text-center font-bold rounded font-sans shadow-sm">
+                                QUICK VIEW
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 flex flex-col px-0.5">
+                            <div className="flex justify-between items-start mb-1">
+                              <h4 className="text-sm md:text-base font-medium text-[#0F172A] truncate pr-2 group-hover:text-[#008080] transition-colors font-serif">
+                                {product.name}
+                              </h4>
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  await toggleWishlistItem(product.id, token);
+                                }}
+                                className={`shrink-0 p-0.5 transition-colors ${wishlistIds.includes(product.id)
+                                    ? 'text-red-500 hover:text-red-600'
+                                    : 'text-slate-300 hover:text-[#008080]'
+                                  }`}
+                                title={wishlistIds.includes(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+                              >
+                                <span className="material-symbols-outlined text-[18px]">
+                                  {wishlistIds.includes(product.id) ? 'favorite' : 'favorite_border'}
+                                </span>
+                              </button>
+                            </div>
+                            <p className="text-[11px] text-[#64748B] font-sans mb-2">{material}</p>
+                            <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
+                              <p className="text-base md:text-lg font-serif font-bold text-[#0F172A]">{priceText}</p>
+                              <span className="text-[11px] font-bold text-[#008080] group-hover:underline font-sans flex items-center gap-0.5">
+                                Details <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Row 2 - Left Column: Clean Offer Card (Starts at EXACT same vertical Y pixel as Row 2 Products) */}
+              <div className="lg:col-span-4 flex flex-col h-full">
                 {showOfferSection && (
                   <Link
                     href={campaignCtaLink || (campaignProductSlug ? `/products/${campaignProductSlug}/` : `/shop/?occasion=${selectedOccasion}`)}
-                    className="group block relative w-full aspect-[16/11] sm:aspect-[4/3] rounded-xl overflow-hidden border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-300"
+                    className="group block relative w-full h-full min-h-[300px] md:min-h-[340px] rounded-xl overflow-hidden border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-300"
                   >
                     {heroVideoUrl || campaignVideoUrl ? (
                       (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
                         <iframe
                           src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
                           title="Campaign Offer Video"
-                          className="w-full h-full object-cover border-0 pointer-events-none"
+                          className="absolute inset-0 w-full h-full object-cover border-0 pointer-events-none"
                         />
                       ) : (
                         <video
@@ -1300,12 +1390,12 @@ export default function HomePage() {
                           loop
                           muted
                           playsInline
-                          className="w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
                       )
                     ) : (
                       <div
-                        className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
                         style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
                       />
                     )}
@@ -1332,11 +1422,11 @@ export default function HomePage() {
                 )}
               </div>
 
-              {/* Right Column: Dynamic Curated Product Cards for Active Occasion (Large Luxury Grid) */}
+              {/* Row 2 - Right Column: Bottom 2 Products (Cards 3 & 4) */}
               <div className="lg:col-span-8">
                 {occasionLoading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
-                    {Array.from({ length: 4 }).map((_, idx) => (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 h-full">
+                    {Array.from({ length: 2 }).map((_, idx) => (
                       <div key={idx} className="flex flex-col h-full animate-pulse bg-white p-3.5 rounded-xl border border-[#E5E7EB]">
                         <div className="aspect-[4/3.8] bg-slate-100 rounded-lg mb-3" />
                         <div className="h-4 bg-slate-100 w-3/4 rounded mb-2" />
@@ -1346,8 +1436,8 @@ export default function HomePage() {
                     ))}
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 transition-all duration-300">
-                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 4).map((product) => {
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 h-full">
+                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(2, 4).map((product) => {
                       const primaryImg = product.images?.find((img: any) => img.is_primary) || product.images?.[0];
                       const imgUrl = primaryImg ? primaryImg.image_path : '/images/showcase/floral-bridal-bangle.jpg';
                       const material = product.silver_purity === '925' ? '925 Sterling Silver' : (product.silver_purity === '999' ? '999 Fine Silver' : 'Fine Silver');

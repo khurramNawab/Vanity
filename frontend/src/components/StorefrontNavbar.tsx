@@ -130,13 +130,25 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
   ];
 
   const handleAboutEnter = () => {
-    if (aboutTimeout.current) clearTimeout(aboutTimeout.current);
+    if (aboutTimeout.current) {
+      clearTimeout(aboutTimeout.current);
+      aboutTimeout.current = null;
+    }
     setAboutOpen(true);
   };
 
   const handleAboutLeave = () => {
-    aboutTimeout.current = setTimeout(() => setAboutOpen(false), 200);
+    if (aboutTimeout.current) clearTimeout(aboutTimeout.current);
+    aboutTimeout.current = setTimeout(() => {
+      setAboutOpen(false);
+    }, 200);
   };
+
+  useEffect(() => {
+    return () => {
+      if (aboutTimeout.current) clearTimeout(aboutTimeout.current);
+    };
+  }, []);
 
   const profilePath = user ? (user.role === 'admin' ? '/admin/' : '/account/') : '/login/';
 
