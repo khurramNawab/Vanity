@@ -19,7 +19,7 @@ const OCCASIONS = [
     h4Heading: 'Festive Shopping',
     description: 'Durga Puja, Diwali, and Poila Boishakh call for pieces that stand out with brilliant silver craft.',
     badge: 'Festive Edit',
-    ctaText: 'Explore Festive Collection',
+    ctaText: 'Jodhpur Jewellery',
   },
   {
     id: 'wedding',
@@ -854,13 +854,13 @@ export default function HomePage() {
                   <h2 className="font-normal text-xs md:text-sm leading-relaxed text-[#475569] m-0">
                     As a trusted online jewellery brand in Kolkata, Vanity brings the experience of a jewellery store directly to your computer, phone or laptop, without long queues or the pressure of an in-store visit. Browse, compare, and choose your favourite pieces with ease. Whether you’re looking for{' '}
                     <span className="font-semibold text-[#0F172A]">
-                      <Link href="/shop?category=necklaces" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Necklace</Link>,{' '}
-                      <Link href="/shop?category=earrings" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Earrings</Link>,{' '}
-                      <Link href="/shop?category=bracelets" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Bracelet</Link>,{' '}
-                      <Link href="/shop?category=bangles" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Bangle</Link>,{' '}
-                      <Link href="/shop?category=pendants" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Pendant</Link>,{' '}
-                      <Link href="/shop?category=tops" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Tops</Link>,{' '}
-                      <Link href="/shop?category=mala" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Malas</Link>
+                      <Link href="/shop/?category=necklaces" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Necklace</Link>,{' '}
+                      <Link href="/shop/?category=earrings" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Earrings</Link>,{' '}
+                      <Link href="/shop/?category=bracelets" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Bracelet</Link>,{' '}
+                      <Link href="/shop/?category=bangles" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Bangle</Link>,{' '}
+                      <Link href="/shop/?category=pendants" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Pendant</Link>,{' '}
+                      <Link href="/shop/?category=tops" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Tops</Link>,{' '}
+                      <Link href="/shop/?category=mala" className="text-[#008080] hover:text-[#0F172A] underline underline-offset-2 transition-colors">Malas</Link>
                     </span>{' '}
                     Vanity offers a seamless way to find pieces that suit your style.
                   </h2>
@@ -889,15 +889,12 @@ export default function HomePage() {
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3 md:mb-4 gap-2">
               <div>
-                <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight flex items-center flex-wrap gap-2.5">
-                  <span>Kolkata jewellery e-shop</span>
-                  <span className="font-serif text-2xl md:text-[28px] text-[#008080] font-normal">
-                    with Vanity
-                  </span>
+                <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight">
+                  Kolkata jewellery e-shop with Vanity
                 </h2>
               </div>
               <Link 
-                href="/shop" 
+                href="/shop/" 
                 className="font-sans text-xs font-bold uppercase tracking-widest text-[#008080] hover:text-[#0F172A] transition-colors flex items-center gap-2 border-b-2 border-[#008080]/50 hover:border-[#0F172A] pb-0.5 shrink-0"
               >
                 VIEW COLLECTION <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -1203,10 +1200,10 @@ export default function HomePage() {
 
                 {/* Explore Occasion CTA Button */}
                 <Link
-                  href={`/shop?occasion=${selectedOccasion}`}
+                  href={`/shop/?occasion=${selectedOccasion}`}
                   className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] text-white hover:bg-[#006666] py-2.5 px-4 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow transition-all font-sans mb-3"
                 >
-                  <span>{OCCASIONS.find(o => o.id === selectedOccasion)?.ctaText || 'Explore Collection'}</span>
+                  <span>{OCCASIONS.find(o => o.id === selectedOccasion)?.ctaText || 'Jodhpur Jewellery'}</span>
                   <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </Link>
 

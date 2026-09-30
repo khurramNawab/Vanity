@@ -29,12 +29,13 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
     if (href.startsWith('/')) {
       try {
         const url = new URL(href, 'http://localhost');
-        const hrefPath = url.pathname;
+        const hrefPath = url.pathname.replace(/\/$/, '') || '/';
+        const currentPath = (pathname || '').replace(/\/$/, '') || '/';
         const hrefCategory = url.searchParams.get('category');
         
-        if (pathname === hrefPath) {
+        if (currentPath === hrefPath) {
           if (hrefCategory) {
-            return currentCategory === hrefCategory;
+            return currentCategory?.toLowerCase() === hrefCategory.toLowerCase();
           }
           if (currentCategory && hrefPath === '/shop') {
             return false;
@@ -50,11 +51,17 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
 
   const isAboutActive = 
     pathname === '/about' ||
+    pathname === '/about/' ||
     pathname === '/shipping' || 
+    pathname === '/shipping/' || 
     pathname === '/returns' || 
+    pathname === '/returns/' || 
     pathname === '/exchange' || 
+    pathname === '/exchange/' || 
     pathname === '/contact' || 
-    activePath === '/about';
+    pathname === '/contact/' || 
+    activePath === '/about' ||
+    activePath === '/about/';
 
   // Read cart and wishlist count from localStorage and listen for changes
   useEffect(() => {
@@ -105,21 +112,21 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
   }, []);
 
   const navLinks = [
-    { label: 'Necklace', href: '/shop?category=Necklaces' },
-    { label: 'Earrings', href: '/shop?category=Earrings' },
-    { label: 'Bracelet', href: '/shop?category=Bracelets' },
-    { label: 'Bangle', href: '/shop?category=Bangles' },
-    { label: 'Pendant', href: '/shop?category=Pendants' },
-    { label: 'Tops', href: '/shop?category=Tops' },
-    { label: 'Mala', href: '/shop?category=Mala' },
+    { label: 'Necklace', href: '/shop/?category=Necklaces' },
+    { label: 'Earrings', href: '/shop/?category=Earrings' },
+    { label: 'Bracelet', href: '/shop/?category=Bracelets' },
+    { label: 'Bangle', href: '/shop/?category=Bangles' },
+    { label: 'Pendant', href: '/shop/?category=Pendants' },
+    { label: 'Tops', href: '/shop/?category=Tops' },
+    { label: 'Mala', href: '/shop/?category=Mala' },
   ];
 
   const aboutDropdownLinks = [
-    { label: 'About Us', href: '/about' },
-    { label: 'Shipping', href: '/shipping' },
-    { label: 'Returns', href: '/returns' },
-    { label: 'Exchange', href: '/exchange' },
-    { label: 'Contact', href: '/contact' },
+    { label: 'About Us', href: '/about/' },
+    { label: 'Shipping', href: '/shipping/' },
+    { label: 'Returns', href: '/returns/' },
+    { label: 'Exchange', href: '/exchange/' },
+    { label: 'Contact', href: '/contact/' },
   ];
 
   const handleAboutEnter = () => {
@@ -131,7 +138,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
     aboutTimeout.current = setTimeout(() => setAboutOpen(false), 200);
   };
 
-  const profilePath = user ? (user.role === 'admin' ? '/admin' : '/account') : '/login';
+  const profilePath = user ? (user.role === 'admin' ? '/admin/' : '/account/') : '/login/';
 
   return (
     <>
@@ -263,7 +270,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
             </button>
 
             {user?.role === 'admin' && (
-              <Link href="/admin" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-[#1A1A1A] text-[#9A7E44] px-2.5 py-1 rounded border border-[#9A7E44]/40 hover:bg-[#9A7E44] hover:text-white transition-colors">
+              <Link href="/admin/" className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold bg-[#1A1A1A] text-[#9A7E44] px-2.5 py-1 rounded border border-[#9A7E44]/40 hover:bg-[#9A7E44] hover:text-white transition-colors">
                 <svg className="w-3.5 h-3.5 text-[#9A7E44]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -271,7 +278,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
               </Link>
             )}
 
-            <Link href="/search" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:flex items-center justify-center w-8 h-8" title="Search">
+            <Link href="/search/" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none hidden md:flex items-center justify-center w-8 h-8" title="Search">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -282,7 +289,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
               </svg>
             </Link>
             {/* Wishlist */}
-            <Link href="/wishlist" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Wishlist">
+            <Link href="/wishlist/" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Wishlist">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
@@ -292,7 +299,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
                 </span>
               )}
             </Link>
-            <Link href="/cart" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Cart">
+            <Link href="/cart/" className="text-on-surface-variant hover:text-primary transition-colors focus:outline-none relative flex items-center justify-center w-8 h-8" title="Cart">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
@@ -326,6 +333,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
             {/* Mobile About with sub-links */}
             <div className="border-t border-outline-variant/10 pt-2">
               <button
+                type="button"
                 className="w-full flex items-center justify-between py-2.5 text-on-surface-variant hover:text-primary transition-colors font-body-md"
                 onClick={() => setAboutOpen(!aboutOpen)}
               >
@@ -350,10 +358,10 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
 
             {/* Mobile-only links */}
             <div className="border-t border-outline-variant/10 pt-2 flex items-center gap-4">
-              <Link href="/search" className="text-on-surface-variant hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              <Link href="/search/" className="text-on-surface-variant hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 <span className="material-symbols-outlined text-[22px]">search</span>
               </Link>
-              <Link href={user ? '/account' : '/login'} className="text-on-surface-variant hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
+              <Link href={user ? '/account/' : '/login/'} className="text-on-surface-variant hover:text-primary transition-colors" onClick={() => setMobileMenuOpen(false)}>
                 <span className="material-symbols-outlined text-[22px]">person</span>
               </Link>
             </div>

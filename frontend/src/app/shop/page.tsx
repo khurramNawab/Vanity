@@ -49,28 +49,39 @@ function ShopPageContent() {
   }, []);
 
   useEffect(() => {
-    const cat = searchParams ? searchParams.get('category') : null;
+    let cat = searchParams ? searchParams.get('category') : null;
+    let occ = searchParams ? searchParams.get('occasion') : null;
+    let style = searchParams ? searchParams.get('style') : null;
+    let purity = searchParams ? searchParams.get('purity') : null;
+
+    if (typeof window !== 'undefined' && (!cat && !occ && !style && !purity)) {
+      const urlParams = new URLSearchParams(window.location.search);
+      cat = urlParams.get('category') || cat;
+      occ = urlParams.get('occasion') || occ;
+      style = urlParams.get('style') || style;
+      purity = urlParams.get('purity') || purity;
+    }
+
     if (cat) {
-      setSelectedCat(cat);
+      // Find matching standard category name case-insensitively
+      const matched = CATEGORIES.find(c => c.toLowerCase() === cat!.toLowerCase());
+      setSelectedCat(matched || cat);
     } else {
       setSelectedCat('All');
     }
 
-    const occ = searchParams ? searchParams.get('occasion') : null;
     if (occ) {
       setSelectedOccasion(occ);
     } else {
       setSelectedOccasion('All');
     }
 
-    const style = searchParams ? searchParams.get('style') : null;
     if (style) {
       setSelectedStyles([style]);
     } else {
       setSelectedStyles([]);
     }
 
-    const purity = searchParams ? searchParams.get('purity') : null;
     if (purity) {
       if (purity.toLowerCase().includes('925') || purity.toLowerCase().includes('silver')) {
         setSelectedCat('Silver');
