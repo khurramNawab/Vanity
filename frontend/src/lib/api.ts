@@ -4,14 +4,13 @@ export function getApiBaseUrl(): string {
   }
   if (typeof window !== 'undefined') {
     const host = window.location.hostname;
-    if (host === 'localhost') {
+    if (host === 'localhost' || host === '127.0.0.1') {
       return 'http://localhost:8000/api';
     }
-    if (host === '127.0.0.1') {
-      return 'http://127.0.0.1:8000/api';
-    }
+    // Production domain (e.g. thevanityjewels.com)
+    return `${window.location.origin}/api`;
   }
-  return 'http://127.0.0.1:8000/api';
+  return '/api';
 }
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {

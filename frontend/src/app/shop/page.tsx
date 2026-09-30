@@ -13,6 +13,153 @@ import { getLocalWishlist, toggleWishlistItem } from '@/lib/wishlist';
 const CATEGORIES = ['All', 'Necklaces', 'Earrings', 'Bracelets', 'Bangles', 'Pendants', 'Tops', 'Mala', 'Rings'];
 const STYLES = ['Choker', 'Pendant', 'Layered', 'Mangalsutra', 'Statement'];
 
+const INITIAL_FALLBACK_PRODUCTS = [
+  {
+    id: 1,
+    sku: 'VNT-RNG-001',
+    name: 'Classic Solitaire Ring',
+    slug: 'classic-solitaire-ring',
+    description: 'A timeless 925 sterling silver solitaire ring featuring a brilliant CZ diamond center stone.',
+    silver_purity: '925',
+    calculated_price: 1350,
+    base_price: 1500,
+    is_featured: true,
+    is_bestseller: false,
+    is_new_arrival: true,
+    occasion: 'everyday',
+    category: { name: 'Rings', slug: 'rings' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  },
+  {
+    id: 2,
+    sku: 'VNT-NEC-002',
+    name: 'Royal Heritage Necklace',
+    slug: 'royal-heritage-necklace',
+    description: 'An editorial royal heritage necklace featuring intricate traditional carvings for festive occasions and Durga Puja celebrations.',
+    silver_purity: '925',
+    calculated_price: 5100,
+    base_price: 6000,
+    is_featured: true,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'festive',
+    category: { name: 'Necklaces', slug: 'necklaces' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  },
+  {
+    id: 3,
+    sku: 'VNT-BRC-003',
+    name: 'Infinity Silver Bracelet',
+    slug: 'infinity-silver-bracelet',
+    description: 'A clean and sleek infinity-themed silver cuff bracelet ideal for work, college, and everyday wear.',
+    silver_purity: '925',
+    calculated_price: 3500,
+    base_price: 3500,
+    is_featured: false,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'everyday',
+    category: { name: 'Bracelets', slug: 'bracelets' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  },
+  {
+    id: 4,
+    sku: 'VNT-EAR-004',
+    name: 'Elegant Pearl Drop Earrings',
+    slug: 'elegant-pearl-drop-earrings',
+    description: 'Graceful drop earrings utilizing AAA grade fresh water pearls in 925 silver, an unforgettable gift for birthdays and anniversaries.',
+    silver_purity: '925',
+    calculated_price: 2475,
+    base_price: 2750,
+    is_featured: true,
+    is_bestseller: false,
+    is_new_arrival: true,
+    occasion: 'gifting',
+    category: { name: 'Earrings', slug: 'earrings' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  },
+  {
+    id: 5,
+    sku: 'VNT-CHK-005',
+    name: 'Vintage Filigree Choker',
+    slug: 'vintage-filigree-choker',
+    description: 'A breathtaking vintage choker adorned with intricate Bengali silver filigree work, tailor-made for bridal silverware and wedding receptions.',
+    silver_purity: '925',
+    calculated_price: 8900,
+    base_price: 8900,
+    is_featured: true,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'wedding',
+    category: { name: 'Necklaces', slug: 'necklaces' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  },
+  {
+    id: 6,
+    sku: 'VNT-TOP-006',
+    name: 'Imperial Ruby & Pearl Drop Tops',
+    slug: 'imperial-ruby-pearl-drop-tops',
+    description: 'Everyday understated luxury CZ tops embedded with hand-cut pavé stones and certified BIS 925 authenticity.',
+    silver_purity: '925',
+    calculated_price: 5999,
+    base_price: 5999,
+    is_featured: false,
+    is_bestseller: false,
+    is_new_arrival: true,
+    occasion: 'everyday',
+    category: { name: 'Tops', slug: 'tops' },
+    images: [{ image_path: '/images/showcase/ruby-pearl-earrings.jpg', is_primary: true }]
+  },
+  {
+    id: 7,
+    sku: 'VNT-BNG-007',
+    name: 'Royal Floral Heritage CZ Bangle',
+    slug: 'royal-floral-heritage-cz-bangle',
+    description: 'Heavy traditional silver kada cuff with embossed tribal motifs, honoring the silver artisan roots of Bowbazar Kolkata.',
+    silver_purity: '925',
+    calculated_price: 7899,
+    base_price: 7899,
+    is_featured: true,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'festive',
+    category: { name: 'Bangles', slug: 'bangles' },
+    images: [{ image_path: '/images/showcase/floral-bridal-bangle.jpg', is_primary: true }]
+  },
+  {
+    id: 8,
+    sku: 'VNT-PND-008',
+    name: 'Rose Cushion Solitaire Pendant',
+    slug: 'rose-cushion-solitaire-pendant',
+    description: 'A glowing solitaire pendant with blush rose gold highlights and shimmering 925 sterling silver chain.',
+    silver_purity: '925',
+    calculated_price: 4499,
+    base_price: 4499,
+    is_featured: true,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'gifting',
+    category: { name: 'Pendants', slug: 'pendants' },
+    images: [{ image_path: '/images/showcase/pink-pendant-necklace.jpg', is_primary: true }]
+  },
+  {
+    id: 9,
+    sku: 'VNT-MAL-009',
+    name: 'Artisan Silver Bead Mala',
+    slug: 'artisan-silver-bead-mala',
+    description: 'A 54-bead handcrafted silver mala chain with intricate filigree details and hallmarked purity.',
+    silver_purity: '925',
+    calculated_price: 6800,
+    base_price: 6800,
+    is_featured: false,
+    is_bestseller: true,
+    is_new_arrival: false,
+    occasion: 'festive',
+    category: { name: 'Mala', slug: 'mala' },
+    images: [{ image_path: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80', is_primary: true }]
+  }
+];
+
 function ShopPageContent() {
   const { token } = useAuth();
   const searchParams = useSearchParams();
@@ -21,7 +168,7 @@ function ShopPageContent() {
   const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('featured');
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [dbProducts, setDbProducts] = useState<any[]>([]);
+  const [dbProducts, setDbProducts] = useState<any[]>(INITIAL_FALLBACK_PRODUCTS);
   const [loading, setLoading] = useState(true);
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
 
@@ -40,11 +187,16 @@ function ShopPageContent() {
     setLoading(true);
     fetchApi('/products')
       .then(res => {
-        if (res.success) {
+        if (res.success && res.products && res.products.length > 0) {
           setDbProducts(res.products);
+        } else {
+          setDbProducts(INITIAL_FALLBACK_PRODUCTS);
         }
       })
-      .catch(err => console.error('Error loading storefront products:', err))
+      .catch(err => {
+        console.error('Error loading storefront products:', err);
+        setDbProducts(INITIAL_FALLBACK_PRODUCTS);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -64,7 +216,7 @@ function ShopPageContent() {
 
     if (cat) {
       // Find matching standard category name case-insensitively
-      const matched = CATEGORIES.find(c => c.toLowerCase() === cat!.toLowerCase());
+      const matched = CATEGORIES.find(c => c.toLowerCase() === cat!.toLowerCase() || c.toLowerCase().replace(/s$/, '') === cat!.toLowerCase().replace(/s$/, ''));
       setSelectedCat(matched || cat);
     } else {
       setSelectedCat('All');
@@ -103,21 +255,23 @@ function ShopPageContent() {
     // Category match
     if (selectedCat !== 'All') {
       const catLower = selectedCat.toLowerCase();
+      const catSingular = catLower.replace(/s$/, '');
       const productCatSlug = (product.category?.slug || '').toLowerCase();
       const productCatName = (product.category?.name || '').toLowerCase();
       const productName = (product.name || '').toLowerCase();
+      const productDesc = (product.description || '').toLowerCase();
 
       const matchesCat = 
+        productCatSlug === catLower ||
+        productCatSlug === catSingular ||
         productCatSlug.includes(catLower) || 
+        productCatSlug.includes(catSingular) || 
         productCatName.includes(catLower) || 
+        productCatName.includes(catSingular) || 
         productName.includes(catLower) ||
-        (catLower === 'necklaces' && productCatSlug === 'necklaces') ||
-        (catLower === 'earrings' && productCatSlug === 'earrings') ||
-        (catLower === 'bracelets' && productCatSlug === 'bracelets') ||
-        (catLower === 'bangles' && productCatSlug === 'bangles') ||
-        (catLower === 'pendants' && productCatSlug === 'pendants') ||
-        (catLower === 'tops' && productCatSlug === 'tops') ||
-        (catLower === 'mala' && productCatSlug === 'mala');
+        productName.includes(catSingular) ||
+        productDesc.includes(catLower) ||
+        productDesc.includes(catSingular);
 
       if (!matchesCat) return false;
     }
