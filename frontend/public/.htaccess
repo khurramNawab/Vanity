@@ -6,7 +6,7 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # 2. Allow direct access to existing files and directories (_next, static CSS, JS, images)
+    # 2. Direct access to existing static files and directories (_next, static chunks, CSS, JS, images)
     RewriteCond %{REQUEST_FILENAME} -f [OR]
     RewriteCond %{REQUEST_FILENAME} -d
     RewriteRule ^ - [L]
@@ -15,28 +15,32 @@
     RewriteCond %{REQUEST_URI} ^/api(/.*)?$ [NC]
     RewriteRule ^api/(.*)$ api/index.php [L,QSA]
 
-    # 4. Route top-level Next.js HTML pages (e.g., /search -> /search.html)
-    RewriteCond %{DOCUMENT_ROOT}/$1.html -f
-    RewriteRule ^([^/]+)/?$ $1.html [L]
+    # 4. Handle folder-based index.html (for Next.js export with trailingSlash: true)
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^(.*)$ $1/index.html [L]
 
-    # 5. Route nested Next.js HTML pages (e.g., /blog/slug -> /blog/slug.html, /products/1 -> /products/1.html)
-    RewriteCond %{DOCUMENT_ROOT}/$1.html -f
+    # 5. Handle direct .html files if any
+    RewriteCond %{REQUEST_FILENAME}.html -f
     RewriteRule ^(.*)$ $1.html [L]
 
-    # 6. SPA fallback for dynamic client-side routes
+    # 6. SPA fallback for dynamic client-side routes (e.g. dynamic filters)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.html [L]
 </IfModule>
 
-# Explicit MIME Types for Next.js CSS & JS bundles
+# Explicit MIME Types for Next.js CSS, JS & Web Fonts
 <IfModule mod_mime.c>
     AddType text/css .css
     AddType application/javascript .js .mjs
     AddType application/json .json
     AddType image/svg+xml .svg
+    AddType image/webp .webp
+    AddType image/png .png
+    AddType image/jpeg .jpg .jpeg
     AddType font/woff2 .woff2
     AddType font/woff .woff
+    AddType font/ttf .ttf
 </IfModule>
 
 # Caching for static assets
@@ -48,6 +52,7 @@
     ExpiresByType image/jpeg "access plus 1 year"
     ExpiresByType image/png "access plus 1 year"
     ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
 </IfModule>
 
 # Security Headers
