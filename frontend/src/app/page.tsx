@@ -598,9 +598,11 @@ export default function HomePage() {
 
   // Fetch occasion products dynamically when selected occasion changes
   useEffect(() => {
+    let isMounted = true;
     setOccasionLoading(true);
     fetchApi(`/products?occasion=${selectedOccasion}&limit=8`)
       .then(res => {
+        if (!isMounted) return;
         const fallbackList = OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive;
         if (res.success && res.products && res.products.length >= 4) {
           setOccasionProducts(res.products.slice(0, 4));
@@ -614,11 +616,18 @@ export default function HomePage() {
           setOccasionProducts(fallbackList);
         }
       })
-      .catch(err => {
-        console.error('Error fetching occasion products:', err);
-        setOccasionProducts(OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive);
+      .catch(() => {
+        if (isMounted) {
+          setOccasionProducts(OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive);
+        }
       })
-      .finally(() => setOccasionLoading(false));
+      .finally(() => {
+        if (isMounted) setOccasionLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedOccasion]);
 
   // Autoplay carousel logic

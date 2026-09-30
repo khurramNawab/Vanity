@@ -1,4 +1,18 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+export function getApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost') {
+      return 'http://localhost:8000/api';
+    }
+    if (host === '127.0.0.1') {
+      return 'http://127.0.0.1:8000/api';
+    }
+  }
+  return 'http://127.0.0.1:8000/api';
+}
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('vanity_token') : null;
@@ -15,8 +29,11 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     headers.set('Content-Type', 'application/json');
   }
 
+  const baseUrl = getApiBaseUrl();
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(url, {
       ...options,
       headers,
     });
@@ -71,7 +88,9 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
 
     return data;
   } catch (err: any) {
-    console.error(`Network error on ${endpoint}:`, err);
+    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+      console.warn(`[Vanity API] Offline/Unreachable (${endpoint}): fallback data utilized.`);
+    }
     return {
       success: false,
       message: err.message || 'Network connection failed. Please check backend server.',
@@ -79,3 +98,4 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     };
   }
 }
+
