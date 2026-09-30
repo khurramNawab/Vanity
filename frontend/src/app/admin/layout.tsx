@@ -9,19 +9,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, token, loading, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const normalizedPath = pathname?.replace(/\/$/, '') || '';
+  const isLoginPage = normalizedPath === '/admin/login';
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     if (!loading) {
-      if (pathname === '/admin/login') {
+      if (isLoginPage) {
         setChecking(false);
       } else if (!token || !user || user.role !== 'admin') {
-        router.push('/admin/login');
+        router.push('/admin/login/');
       } else {
         setChecking(false);
       }
     }
-  }, [user, token, loading, pathname, router]);
+  }, [user, token, loading, isLoginPage, router]);
 
   useEffect(() => {
     // Prevent mouse wheel from incrementing/decrementing number inputs accidentally
@@ -34,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return () => window.removeEventListener('wheel', handleWheel);
   }, []);
 
-  if (pathname === '/admin/login') {
+  if (isLoginPage) {
     return <>{children}</>;
   }
 
@@ -80,7 +82,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Nav items */}
         <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            const isActive = pathname === item.path || (item.path !== '/admin' && pathname.startsWith(item.path));
+            const itemNormalized = item.path.replace(/\/$/, '');
+            const isActive = normalizedPath === itemNormalized || (itemNormalized !== '/admin' && normalizedPath.startsWith(itemNormalized));
             return (
               <Link
                 key={item.path}
@@ -105,11 +108,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
         {/* Bottom links */}
         <div className="p-4 border-t border-outline-variant/20 shrink-0 bg-surface-container-highest/80 space-y-1">
-          <Link className={`flex items-center px-4 py-2 rounded-lg transition-colors text-sm ${pathname === '/admin/support' ? 'bg-primary text-on-primary font-semibold' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'}`} href="/admin/support">
+          <Link className={`flex items-center px-4 py-2 rounded-lg transition-colors text-sm ${normalizedPath === '/admin/support' ? 'bg-primary text-on-primary font-semibold' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'}`} href="/admin/support">
             <span className="material-symbols-outlined mr-3 text-lg" style={{ fontVariationSettings: `'FILL' 0` }}>support_agent</span>
             Support
           </Link>
-          <Link className={`flex items-center px-4 py-2 rounded-lg transition-colors text-sm ${pathname === '/admin/shipping' ? 'bg-primary text-on-primary font-semibold' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'}`} href="/admin/shipping">
+          <Link className={`flex items-center px-4 py-2 rounded-lg transition-colors text-sm ${normalizedPath === '/admin/shipping' ? 'bg-primary text-on-primary font-semibold' : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-high'}`} href="/admin/shipping">
             <span className="material-symbols-outlined mr-3 text-lg" style={{ fontVariationSettings: `'FILL' 0` }}>local_shipping</span>
             Shipping Policy
           </Link>
