@@ -200,6 +200,9 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
               onMouseLeave={handleAboutLeave}
             >
               <button
+                type="button"
+                aria-expanded={aboutOpen}
+                aria-haspopup="true"
                 className={`font-body-md text-body-md transition-all duration-200 pb-1 flex items-center gap-1 ${
                   isAboutActive
                     ? 'text-secondary border-b-2 border-secondary font-semibold'
