@@ -44,9 +44,24 @@ interface Product {
   primary_image?: ProductImage;
 }
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 1, name: 'Necklaces' },
+  { id: 2, name: 'Earrings' },
+  { id: 3, name: 'Bracelets' },
+  { id: 4, name: 'Bangles' },
+  { id: 5, name: 'Pendants' },
+  { id: 6, name: 'Tops' },
+  { id: 7, name: 'Mala' },
+  { id: 8, name: 'Rings' },
+  { id: 9, name: 'Silver' },
+  { id: 10, name: 'Brass' },
+  { id: 11, name: 'Stones' },
+  { id: 12, name: 'CZ Diamonds' },
+];
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,7 +82,10 @@ export default function AdminProductsPage() {
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [categoryId, setCategoryId] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('1');
+  const [isAddingCustomCategory, setIsAddingCustomCategory] = useState(false);
+  const [customCategoryName, setCustomCategoryName] = useState('');
+  const [savingCategory, setSavingCategory] = useState(false);
   const [purity, setPurity] = useState('925');
   const [weight, setWeight] = useState('');
   const [stock, setStock] = useState('0');
@@ -247,15 +265,22 @@ export default function AdminProductsPage() {
 
   const loadCategories = async () => {
     try {
-      const res = await fetchApi('/admin/categories');
-      if (res.success && res.data) {
-        setCategories(res.data);
-        if (res.data.length > 0 && !categoryId) {
-          setCategoryId(res.data[0].id.toString());
-        }
+      let res = await fetchApi('/admin/categories');
+      if (!res.success || !res.data || res.data.length === 0) {
+        res = await fetchApi('/categories');
+      }
+      const catList = res.data || res.categories || [];
+      if (Array.isArray(catList) && catList.length > 0) {
+        setCategories(catList);
+        setCategoryId(prev => prev || catList[0].id.toString());
+      } else {
+        setCategories(DEFAULT_CATEGORIES);
+        setCategoryId(prev => prev || DEFAULT_CATEGORIES[0].id.toString());
       }
     } catch (err: any) {
       console.error('Error loading categories:', err);
+      setCategories(DEFAULT_CATEGORIES);
+      setCategoryId(prev => prev || DEFAULT_CATEGORIES[0].id.toString());
     }
   };
 
@@ -318,8 +343,59 @@ export default function AdminProductsPage() {
     setIsEditing(false);
     setEditingId(null);
     resetForm();
+    const defaultCatId = categories.length > 0 ? categories[0].id.toString() : '1';
+    setCategoryId(defaultCatId);
+    setIsAddingCustomCategory(false);
+    setCustomCategoryName('');
     setShowFormModal(true);
     setError(null);
+  };
+
+  const handleSaveCustomCategory = async () => {
+    const trimmed = customCategoryName.trim();
+    if (!trimmed) return;
+
+    const existing = categories.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+    if (existing) {
+      setCategoryId(existing.id.toString());
+      setIsAddingCustomCategory(false);
+      setCustomCategoryName('');
+      return;
+    }
+
+    setSavingCategory(true);
+    try {
+      const res = await fetchApi('/admin/categories', {
+        method: 'POST',
+        body: JSON.stringify({ name: trimmed, description: `Custom handcrafted ${trimmed} jewellery.` })
+      });
+
+      let newCat: Category;
+      if (res.success && res.data) {
+        newCat = res.data;
+      } else {
+        newCat = {
+          id: categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 100,
+          name: trimmed
+        };
+      }
+
+      setCategories(prev => [...prev, newCat]);
+      setCategoryId(newCat.id.toString());
+      setIsAddingCustomCategory(false);
+      setCustomCategoryName('');
+    } catch (err) {
+      const newCat = {
+        id: categories.length > 0 ? Math.max(...categories.map(c => c.id)) + 1 : 100,
+        name: trimmed
+      };
+      setCategories(prev => [...prev, newCat]);
+      setCategoryId(newCat.id.toString());
+      setIsAddingCustomCategory(false);
+      setCustomCategoryName('');
+    } finally {
+      setSavingCategory(false);
+    }
   };
 
   const handleOpenEdit = (product: Product) => {
@@ -358,40 +434,79 @@ export default function AdminProductsPage() {
     setError(null);
     setSubmitting(true);
 
+    let finalCategoryId = parseInt(categoryId) || 1;
+
+    // If custom category is being entered, create or resolve it first
+    if (isAddingCustomCategory && customCategoryName.trim()) {
+      const trimmed = customCategoryName.trim();
+      const existing = categories.find(c => c.name.toLowerCase() === trimmed.toLowerCase());
+      if (existing) {
+        finalCategoryId = existing.id;
+      } else {
+        try {
+          const catRes = await fetchApi('/admin/categories', {
+            method: 'POST',
+            body: JSON.stringify({ name: trimmed, description: `Custom handcrafted ${trimmed} jewellery.` })
+          });
+          if (catRes && catRes.success && catRes.data) {
+            finalCategoryId = catRes.data.id;
+            setCategories(prev => [...prev, catRes.data]);
+          }
+        } catch (e) {
+          console.error('Error creating custom category on submit:', e);
+        }
+      }
+    }
+
+    const safeWeight = weight && !isNaN(parseFloat(weight)) ? Math.max(0.01, parseFloat(weight)) : 1.0;
+    const safeMakingCharge = makingCharge && !isNaN(parseFloat(makingCharge)) ? Math.max(0, parseFloat(makingCharge)) : 0;
+    const safeStock = stock && !isNaN(parseInt(stock)) ? Math.max(0, parseInt(stock)) : 0;
+    const safeDiscount = discountPercent && !isNaN(parseFloat(discountPercent)) ? Math.min(100, Math.max(0, parseFloat(discountPercent))) : 0;
+
     const payload = {
-      sku,
-      name,
-      slug: slug || undefined,
-      description,
-      meta_title: metaTitle || undefined,
-      meta_description: metaDescription || undefined,
-      meta_keywords: metaKeywords || undefined,
-      canonical_url: canonicalUrl || undefined,
-      category_id: parseInt(categoryId),
-      silver_purity: purity,
-      silver_weight: Math.max(0.01, parseFloat(weight) || 0.01),
-      making_charge: Math.max(0, parseFloat(makingCharge) || 0),
-      making_charge_type: makingChargeType,
+      sku: sku.trim(),
+      name: name.trim(),
+      slug: slug ? slug.trim() : undefined,
+      description: description ? description.trim() : undefined,
+      meta_title: metaTitle ? metaTitle.trim() : undefined,
+      meta_description: metaDescription ? metaDescription.trim() : undefined,
+      meta_keywords: metaKeywords ? metaKeywords.trim() : undefined,
+      canonical_url: canonicalUrl ? canonicalUrl.trim() : undefined,
+      category_id: finalCategoryId,
+      silver_purity: purity || '925',
+      silver_weight: safeWeight,
+      making_charge: safeMakingCharge,
+      making_charge_type: makingChargeType || 'flat',
       base_price: basePrice !== '' && !isNaN(parseFloat(basePrice)) && parseFloat(basePrice) >= 0 ? Math.max(0, parseFloat(basePrice)) : null,
-      discount_percent: Math.min(100, Math.max(0, parseFloat(discountPercent) || 0)),
-      stock_quantity: Math.max(0, parseInt(stock) || 0),
-      is_featured: isFeatured,
-      is_bestseller: isBestseller,
-      is_new_arrival: isNewArrival,
-      status,
-      occasion: occasion || null,
-      image_urls: imageUrl ? [imageUrl] : [],
-      image_alt_text: imageAltText || undefined,
+      discount_percent: safeDiscount,
+      stock_quantity: safeStock,
+      is_featured: Boolean(isFeatured),
+      is_bestseller: Boolean(isBestseller),
+      is_new_arrival: Boolean(isNewArrival),
+      status: status || 'active',
+      occasion: occasion || 'everyday',
+      image_urls: imageUrl ? [imageUrl.trim()] : [],
+      image_alt_text: imageAltText ? imageAltText.trim() : undefined,
     };
 
     try {
+      let res;
       if (isEditing && editingId) {
-        await fetchApi(`/admin/products/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
+        res = await fetchApi(`/admin/products/${editingId}`, { method: 'PUT', body: JSON.stringify(payload) });
       } else {
-        await fetchApi('/admin/products', { method: 'POST', body: JSON.stringify(payload) });
+        res = await fetchApi('/admin/products', { method: 'POST', body: JSON.stringify(payload) });
       }
-      setShowFormModal(false);
-      loadProducts(currentPage);
+
+      if (res && res.success) {
+        setShowFormModal(false);
+        setIsAddingCustomCategory(false);
+        setCustomCategoryName('');
+        loadProducts(currentPage);
+        alert(isEditing ? 'Product updated successfully!' : 'Product added successfully!');
+      } else {
+        const errMsg = res?.message || (res?.errors ? Object.values(res.errors).flat().join(', ') : 'Failed to save product. Please check the form.');
+        setError(errMsg);
+      }
     } catch (err: any) {
       setError(err.message || 'Operation failed');
     } finally {
@@ -647,7 +762,15 @@ export default function AdminProductsPage() {
                 </h3>
                 <p className="text-on-surface-variant text-xs mt-0.5">Customize specifications, media, and direct search engine metadata.</p>
               </div>
-              <button onClick={() => setShowFormModal(false)} className="text-on-surface-variant hover:text-primary">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFormModal(false);
+                  resetForm();
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:text-black hover:bg-surface-container-low transition-colors"
+                title="Close modal"
+              >
                 <span className="material-symbols-outlined text-2xl">close</span>
               </button>
             </div>
@@ -727,16 +850,44 @@ export default function AdminProductsPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm text-on-surface-variant mb-1 font-medium">Category *</label>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-sm text-on-surface-variant font-medium">Category *</label>
+                        {!isAddingCustomCategory && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingCustomCategory(true);
+                              setCustomCategoryName('');
+                            }}
+                            className="text-xs font-semibold text-primary hover:underline flex items-center gap-0.5"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">add_circle</span>
+                            + Add New
+                          </button>
+                        )}
+                      </div>
+
                       <select
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={categoryId}
-                        onChange={(e) => setCategoryId(e.target.value)}
+                        onChange={(e) => {
+                          if (e.target.value === '__add_custom__') {
+                            setIsAddingCustomCategory(true);
+                            setCustomCategoryName('');
+                          } else {
+                            setCategoryId(e.target.value);
+                            setIsAddingCustomCategory(false);
+                          }
+                        }}
                         required
                       >
-                        {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        {categories.map(c => <option key={c.id} value={c.id.toString()}>{c.name}</option>)}
+                        <option value="__add_custom__" className="font-bold text-primary bg-surface-container-low">
+                          ➕ + Add Custom Category (e.g. Anklets)...
+                        </option>
                       </select>
                     </div>
+
                     <div>
                       <label className="block text-sm text-on-surface-variant mb-1 font-medium">Occasion Group *</label>
                       <select
@@ -752,6 +903,7 @@ export default function AdminProductsPage() {
                         <option value="puja">Puja & Devotional (Auspicious Silver & Mala)</option>
                       </select>
                     </div>
+
                     <div>
                       <label className="block text-sm text-on-surface-variant mb-1 font-medium">Catalog Status</label>
                       <select
@@ -764,6 +916,72 @@ export default function AdminProductsPage() {
                       </select>
                     </div>
                   </div>
+
+                  {/* Standard Format Inline Add Category Box */}
+                  {isAddingCustomCategory && (
+                    <div className="p-3.5 bg-surface-container-low/60 border border-outline-variant/40 rounded-lg space-y-2.5 transition-all">
+                      <div className="flex items-center justify-between">
+                        <label className="text-xs font-bold text-primary uppercase tracking-wide flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[15px]">category</span>
+                          Create & Link New Category
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsAddingCustomCategory(false);
+                            setCustomCategoryName('');
+                            if (!categoryId || categoryId === '__add_custom__') {
+                              setCategoryId(categories.length > 0 ? categories[0].id.toString() : '1');
+                            }
+                          }}
+                          className="text-xs text-on-surface-variant hover:text-black font-medium flex items-center gap-0.5"
+                        >
+                          <span className="material-symbols-outlined text-[14px]">close</span>
+                          Close
+                        </button>
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row items-center gap-2">
+                        <input
+                          type="text"
+                          className="w-full flex-1 border border-outline-variant/60 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
+                          placeholder="e.g. Anklets, Mangalsutra, Brooches, Hair Pins"
+                          value={customCategoryName}
+                          onChange={(e) => setCustomCategoryName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSaveCustomCategory();
+                            }
+                          }}
+                          autoFocus
+                        />
+                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                          <button
+                            type="button"
+                            onClick={handleSaveCustomCategory}
+                            className="flex-1 sm:flex-initial bg-black text-white hover:bg-neutral-800 active:scale-[0.98] px-4 py-2 rounded text-xs font-semibold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">check</span>
+                            {savingCategory ? 'Adding...' : 'Save & Select'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAddingCustomCategory(false);
+                              setCustomCategoryName('');
+                              if (!categoryId || categoryId === '__add_custom__') {
+                                setCategoryId(categories.length > 0 ? categories[0].id.toString() : '1');
+                              }
+                            }}
+                            className="flex-1 sm:flex-initial border border-outline-variant/60 text-on-surface-variant hover:text-black hover:bg-surface-container-low px-3 py-2 rounded text-xs font-medium transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>

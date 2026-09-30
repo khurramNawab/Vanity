@@ -31,7 +31,9 @@ class PublicProductController extends Controller
             }
         }
 
-        $query = Product::where('status', 'active')->with(['category', 'images']);
+        $query = Product::where(function ($q) {
+            $q->where('status', 'active')->orWhereNull('status');
+        })->with(['category', 'images', 'primaryImage']);
 
         // Search query parameter
         if ($request->has('search')) {

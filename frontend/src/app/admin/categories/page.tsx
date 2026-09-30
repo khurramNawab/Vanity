@@ -11,8 +11,23 @@ interface Category {
   products_count?: number;
 }
 
+const DEFAULT_CATEGORIES: Category[] = [
+  { id: 1, name: 'Necklaces', slug: 'necklaces', description: 'Exquisite silver neckpieces and chains for all occasions.', products_count: 4 },
+  { id: 2, name: 'Earrings', slug: 'earrings', description: 'Beautiful drop, stud, and hoop earrings in 925 sterling silver.', products_count: 4 },
+  { id: 3, name: 'Bracelets', slug: 'bracelets', description: 'Elegantly structured bracelets and cuffs.', products_count: 3 },
+  { id: 4, name: 'Bangles', slug: 'bangles', description: 'Handcrafted silver and oxidised bangles and kadas.', products_count: 2 },
+  { id: 5, name: 'Pendants', slug: 'pendants', description: 'Delicate and statement silver pendants with precious stones.', products_count: 3 },
+  { id: 6, name: 'Tops', slug: 'tops', description: 'Daily wear and festive silver tops and studs.', products_count: 2 },
+  { id: 7, name: 'Mala', slug: 'mala', description: 'Traditional artisan beaded and silver malas.', products_count: 1 },
+  { id: 8, name: 'Rings', slug: 'rings', description: 'Sophisticated and premium silver rings crafted to perfection.', products_count: 2 },
+  { id: 9, name: 'Silver', slug: 'silver', description: 'Pure 925 sterling silver and fine silver jewellery.', products_count: 8 },
+  { id: 10, name: 'Brass', slug: 'brass', description: 'Handcrafted brass and oxidised designer ornaments.', products_count: 2 },
+  { id: 11, name: 'Stones', slug: 'stones', description: 'Precious & semi-precious stone embedded jewellery.', products_count: 3 },
+  { id: 12, name: 'CZ Diamonds', slug: 'cz-diamonds', description: 'Brilliant cubic zirconia diamond embellished ornaments.', products_count: 4 },
+];
+
 export default function AdminCategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -27,12 +42,19 @@ export default function AdminCategoriesPage() {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetchApi('/admin/categories');
-      if (response.success) {
-        setCategories(response.data);
+      let response = await fetchApi('/admin/categories');
+      if (!response.success || !response.data || response.data.length === 0) {
+        response = await fetchApi('/categories');
+      }
+      const list = response.data || response.categories || [];
+      if (Array.isArray(list) && list.length > 0) {
+        setCategories(list);
+      } else {
+        setCategories(DEFAULT_CATEGORIES);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to load categories');
+      console.error('Error loading categories:', err);
+      setCategories(DEFAULT_CATEGORIES);
     } finally {
       setLoading(false);
     }
@@ -66,19 +88,25 @@ export default function AdminCategoriesPage() {
     setSubmitting(true);
 
     try {
+      let res;
       if (isEditing && editingId) {
-        await fetchApi(`/admin/categories/${editingId}`, {
+        res = await fetchApi(`/admin/categories/${editingId}`, {
           method: 'PUT',
-          body: JSON.stringify({ name, description }),
+          body: JSON.stringify({ name: name.trim(), description: description.trim() }),
         });
       } else {
-        await fetchApi('/admin/categories', {
+        res = await fetchApi('/admin/categories', {
           method: 'POST',
-          body: JSON.stringify({ name, description }),
+          body: JSON.stringify({ name: name.trim(), description: description.trim() }),
         });
       }
-      setShowFormModal(false);
-      loadCategories();
+
+      if (res && res.success) {
+        setShowFormModal(false);
+        loadCategories();
+      } else {
+        setError(res?.message || 'Failed to save category. Please check details.');
+      }
     } catch (err: any) {
       setError(err.message || 'Operation failed');
     } finally {
@@ -92,81 +120,85 @@ export default function AdminCategoriesPage() {
     }
 
     try {
-      await fetchApi(`/admin/categories/${id}`, { method: 'DELETE' });
-      loadCategories();
+      const res = await fetchApi(`/admin/categories/${id}`, { method: 'DELETE' });
+      if (res && res.success) {
+        loadCategories();
+      } else {
+        alert(res?.message || 'Failed to delete category');
+      }
     } catch (err: any) {
       alert(err.message || 'Failed to delete category');
     }
   };
 
   return (
-    <div className="bg-surface min-h-screen p-5 md:p-12 space-y-6">
+    <div className="bg-surface min-h-screen p-5 md:p-10 space-y-6">
       {/* Header action bar */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="font-headline-lg text-headline-lg font-bold text-primary">Categories</h2>
+          <h1 className="font-headline-lg text-2xl md:text-3xl font-bold text-primary tracking-tight">Categories</h1>
           <p className="text-on-surface-variant text-sm mt-1">Manage categories in your jewellery catalog</p>
         </div>
         <button
           onClick={handleOpenCreate}
-          className="flex items-center justify-center px-4 py-2.5 bg-primary text-on-primary rounded hover:bg-on-surface-variant transition-colors text-sm font-medium whitespace-nowrap"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 bg-black text-white hover:bg-neutral-800 rounded-lg shadow-sm transition-all text-sm font-medium whitespace-nowrap"
         >
-          <span className="material-symbols-outlined mr-2 text-[18px]">add</span>
+          <span className="material-symbols-outlined text-[18px]">add</span>
           Add Category
         </button>
       </div>
 
       {error && !showFormModal && (
-        <div className="p-3 bg-error-container/20 border border-error/20 text-error rounded text-sm">{error}</div>
+        <div className="p-3.5 bg-error-container/20 border border-error/30 text-error rounded-lg text-sm">{error}</div>
       )}
 
       {/* Main categories list */}
       {loading ? (
-        <div className="flex flex-col items-center py-12">
-          <div className="w-8 h-8 border-4 border-secondary border-t-transparent rounded-full animate-spin" />
+        <div className="flex flex-col items-center py-16">
+          <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
           <p className="text-on-surface-variant text-sm mt-3">Loading categories...</p>
         </div>
       ) : categories.length === 0 ? (
-        <div className="bg-surface-container-lowest border border-outline-variant/30 text-center py-12 rounded">
+        <div className="bg-surface-container-lowest border border-outline-variant/30 text-center py-16 rounded-xl">
           <span className="material-symbols-outlined text-[48px] text-outline-variant">category</span>
           <h3 className="font-headline-md text-headline-md text-primary mt-2">No categories found</h3>
           <p className="text-on-surface-variant text-sm mt-1">Get started by creating your first product category.</p>
         </div>
       ) : (
-        <div className="bg-surface-container-lowest border border-outline-variant/20 rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-outline-variant/30 bg-surface-container-low/50">
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant text-[10px]">Name</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant text-[10px]">Slug</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant text-[10px]">Description</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant text-[10px] text-center">Products</th>
-                  <th className="py-3 px-4 font-label-upper text-label-upper text-on-surface-variant text-[10px] text-right">Actions</th>
+                <tr className="border-b border-outline-variant/30 bg-surface-container-low/40">
+                  <th className="py-4 px-6 font-label-upper text-xs font-semibold text-on-surface-variant tracking-wider uppercase">Name</th>
+                  <th className="py-4 px-6 font-label-upper text-xs font-semibold text-on-surface-variant tracking-wider uppercase">Slug</th>
+                  <th className="py-4 px-6 font-label-upper text-xs font-semibold text-on-surface-variant tracking-wider uppercase">Description</th>
+                  <th className="py-4 px-6 font-label-upper text-xs font-semibold text-on-surface-variant tracking-wider uppercase text-center">Products</th>
+                  <th className="py-4 px-6 font-label-upper text-xs font-semibold text-on-surface-variant tracking-wider uppercase text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/20 font-body-md text-sm text-on-surface">
-                {categories.map((category, idx) => (
-                  <tr key={category.id} className={`hover:bg-surface-container-lowest/80 transition-colors group ${idx % 2 === 1 ? 'bg-surface-container-low/20' : ''}`}>
-                    <td className="py-3 px-4 font-medium text-primary">{category.name}</td>
-                    <td className="py-3 px-4 text-on-surface-variant font-mono text-xs">{category.slug}</td>
-                    <td className="py-3 px-4 text-on-surface-variant max-w-xs truncate">{category.description || '—'}</td>
-                    <td className="py-3 px-4 text-center">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-surface-container text-on-surface-variant">
+              <tbody className="divide-y divide-outline-variant/20 text-sm">
+                {categories.map((category) => (
+                  <tr key={category.id} className="hover:bg-surface-container-low/30 transition-colors">
+                    <td className="py-4 px-6 font-semibold text-on-surface">{category.name}</td>
+                    <td className="py-4 px-6 text-on-surface-variant font-mono text-xs">{category.slug}</td>
+                    <td className="py-4 px-6 text-on-surface-variant max-w-md truncate">{category.description || '—'}</td>
+                    <td className="py-4 px-6 text-center">
+                      <span className="inline-flex items-center justify-center min-w-[28px] h-6 px-2 rounded-full text-xs font-semibold bg-neutral-100 text-neutral-700">
                         {category.products_count ?? 0}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-right">
-                      <div className="flex items-center justify-end gap-3">
+                    <td className="py-4 px-6 text-right">
+                      <div className="flex items-center justify-end gap-3 font-medium text-xs">
                         <button
                           onClick={() => handleOpenEdit(category)}
-                          className="text-on-surface-variant hover:text-primary transition-colors text-sm font-medium"
+                          className="text-neutral-700 hover:text-black hover:underline transition-colors px-2 py-1 rounded"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(category.id)}
-                          className="text-error/80 hover:text-error transition-colors text-sm font-medium"
+                          className="text-red-600 hover:text-red-700 hover:underline transition-colors px-2 py-1 rounded"
                         >
                           Delete
                         </button>

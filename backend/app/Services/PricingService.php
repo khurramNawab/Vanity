@@ -52,13 +52,17 @@ class PricingService
         }
 
         // 3. Unit price before discount
-        $unitPrice = $silverValue + $makingCharge;
+        if ($product->base_price !== null && (float) $product->base_price > 0) {
+            $unitPrice = (float) $product->base_price;
+        } else {
+            $unitPrice = $silverValue + $makingCharge;
+        }
 
         // 4. Calculate discount
         $discount = $unitPrice * ((float) $product->discount_percent / 100.0);
 
         // 5. Final unit price
-        $finalUnitPrice = $unitPrice - $discount;
+        $finalUnitPrice = max(0, $unitPrice - $discount);
 
         // 6. Subtotal
         $subtotal = $finalUnitPrice * $quantity;

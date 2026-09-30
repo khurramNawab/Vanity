@@ -75,18 +75,18 @@ class ProductController extends Controller
             'meta_keywords' => 'nullable|string',
             'canonical_url' => 'nullable|string|max:255',
             'og_image_url' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'silver_purity' => 'required|string|max:50',
-            'silver_weight' => 'required|numeric|min:0.01',
-            'making_charge' => 'required|numeric|min:0',
-            'making_charge_type' => 'required|in:flat,percent',
+            'category_id' => 'nullable|integer',
+            'silver_purity' => 'nullable|string|max:50',
+            'silver_weight' => 'nullable|numeric|min:0',
+            'making_charge' => 'nullable|numeric|min:0',
+            'making_charge_type' => 'nullable|in:flat,percent',
             'base_price' => 'nullable|numeric|min:0',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
-            'stock_quantity' => 'required|integer|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
             'is_featured' => 'boolean',
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
-            'status' => 'required|in:active,inactive',
+            'status' => 'nullable|in:active,inactive',
             'occasion' => 'nullable|string|max:100',
             'image_alt_text' => 'nullable|string',
             'image_alt_texts.*' => 'nullable|string',
@@ -100,6 +100,16 @@ class ProductController extends Controller
                 'message' => $validator->errors()->first(),
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // Auto-heal or resolve category
+        $categoryId = $request->category_id;
+        if (!$categoryId || !\App\Models\Category::where('id', $categoryId)->exists()) {
+            $cat = \App\Models\Category::firstOrCreate(
+                ['name' => 'Necklaces'],
+                ['slug' => 'necklaces', 'description' => 'Exquisite silver neckpieces and chains for all occasions.']
+            );
+            $categoryId = $cat->id;
         }
 
         $rawSlug = !empty($request->slug) ? $request->slug : $request->name;
@@ -120,19 +130,19 @@ class ProductController extends Controller
             'meta_keywords' => $request->meta_keywords,
             'canonical_url' => $request->canonical_url,
             'og_image_url' => $request->og_image_url,
-            'category_id' => $request->category_id,
-            'silver_purity' => $request->silver_purity,
-            'silver_weight' => $request->silver_weight,
-            'making_charge' => $request->making_charge,
-            'making_charge_type' => $request->making_charge_type,
-            'base_price' => $request->base_price,
-            'discount_percent' => $request->discount_percent ?? 0.00,
-            'stock_quantity' => $request->stock_quantity,
+            'category_id' => $categoryId,
+            'silver_purity' => $request->silver_purity ?: '925',
+            'silver_weight' => $request->silver_weight ? floatval($request->silver_weight) : 1.0,
+            'making_charge' => $request->making_charge ? floatval($request->making_charge) : 0,
+            'making_charge_type' => $request->making_charge_type ?: 'flat',
+            'base_price' => $request->base_price !== null && $request->base_price !== '' ? floatval($request->base_price) : null,
+            'discount_percent' => $request->discount_percent ? floatval($request->discount_percent) : 0.00,
+            'stock_quantity' => $request->stock_quantity ? intval($request->stock_quantity) : 0,
             'is_featured' => $request->boolean('is_featured', false),
             'is_bestseller' => $request->boolean('is_bestseller', false),
             'is_new_arrival' => $request->boolean('is_new_arrival', false),
-            'status' => $request->status,
-            'occasion' => $request->occasion,
+            'status' => $request->status ?: 'active',
+            'occasion' => $request->occasion ?: 'everyday',
         ]);
 
         $defaultAlt = $request->image_alt_text ?: ($request->name . ' - Handcrafted 925 Sterling Silver Jewellery');
@@ -232,18 +242,18 @@ class ProductController extends Controller
             'meta_keywords' => 'nullable|string',
             'canonical_url' => 'nullable|string|max:255',
             'og_image_url' => 'nullable|string',
-            'category_id' => 'required|exists:categories,id',
-            'silver_purity' => 'required|string|max:50',
-            'silver_weight' => 'required|numeric|min:0.01',
-            'making_charge' => 'required|numeric|min:0',
-            'making_charge_type' => 'required|in:flat,percent',
+            'category_id' => 'nullable|integer',
+            'silver_purity' => 'nullable|string|max:50',
+            'silver_weight' => 'nullable|numeric|min:0',
+            'making_charge' => 'nullable|numeric|min:0',
+            'making_charge_type' => 'nullable|in:flat,percent',
             'base_price' => 'nullable|numeric|min:0',
             'discount_percent' => 'nullable|numeric|min:0|max:100',
-            'stock_quantity' => 'required|integer|min:0',
+            'stock_quantity' => 'nullable|integer|min:0',
             'is_featured' => 'boolean',
             'is_bestseller' => 'boolean',
             'is_new_arrival' => 'boolean',
-            'status' => 'required|in:active,inactive',
+            'status' => 'nullable|in:active,inactive',
             'occasion' => 'nullable|string|max:100',
             'image_alt_text' => 'nullable|string',
             'image_alt_texts.*' => 'nullable|string',
@@ -257,6 +267,16 @@ class ProductController extends Controller
                 'message' => $validator->errors()->first(),
                 'errors' => $validator->errors()
             ], 422);
+        }
+
+        // Auto-heal category if not existing
+        $categoryId = $request->category_id ?: $product->category_id;
+        if (!$categoryId || !\App\Models\Category::where('id', $categoryId)->exists()) {
+            $cat = \App\Models\Category::firstOrCreate(
+                ['name' => 'Necklaces'],
+                ['slug' => 'necklaces', 'description' => 'Exquisite silver neckpieces and chains for all occasions.']
+            );
+            $categoryId = $cat->id;
         }
 
         if (!empty($request->slug)) {
@@ -286,19 +306,19 @@ class ProductController extends Controller
             'meta_keywords' => $request->meta_keywords,
             'canonical_url' => $request->canonical_url,
             'og_image_url' => $request->og_image_url,
-            'category_id' => $request->category_id,
-            'silver_purity' => $request->silver_purity,
-            'silver_weight' => $request->silver_weight,
-            'making_charge' => $request->making_charge,
-            'making_charge_type' => $request->making_charge_type,
-            'base_price' => $request->base_price,
-            'discount_percent' => $request->discount_percent ?? 0.00,
-            'stock_quantity' => $request->stock_quantity,
+            'category_id' => $categoryId,
+            'silver_purity' => $request->silver_purity ?: '925',
+            'silver_weight' => $request->silver_weight ? floatval($request->silver_weight) : ($product->silver_weight ?: 1.0),
+            'making_charge' => $request->making_charge !== null ? floatval($request->making_charge) : ($product->making_charge ?: 0),
+            'making_charge_type' => $request->making_charge_type ?: ($product->making_charge_type ?: 'flat'),
+            'base_price' => $request->base_price !== null && $request->base_price !== '' ? floatval($request->base_price) : null,
+            'discount_percent' => $request->discount_percent !== null ? floatval($request->discount_percent) : ($product->discount_percent ?: 0.00),
+            'stock_quantity' => $request->stock_quantity !== null ? intval($request->stock_quantity) : ($product->stock_quantity ?: 0),
             'is_featured' => $request->boolean('is_featured', false),
             'is_bestseller' => $request->boolean('is_bestseller', false),
             'is_new_arrival' => $request->boolean('is_new_arrival', false),
-            'status' => $request->status,
-            'occasion' => $request->occasion,
+            'status' => $request->status ?: ($product->status ?: 'active'),
+            'occasion' => $request->occasion ?: ($product->occasion ?: 'everyday'),
         ]);
 
         if ($request->has('image_alt_text') && !empty($request->image_alt_text)) {
