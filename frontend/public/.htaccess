@@ -1,3 +1,5 @@
+DirectoryIndex index.html index.php
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteBase /
@@ -6,9 +8,8 @@
     RewriteCond %{HTTPS} off
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # 2. Direct access to existing static files and directories (_next, static chunks, CSS, JS, images)
-    RewriteCond %{REQUEST_FILENAME} -f [OR]
-    RewriteCond %{REQUEST_FILENAME} -d
+    # 2. Direct access to existing static files (_next static assets, CSS, JS, images, fonts, media)
+    RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
     # 3. Route API requests to Laravel Backend (if co-hosted under /api)
@@ -16,6 +17,7 @@
     RewriteRule ^api/(.*)$ api/index.php [L,QSA]
 
     # 4. Handle folder-based index.html (for Next.js export with trailingSlash: true)
+    RewriteCond %{REQUEST_FILENAME} -d
     RewriteCond %{REQUEST_FILENAME}/index.html -f
     RewriteRule ^(.*)$ $1/index.html [L]
 
