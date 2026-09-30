@@ -1148,7 +1148,80 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Section 4: H3 - Jewellery for Every Occasion (Left Vertical Tabs + Right Dynamic Grid) */}
+        {/* Section 4: H3 - Shop by Category */}
+        <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
+          <div className="max-w-[1280px] mx-auto px-5 md:px-12">
+            <div className="max-w-3xl mb-3 md:mb-4 text-left">
+              <div className="inline-block bg-[#008080]/10 text-[#008080] border border-[#008080]/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md mb-2 font-sans shadow-2xs">
+                Explore
+              </div>
+              <h3 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
+                Shop by Category
+              </h3>
+              <p className="text-[#526071] text-xs md:text-sm leading-relaxed font-sans">
+                Vanity&apos;s Kolkata jewellery online store is organised to help you find exactly what you&apos;re looking for, without endless scrolling.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+              {/* Category 1: Necklaces & Pendants */}
+              <Link href="/shop/?category=Necklaces" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/pink-pendant-necklace.jpg')` }}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Necklaces &amp; Pendants</h4>
+                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
+                      Layer them, wear them solo, or gift them — designed for both traditional sarees and modern outfits.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
+                    BROWSE NECKLACES <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                  </span>
+                </div>
+              </Link>
+
+              {/* Category 2: Earrings & Tops */}
+              <Link href="/shop/?category=Earrings" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/ruby-pearl-earrings.jpg')` }}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Earrings &amp; Tops</h4>
+                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
+                      Studs for the office, jhumkas for festivals, hoops for the weekend — earrings that move with your day.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
+                    BROWSE EARRINGS <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                  </span>
+                </div>
+              </Link>
+
+              {/* Category 3: Bangles & Bracelets */}
+              <Link href="/shop/?category=Bangles" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/floral-bridal-bangle.jpg')` }}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Bangles &amp; Bracelets</h4>
+                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
+                      A mix of contemporary and classic designs that pair beautifully with both Western and ethnic wear.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
+                    BROWSE BANGLES <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+                  </span>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 5: H3 - Jewellery for Every Occasion (Left Vertical Tabs + Right Dynamic Grid) */}
         <section
           className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6"
           onMouseEnter={() => setIsOccasionPaused(true)}
@@ -1207,83 +1280,55 @@ export default function HomePage() {
                   <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </Link>
 
-                {/* Exclusive Festive / Mother's Day Offer Card (Positioned directly in Left Column below CTA Button) */}
+                {/* Exclusive Festive / Mother's Day Offer Card (Clean luxury image with offer tag, perfectly aligned) */}
                 {showOfferSection && (
-                  <div className="group flex flex-col bg-gradient-to-br from-[#1A1A1A] via-[#2A1820] to-[#111827] text-white p-3.5 md:p-4 rounded-xl border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-                    {/* Media Header (Video / Image) */}
-                    <div className="relative aspect-[16/10] bg-black/60 mb-3 overflow-hidden rounded-lg border border-[#D4AF37]/30">
-                      {heroVideoUrl || campaignVideoUrl ? (
-                        (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
-                          <iframe
-                            src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
-                            title="Campaign Offer Video"
-                            className="w-full h-full object-cover border-0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
-                        ) : (
-                          <video
-                            src={heroVideoUrl || campaignVideoUrl}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            controls
-                            className="w-full h-full object-cover"
-                          />
-                        )
-                      ) : (
-                        <div
-                          className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                          style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
+                  <Link
+                    href={campaignCtaLink || (campaignProductSlug ? `/products/${campaignProductSlug}/` : `/shop/?occasion=${selectedOccasion}`)}
+                    className="group block relative w-full aspect-[16/11] sm:aspect-[4/3] rounded-xl overflow-hidden border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-300"
+                  >
+                    {heroVideoUrl || campaignVideoUrl ? (
+                      (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
+                        <iframe
+                          src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
+                          title="Campaign Offer Video"
+                          className="w-full h-full object-cover border-0 pointer-events-none"
                         />
-                      )}
-                      <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
-                        <span className="bg-gradient-to-r from-[#B89758] to-[#D4AF37] text-white text-[10px] px-2.5 py-0.5 tracking-wider uppercase font-bold rounded font-sans shadow-md flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]">auto_awesome</span>
-                          {campaignBadgeText || (campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} OFFER` : "MOTHER'S DAY & FESTIVE OFFER")}
-                        </span>
-                      </div>
+                      ) : (
+                        <video
+                          src={heroVideoUrl || campaignVideoUrl}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="w-full h-full object-cover"
+                        />
+                      )
+                    ) : (
+                      <div
+                        className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                        style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
+                      />
+                    )}
+                    
+                    {/* Top Offer Badge */}
+                    <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+                      <span className="bg-gradient-to-r from-[#B89758] via-[#D4AF37] to-[#B89758] text-white text-[10px] md:text-[11px] px-2.5 py-1 tracking-wider uppercase font-bold rounded-lg font-sans shadow-md flex items-center gap-1.5 border border-white/20">
+                        <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
+                        {campaignBadgeText || (campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} OFFER` : "MOTHER'S DAY & FESTIVE OFFER")}
+                      </span>
                     </div>
 
-                    {/* Content Body */}
-                    <div className="flex-1 flex flex-col justify-between">
-                      <div className="mb-2.5">
-                        <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/10 border border-[#D4AF37]/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider mb-1 font-sans">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                          <span>{campaignTagText || "Exclusive Festive Edit"}</span>
-                        </div>
-                        <h4 className="text-sm md:text-base font-serif font-medium text-white mb-1">
-                          {campaignText || "Durga Puja Offer"}
-                        </h4>
-                        <p className="text-[11px] text-[#CBD5E1] font-sans leading-relaxed line-clamp-2">
-                          {campaignSubtitle || "Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount."}
-                        </p>
-                      </div>
-
-                      <div className="space-y-2 mt-auto pt-2 border-t border-white/10">
-                        {Boolean(campaignCode || signupCode) && (
-                          <button
-                            type="button"
-                            onClick={() => handleCopyCode(campaignCode || signupCode)}
-                            className="w-full py-1.5 px-2 bg-white/10 hover:bg-white/20 border border-[#D4AF37]/40 rounded-lg text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <span className="material-symbols-outlined text-[15px] text-[#FDE047]">sell</span>
-                            <span>{copiedCode ? 'COPIED TO CLIPBOARD!' : `USE CODE: ${campaignCode || signupCode}`}</span>
-                            <span className="material-symbols-outlined text-[13px] text-stone-300">content_copy</span>
-                          </button>
-                        )}
-
-                        <Link
-                          href={campaignCtaLink || (campaignProductSlug ? `/products/${campaignProductSlug}` : `/shop?occasion=${selectedOccasion}`)}
-                          className="w-full py-2 bg-[#008080] hover:bg-[#006666] text-white text-xs font-bold uppercase tracking-wider rounded-lg font-sans text-center transition-colors flex items-center justify-center gap-1 shadow-sm"
-                        >
-                          <span>{campaignCtaText || "Explore Offer Collection"}</span>
-                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                        </Link>
-                      </div>
+                    {/* Subtle bottom gradient with tag */}
+                    <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center justify-between text-white pointer-events-none">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300 font-sans flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        {campaignTagText || "Exclusive Festive Edit"}
+                      </span>
+                      <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded font-sans flex items-center gap-0.5 group-hover:bg-[#008080] transition-colors">
+                        Shop Offer <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                      </span>
                     </div>
-                  </div>
+                  </Link>
                 )}
               </div>
 
@@ -1373,79 +1418,6 @@ export default function HomePage() {
                 )}
               </div>
 
-            </div>
-          </div>
-        </section>
-
-        {/* Section 5: H3 - Shop by Category */}
-        <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
-          <div className="max-w-[1280px] mx-auto px-5 md:px-12">
-            <div className="max-w-3xl mb-3 md:mb-4 text-left">
-              <div className="inline-block bg-[#008080]/10 text-[#008080] border border-[#008080]/20 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-md mb-2 font-sans shadow-2xs">
-                Explore
-              </div>
-              <h3 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
-                Shop by Category
-              </h3>
-              <p className="text-[#526071] text-xs md:text-sm leading-relaxed font-sans">
-                Vanity&apos;s Kolkata jewellery online store is organised to help you find exactly what you&apos;re looking for, without endless scrolling.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-              {/* Category 1: Necklaces & Pendants */}
-              <Link href="/shop?category=Necklaces" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/pink-pendant-necklace.jpg')` }}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Necklaces &amp; Pendants</h4>
-                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
-                      Layer them, wear them solo, or gift them — designed for both traditional sarees and modern outfits.
-                    </p>
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
-                    BROWSE NECKLACES <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </span>
-                </div>
-              </Link>
-
-              {/* Category 2: Earrings & Tops */}
-              <Link href="/shop?category=Earrings" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/ruby-pearl-earrings.jpg')` }}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Earrings &amp; Tops</h4>
-                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
-                      Studs for the office, jhumkas for festivals, hoops for the weekend — earrings that move with your day.
-                    </p>
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
-                    BROWSE EARRINGS <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </span>
-                </div>
-              </Link>
-
-              {/* Category 3: Bangles & Bracelets */}
-              <Link href="/shop?category=Bangles" className="group bg-white rounded-xl overflow-hidden border border-[#E5E7EB] shadow-xs hover:shadow-md hover:border-[#008080]/60 hover:-translate-y-1 transition-all duration-300 flex flex-col">
-                <div className="h-40 md:h-44 bg-[#F5F2EC] bg-cover bg-center transition-transform duration-500 group-hover:scale-105 relative overflow-hidden" style={{ backgroundImage: `url('/images/showcase/floral-bridal-bangle.jpg')` }}>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <div className="p-3.5 md:p-4 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h4 className="text-base md:text-lg font-normal text-[#0F172A] mb-1 group-hover:text-[#008080] transition-colors font-serif">Bangles &amp; Bracelets</h4>
-                    <p className="text-xs text-[#526071] leading-relaxed mb-2.5 font-sans">
-                      A mix of contemporary and classic designs that pair beautifully with both Western and ethnic wear.
-                    </p>
-                  </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#008080] group-hover:text-[#0F172A] flex items-center gap-1 transition-colors font-sans">
-                    BROWSE BANGLES <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
-                  </span>
-                </div>
-              </Link>
             </div>
           </div>
         </section>
@@ -1576,16 +1548,6 @@ export default function HomePage() {
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#D4AF37]/10 via-[#008080]/5 to-transparent rounded-bl-full pointer-events-none" />
                     
                     <div className="mb-4 pt-1">
-                      {/* Glowing Eye-Catching VIP Badge */}
-                      <div className="inline-flex items-center gap-2 bg-gradient-to-r from-[#FFFBEB] via-[#FEF3C7] to-[#FFFBEB] border-2 border-[#D4AF37] px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider text-[#92400E] shadow-sm mb-2.5 font-sans">
-                        <span className="flex h-2 w-2 relative">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4AF37] opacity-75" />
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#B45309]" />
-                        </span>
-                        <span className="material-symbols-outlined text-[15px] text-[#B45309]">diamond</span>
-                        <span className="tracking-widest">{vipBadgeText || "VIP BESPOKE CONSULTATION"}</span>
-                      </div>
-
                       <h3 className="font-serif text-lg md:text-xl font-medium text-[#0F172A] leading-snug">
                         {vipTitle || "Sterling Silver Personalized Jewelry"}
                       </h3>
@@ -1715,14 +1677,6 @@ export default function HomePage() {
                         <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                       </button>
                     </form>
-
-                    <div className="flex items-center justify-center gap-4 text-[10px] text-[#64748B] pt-3 mt-3 border-t border-slate-200/70 font-sans">
-                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[13px] text-[#008080]">lock</span> 100% Confidential</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[13px] text-[#008080]">verified</span> Free Bespoke Advice</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[13px] text-[#008080]">chat</span> WhatsApp Support</span>
-                    </div>
                   </div>
                 </div>
               )}
