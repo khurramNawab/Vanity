@@ -380,12 +380,16 @@ export default function HomePage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   
   // Campaign Offer Video & Image States
-  const [campaignFestival, setCampaignFestival] = useState<string | null>(null);
-  const [campaignText, setCampaignText] = useState<string>('');
-  const [campaignCode, setCampaignCode] = useState<string>('');
+  const [campaignFestival, setCampaignFestival] = useState<string | null>('mothers_day');
+  const [campaignText, setCampaignText] = useState<string>("Mother's Day & Special Festive Offer");
+  const [campaignSubtitle, setCampaignSubtitle] = useState<string>("Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount.");
+  const [campaignCode, setCampaignCode] = useState<string>('VANITY10');
+  const [campaignCtaText, setCampaignCtaText] = useState<string>('Explore Offer Collection');
+  const [campaignCtaLink, setCampaignCtaLink] = useState<string>('/shop');
   const [campaignVideoUrl, setCampaignVideoUrl] = useState<string>('');
-  const [campaignImageUrl, setCampaignImageUrl] = useState<string>('');
+  const [campaignImageUrl, setCampaignImageUrl] = useState<string>('/images/kolkata-howrah-jewellery-banner.jpg');
   const [campaignProductSlug, setCampaignProductSlug] = useState<string | null>(null);
+  const [showOfferSection, setShowOfferSection] = useState<boolean>(true);
   const [copiedCode, setCopiedCode] = useState(false);
 
   // Appointment Booking Form States
@@ -573,10 +577,14 @@ export default function HomePage() {
         setShowVideoCard(Boolean(isVideoCardEnabled));
         setHeroVideoUrl(videoUrl);
         setCampaignVideoUrl(videoUrl);
-        setCampaignFestival(s.campaign_active_festival && s.campaign_active_festival !== 'none' ? s.campaign_active_festival : null);
-        setCampaignText(s.campaign_active_text || '');
-        setCampaignCode(s.campaign_active_code || '');
-        setCampaignImageUrl(settingsRes.value.campaign_product_image || s.campaign_active_image_url || '');
+        setCampaignFestival(s.campaign_active_festival && s.campaign_active_festival !== 'none' ? s.campaign_active_festival : 'mothers_day');
+        setCampaignText(s.campaign_active_text || "Mother's Day & Special Festive Offer");
+        setCampaignSubtitle(s.campaign_subtitle || "Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount.");
+        setCampaignCode(s.campaign_active_code || 'VANITY10');
+        setCampaignCtaText(s.campaign_cta_text || 'Explore Offer Collection');
+        setCampaignCtaLink(s.campaign_cta_link || '/shop');
+        setShowOfferSection(s.campaign_show_offer_section !== '0');
+        setCampaignImageUrl(settingsRes.value.campaign_product_image || s.campaign_active_image_url || '/images/kolkata-howrah-jewellery-banner.jpg');
         setCampaignProductSlug(settingsRes.value.campaign_product_slug || null);
       }
     });
@@ -1198,77 +1206,7 @@ export default function HomePage() {
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5 transition-all duration-300">
-                    {/* Offer Images & Videos Section Card (Controllable via Admin Panel / Campaigns) */}
-                    <div className="group flex flex-col h-full bg-gradient-to-br from-[#1A1A1A] via-[#2A1820] to-[#111827] text-white p-3.5 md:p-4 rounded-xl border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl transition-all duration-300 relative overflow-hidden">
-                      <div className="relative aspect-[4/3.8] bg-black/60 mb-3 overflow-hidden rounded-lg border border-[#D4AF37]/30">
-                        {heroVideoUrl || campaignVideoUrl ? (
-                          (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
-                            <iframe
-                              src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
-                              title="Campaign Offer Video"
-                              className="w-full h-full object-cover border-0"
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (
-                            <video
-                              src={heroVideoUrl || campaignVideoUrl}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              controls
-                              className="w-full h-full object-cover"
-                            />
-                          )
-                        ) : (
-                          <div
-                            className="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                            style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
-                          />
-                        )}
-                        <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
-                          <span className="bg-gradient-to-r from-[#B89758] to-[#D4AF37] text-white text-[10px] px-2.5 py-0.5 tracking-wider uppercase font-bold rounded font-sans shadow-md">
-                            {campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} OFFER` : "MOTHER'S DAY & FESTIVE OFFER"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex-1 flex flex-col px-0.5 justify-between">
-                        <div>
-                          <h4 className="text-sm md:text-base font-serif font-medium text-white mb-1">
-                            {campaignText || "Mother's Day & Special Festive Offer"}
-                          </h4>
-                          <p className="text-[11px] text-[#CBD5E1] font-sans mb-3 line-clamp-2">
-                            Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount.
-                          </p>
-                        </div>
-
-                        <div className="space-y-2 mt-auto pt-2 border-t border-white/10">
-                          {Boolean(campaignCode || signupCode) && (
-                            <button
-                              type="button"
-                              onClick={() => handleCopyCode(campaignCode || signupCode)}
-                              className="w-full py-1.5 px-2 bg-white/10 hover:bg-white/20 border border-[#D4AF37]/40 rounded text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                            >
-                              <span className="material-symbols-outlined text-[15px] text-[#FDE047]">sell</span>
-                              <span>{copiedCode ? 'COPIED TO CLIPBOARD!' : `USE CODE: ${campaignCode || signupCode}`}</span>
-                            </button>
-                          )}
-
-                          <Link
-                            href={campaignProductSlug ? `/products/${campaignProductSlug}` : `/shop?occasion=${selectedOccasion}`}
-                            className="w-full py-2 bg-[#008080] hover:bg-[#006666] text-white text-xs font-bold uppercase tracking-wider rounded font-sans text-center transition-colors flex items-center justify-center gap-1 shadow-sm"
-                          >
-                            <span>Explore Offer Collection</span>
-                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Curated Occasion Products */}
-                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 3).map((product) => {
+                    {(occasionProducts.length > 0 ? occasionProducts : (OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive)).slice(0, 4).map((product) => {
                       const primaryImg = product.images?.find((img: any) => img.is_primary) || product.images?.[0];
                       const imgUrl = primaryImg ? primaryImg.image_path : '/images/showcase/floral-bridal-bangle.jpg';
                       const material = product.silver_purity === '925' ? '925 Sterling Silver' : (product.silver_purity === '999' ? '999 Fine Silver' : 'Fine Silver');
@@ -1342,6 +1280,136 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* Dedicated Festive / Mother's Day Offer Showcase Section (Positioned Directly Below Jewellery for Every Occasion - Controlled via Admin Panel) */}
+        {showOfferSection && (
+          <section className="bg-gradient-to-b from-[#FAF8F5] via-[#F4EFEA] to-[#FAF8F5] border-b border-[#E5E7EB] py-6 md:py-8 overflow-hidden relative">
+            <div className="max-w-[1280px] mx-auto px-5 md:px-12">
+              <div className="bg-gradient-to-br from-[#1C2826] via-[#1F1D24] to-[#121820] rounded-2xl border-2 border-[#D4AF37]/40 shadow-xl overflow-hidden text-white p-5 md:p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-center">
+                  
+                  {/* Left Column: Video Player / High-Res Media Showcase */}
+                  <div className="lg:col-span-6 flex flex-col justify-center">
+                    <div className="relative aspect-[16/10] md:aspect-[16/9.5] bg-black/80 rounded-xl overflow-hidden border border-[#D4AF37]/30 shadow-2xl group">
+                      {heroVideoUrl || campaignVideoUrl ? (
+                        (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
+                          <iframe
+                            src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
+                            title="Campaign Offer Video"
+                            className="w-full h-full object-cover border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        ) : (
+                          <video
+                            src={heroVideoUrl || campaignVideoUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            controls
+                            className="w-full h-full object-cover"
+                          />
+                        )
+                      ) : (
+                        <div
+                          className="w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                          style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
+                        />
+                      )}
+
+                      {/* Top Overlay Badge */}
+                      <div className="absolute top-3 left-3 z-10 pointer-events-none">
+                        <span className="bg-gradient-to-r from-[#B89758] to-[#D4AF37] text-white text-[11px] px-3 py-1 tracking-wider uppercase font-bold rounded-full font-sans shadow-lg flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
+                          {campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} EXCLUSIVE` : "MOTHER'S DAY & FESTIVE OFFER"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Offer Headline, Subtext, Coupon Badge & Product Showcase */}
+                  <div className="lg:col-span-6 flex flex-col justify-between text-left space-y-4">
+                    <div>
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-[#D4AF37]/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2 font-sans">
+                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        <span>Exclusive Festive Edit</span>
+                      </div>
+                      <h3 className="font-serif text-2xl md:text-3xl lg:text-[32px] font-normal text-white leading-tight tracking-tight mb-2">
+                        {campaignText || "Mother's Day & Special Festive Offer"}
+                      </h3>
+                      <p className="text-xs md:text-sm text-stone-300 font-sans leading-relaxed">
+                        {campaignSubtitle || "Explore handcrafted 925 sterling silver necklaces, bangles, and earrings on exclusive discount."}
+                      </p>
+                    </div>
+
+                    {/* Coupon Code Pill */}
+                    {Boolean(campaignCode || signupCode) && (
+                      <div className="flex flex-wrap items-center gap-3 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleCopyCode(campaignCode || signupCode)}
+                          className="py-2 px-4 bg-white/10 hover:bg-white/20 border border-[#D4AF37]/60 rounded-xl text-white text-xs font-mono font-bold flex items-center gap-2 transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                        >
+                          <span className="material-symbols-outlined text-[16px] text-amber-300">sell</span>
+                          <span>{copiedCode ? 'COPIED TO CLIPBOARD!' : `USE CODE: ${campaignCode || signupCode}`}</span>
+                          <span className="material-symbols-outlined text-[14px] text-stone-300">content_copy</span>
+                        </button>
+                        <span className="text-[11px] text-stone-400 font-sans">Valid across select heirlooms</span>
+                      </div>
+                    )}
+
+                    {/* Mini Showcase of Products on Offer */}
+                    <div className="pt-2 border-t border-white/10">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-stone-300 font-sans">
+                          Featured Products on Offer:
+                        </span>
+                        <span className="text-[11px] text-amber-300 font-semibold font-sans">925 BIS Hallmarked</span>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {[
+                          { title: 'Solitaire Pendant', price: '₹4,499', image: '/images/showcase/rose-cushion-pendant.jpg', link: '/shop?category=pendants' },
+                          { title: 'Heritage Bangle', price: '₹7,899', image: '/images/showcase/floral-bridal-bangle.jpg', link: '/shop?category=bangles' },
+                          { title: 'Eternity Bracelet', price: '₹6,299', image: '/images/showcase/crimson-heart-bracelet.jpg', link: '/shop?category=bracelets' },
+                        ].map((item, idx) => (
+                          <Link
+                            key={idx}
+                            href={item.link}
+                            className="group/item flex flex-col bg-white/5 hover:bg-white/15 p-2 rounded-lg border border-white/10 hover:border-[#008080] transition-all"
+                          >
+                            <div className="aspect-square rounded-md overflow-hidden bg-white/5 mb-1.5">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover group-hover/item:scale-105 transition-transform"
+                              />
+                            </div>
+                            <span className="text-[11px] font-medium text-white truncate font-serif">{item.title}</span>
+                            <span className="text-[10px] text-amber-300 font-bold font-sans">{item.price}</span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Main CTA Link */}
+                    <div className="pt-2">
+                      <Link
+                        href={campaignCtaLink || (campaignProductSlug ? `/products/${campaignProductSlug}` : `/shop`)}
+                        className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] hover:bg-[#006666] text-white py-3 px-6 rounded-xl font-bold uppercase tracking-widest text-xs shadow-md hover:shadow-lg transition-all font-sans"
+                      >
+                        <span>{campaignCtaText || "Explore Offer Collection"}</span>
+                        <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                      </Link>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Section 5: H3 - Shop by Category */}
         <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
