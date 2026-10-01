@@ -19,7 +19,8 @@ const OCCASIONS = [
     h4Heading: 'Festive Shopping',
     description: 'Durga Puja, Diwali, and Poila Boishakh call for pieces that stand out with brilliant silver craft.',
     badge: 'Festive Edit',
-    ctaText: 'Jodhpur Jewellery',
+    ctaText: 'Explore Festive Collection',
+    ctaLink: '/shop/?occasion=festive',
   },
   {
     id: 'wedding',
@@ -29,6 +30,7 @@ const OCCASIONS = [
     description: 'From engagement to reception, find jewellery that complements every traditional and fusion outfit change.',
     badge: 'Bridal Edit',
     ctaText: 'Explore Bridal Collection',
+    ctaLink: '/shop/?occasion=wedding',
   },
   {
     id: 'everyday',
@@ -38,6 +40,7 @@ const OCCASIONS = [
     description: 'Simple, wearable, lightweight designs for work, college, meetings, or daily errands.',
     badge: 'Daily Wear',
     ctaText: 'Explore Daily Collection',
+    ctaLink: '/shop/?occasion=everyday',
   },
   {
     id: 'gifting',
@@ -47,6 +50,7 @@ const OCCASIONS = [
     description: 'Thoughtful jewellery pieces that make birthdays, anniversaries, and milestone celebrations feel truly special.',
     badge: 'Gifting Special',
     ctaText: 'Explore Gift Collection',
+    ctaLink: '/shop/?occasion=gifting',
   },
   {
     id: 'party',
@@ -56,6 +60,7 @@ const OCCASIONS = [
     description: 'High-sparkle CZ diamonds and statement silver ornaments designed for evening glam.',
     badge: 'Party Edit',
     ctaText: 'Explore Party Collection',
+    ctaLink: '/shop/?occasion=party',
   },
   {
     id: 'jaipur-gems',
@@ -64,7 +69,18 @@ const OCCASIONS = [
     h4Heading: 'Gems from Jaipur',
     description: 'Direct artisan sourced vibrant gemstones, ruby malas, emerald pendants, and heritage craft.',
     badge: 'Jaipur Craft',
-    ctaText: 'Jodhpur Jewellery',
+    ctaText: 'Explore Jaipur Gems',
+    ctaLink: '/shop/?occasion=jaipur-gems',
+  },
+  {
+    id: 'jodhpur',
+    label: 'Jodhpur Jewellery',
+    icon: 'stars',
+    h4Heading: 'Jodhpur Jewellery',
+    description: 'Authentic royal Rajasthani heritage silver ornaments, antique carvings, and handcrafted artisan heirlooms.',
+    badge: 'Royal Heritage',
+    ctaText: 'Explore Jodhpur Jewellery',
+    ctaLink: '/jodhpur-jewellery',
   },
 ];
 
@@ -259,6 +275,44 @@ const OCCASION_PRODUCTS_DATA: Record<string, any[]> = {
       images: [{ image_path: '/images/showcase/pink-pendant-necklace.jpg', is_primary: true }]
     }
   ],
+  jodhpur: [
+    {
+      id: 221,
+      slug: 'imperial-ruby-pearl-drop-tops',
+      name: 'Imperial Ruby & Pearl Drop Tops',
+      silver_purity: '925',
+      calculated_price: 5999,
+      is_new_arrival: true,
+      images: [{ image_path: '/images/showcase/ruby-pearl-earrings.jpg', is_primary: true }]
+    },
+    {
+      id: 222,
+      slug: 'rose-cushion-solitaire-pendant',
+      name: 'Rose Cushion Solitaire Pendant',
+      silver_purity: '925',
+      calculated_price: 4499,
+      is_bestseller: true,
+      images: [{ image_path: '/images/showcase/pink-pendant-necklace.jpg', is_primary: true }]
+    },
+    {
+      id: 223,
+      slug: 'royal-floral-heritage-cz-bangle',
+      name: 'Royal Floral Heritage CZ Bangle',
+      silver_purity: '925',
+      calculated_price: 7899,
+      is_bestseller: true,
+      images: [{ image_path: '/images/showcase/floral-bridal-bangle.jpg', is_primary: true }]
+    },
+    {
+      id: 224,
+      slug: 'crimson-heart-eternity-bracelet',
+      name: 'Crimson Heart Eternity Bracelet',
+      silver_purity: '925',
+      calculated_price: 6299,
+      is_new_arrival: true,
+      images: [{ image_path: '/images/showcase/heart-gem-bracelet.jpg', is_primary: true }]
+    }
+  ],
   'jaipur-gems': [
     {
       id: 221,
@@ -375,6 +429,7 @@ export default function HomePage() {
   const [showVideoCard, setShowVideoCard] = useState(false);
   const [wishlistIds, setWishlistIds] = useState<number[]>([]);
   const [selectedOccasion, setSelectedOccasion] = useState('festive');
+  const [isOccasionPaused, setIsOccasionPaused] = useState(false);
   const [occasionProducts, setOccasionProducts] = useState<any[]>([]);
   const [occasionLoading, setOccasionLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -389,7 +444,7 @@ export default function HomePage() {
   const [campaignCtaText, setCampaignCtaText] = useState<string>('Explore Offer Collection');
   const [campaignCtaLink, setCampaignCtaLink] = useState<string>('/shop');
   const [campaignVideoUrl, setCampaignVideoUrl] = useState<string>('');
-  const [campaignImageUrl, setCampaignImageUrl] = useState<string>('/images/kolkata-howrah-jewellery-banner.jpg');
+  const [campaignImageUrl, setCampaignImageUrl] = useState<string>('/images/mother-daughter-jewellery-banner.jpg');
   const [campaignProductSlug, setCampaignProductSlug] = useState<string | null>(null);
   const [showOfferSection, setShowOfferSection] = useState<boolean>(true);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -512,26 +567,18 @@ export default function HomePage() {
   const defaultSlides = [
     {
       id: 1,
-      image_path: '/images/hero-vanity-banner.jpg',
-      headline: 'Online jewellery shopping in Kolkata',
-      subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
+      image_path: '/images/luxury-hero-banner.jpg',
+      headline: 'Heritage Silver & CZ Diamond Heirlooms',
+      subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & BIS Hallmarked.',
       cta_text: 'Shop now',
       cta_link: '/shop',
     },
     {
       id: 2,
       image_path: '/images/kolkata-howrah-jewellery-banner.jpg',
-      headline: 'Heritage Silver & CZ Diamond Heirlooms',
-      subtext: 'Silver, brass, precious & semi-precious stone jewellery with CZ diamonds — delivered across Kolkata and West Bengal.',
-      cta_text: 'Explore Collection',
-      cta_link: '/shop',
-    },
-    {
-      id: 3,
-      image_path: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=1920&q=85',
-      headline: 'Artisan Silver & CZ Diamond Heirlooms',
-      subtext: '925 Sterling Silver with verified BIS Hallmarking and certified luxury craft.',
-      cta_text: 'Explore Collection',
+      headline: 'Online Jewellery Shopping in Kolkata',
+      subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
+      cta_text: 'Shop now',
       cta_link: '/shop',
     }
   ];
@@ -557,22 +604,31 @@ export default function HomePage() {
         const dbSlides = slidesRes.value.slides;
         setSlides([
           {
-            id: 'featured-vanity-banner',
-            image_path: '/images/hero-vanity-banner.jpg',
-            headline: 'Online jewellery shopping in Kolkata',
-            subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
+            id: 'featured-luxury-banner',
+            image_path: '/images/luxury-hero-banner.jpg',
+            headline: 'Heritage Silver & CZ Diamond Heirlooms',
+            subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & BIS Hallmarked.',
             cta_text: 'Shop now',
             cta_link: '/shop',
           },
           {
             id: 'featured-howrah-banner',
             image_path: '/images/kolkata-howrah-jewellery-banner.jpg',
-            headline: 'Heritage Silver & CZ Diamond Heirlooms',
-            subtext: 'Silver, brass, precious & semi-precious stone jewellery with CZ diamonds — delivered across Kolkata and West Bengal.',
+            headline: 'Online Jewellery Shopping in Kolkata',
+            subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
             cta_text: 'Shop now',
             cta_link: '/shop',
           },
-          ...dbSlides.filter((s: any) => s.image_path !== '/images/hero-vanity-banner.jpg' && s.image_path !== '/images/kolkata-howrah-jewellery-banner.jpg')
+          ...dbSlides.filter((s: any) => 
+            s.image_path !== '/images/hero-vanity-banner.jpg' && 
+            s.image_path !== '/images/mother-daughter-jewellery-banner.jpg' &&
+            s.image_path !== '/images/kolkata-howrah-jewellery-banner.jpg' &&
+            s.image_path !== '/images/luxury-hero-banner.jpg' &&
+            !s.image_path?.includes('hero-vanity-banner') &&
+            !s.image_path?.includes('mother-daughter') &&
+            !s.image_path?.includes('photo-1601121141461-9d6647bca1ed') &&
+            !s.image_path?.includes('photo-1509631179647')
+          )
         ]);
       } else {
         setSlides(defaultSlides);
@@ -596,7 +652,7 @@ export default function HomePage() {
         setCampaignCtaText(s.campaign_cta_text || 'Explore Offer Collection');
         setCampaignCtaLink(s.campaign_cta_link || '/shop');
         setShowOfferSection(s.campaign_show_offer_section !== '0');
-        setCampaignImageUrl(settingsRes.value.campaign_product_image || s.campaign_active_image_url || '/images/kolkata-howrah-jewellery-banner.jpg');
+        setCampaignImageUrl(settingsRes.value.campaign_product_image || s.campaign_active_image_url || '/images/mother-daughter-jewellery-banner.jpg');
         setCampaignProductSlug(settingsRes.value.campaign_product_slug || null);
 
         // VIP Consultation dynamic settings
@@ -604,59 +660,53 @@ export default function HomePage() {
         setVipTitle(s.vip_title || 'Sterling Silver Personalized Jewelry');
         setVipSubtitle(s.vip_subtitle || 'Connect with our master jewellery atelier for custom initials, bridal silverware, or private video consultation.');
         setVipFreeTag(s.vip_free_tag || '✨ 100% Free');
-        setVipButtonText(s.vip_button_text || 'Confirm VIP Appointment');
+        setVipButtonText(s.vip_button_text && s.vip_button_text !== 'Confirm VIP Appointment' ? s.vip_button_text : 'Book Now!');
         setShowVipForm(s.vip_form_enabled !== '0');
       }
     });
   }, []);
 
-  // Autoplay occasion change logic (turn by turn automatically)
-  const [isOccasionPaused, setIsOccasionPaused] = useState(false);
-  useEffect(() => {
-    if (isOccasionPaused) return;
-    const timer = setInterval(() => {
-      setSelectedOccasion(prev => {
-        const currentIndex = OCCASIONS.findIndex(o => o.id === prev);
-        const nextIndex = (currentIndex + 1) % OCCASIONS.length;
-        return OCCASIONS[nextIndex].id;
-      });
-    }, 4500);
-    return () => clearInterval(timer);
-  }, [isOccasionPaused]);
-
-  // Fetch occasion products dynamically when selected occasion changes
+  // Fetch occasion products dynamically when selected occasion changes with instant cache
   useEffect(() => {
     let isMounted = true;
-    setOccasionLoading(true);
+    const fallbackList = OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive;
+    
+    // Set immediate products so there is ZERO delay, no skeleton flashing, and no layout shift
+    setOccasionProducts(fallbackList);
+    setOccasionLoading(false);
+
     fetchApi(`/products?occasion=${selectedOccasion}&limit=8`)
       .then(res => {
         if (!isMounted) return;
-        const fallbackList = OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive;
         if (res.success && res.products && res.products.length >= 4) {
           setOccasionProducts(res.products.slice(0, 4));
         } else if (res.success && res.products && res.products.length > 0) {
-          // If fewer than 4 products returned by API, supplement with curated items so 4 cards are always shown
           const existingIds = new Set(res.products.map((p: any) => p.id));
           const extra = fallbackList.filter((f: any) => !existingIds.has(f.id));
           setOccasionProducts([...res.products, ...extra].slice(0, 4));
-        } else {
-          // Fallback to rich curated occasion products dataset
-          setOccasionProducts(fallbackList);
         }
       })
       .catch(() => {
-        if (isMounted) {
-          setOccasionProducts(OCCASION_PRODUCTS_DATA[selectedOccasion] || OCCASION_PRODUCTS_DATA.festive);
-        }
-      })
-      .finally(() => {
-        if (isMounted) setOccasionLoading(false);
+        // keep fallback
       });
 
     return () => {
       isMounted = false;
     };
   }, [selectedOccasion]);
+
+  // Continuous auto-switch across all occasions (Festive, Wedding, Everyday, Gifting, Party, Jaipur, Jodhpur)
+  useEffect(() => {
+    if (isOccasionPaused) return;
+    const interval = setInterval(() => {
+      setSelectedOccasion(prev => {
+        const currentIndex = OCCASIONS.findIndex(o => o.id === prev);
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % OCCASIONS.length;
+        return OCCASIONS[nextIndex].id;
+      });
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isOccasionPaused]);
 
   // Autoplay carousel logic
   useEffect(() => {
@@ -757,8 +807,10 @@ export default function HomePage() {
             <>
               {/* Prev Button */}
               <button
+                type="button"
+                suppressHydrationWarning
                 onClick={() => setCurrentSlide(prev => (prev === 0 ? activeSlides.length - 1 : prev - 1))}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/80 hover:bg-white text-[#0F172A] flex items-center justify-center transition-all focus:outline-none shadow-md backdrop-blur-sm"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/80 hover:bg-white text-[#0F172A] flex items-center justify-center transition-all focus:outline-none shadow-md backdrop-blur-sm cursor-pointer"
                 aria-label="Previous slide"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -767,8 +819,10 @@ export default function HomePage() {
               </button>
               {/* Next Button */}
               <button
+                type="button"
+                suppressHydrationWarning
                 onClick={() => setCurrentSlide(prev => (prev + 1) % activeSlides.length)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/80 hover:bg-white text-[#0F172A] flex items-center justify-center transition-all focus:outline-none shadow-md backdrop-blur-sm"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white/80 hover:bg-white text-[#0F172A] flex items-center justify-center transition-all focus:outline-none shadow-md backdrop-blur-sm cursor-pointer"
                 aria-label="Next slide"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -780,8 +834,10 @@ export default function HomePage() {
                 {activeSlides.map((_, idx) => (
                   <button
                     key={idx}
+                    type="button"
+                    suppressHydrationWarning
                     onClick={() => setCurrentSlide(idx)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${idx === currentSlide ? 'bg-primary scale-125' : 'bg-primary/30 hover:bg-primary/50'
+                    className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer ${idx === currentSlide ? 'bg-primary scale-125' : 'bg-primary/30 hover:bg-primary/50'
                       }`}
                     aria-label={`Go to slide ${idx + 1}`}
                   />
@@ -990,14 +1046,15 @@ export default function HomePage() {
                       <div className="flex-1 flex flex-col px-1 pb-1">
                         <div className="flex justify-between items-start mb-1">
                           <h3 className="text-sm font-medium text-[#0F172A] truncate pr-2 group-hover:text-[#B89758] transition-colors font-serif">{product.name}</h3>
-                          <button
-                            type="button"
+                          <span
+                            role="button"
+                            tabIndex={0}
                             onClick={async (e) => {
                               e.preventDefault();
                               e.stopPropagation();
                               await toggleWishlistItem(product.id, token);
                             }}
-                            className={`shrink-0 p-0.5 transition-colors ${wishlistIds.includes(product.id)
+                            className={`shrink-0 p-0.5 transition-colors cursor-pointer ${wishlistIds.includes(product.id)
                                 ? 'text-red-500 hover:text-red-600'
                                 : 'text-slate-300 hover:text-[#B89758]'
                               }`}
@@ -1006,7 +1063,7 @@ export default function HomePage() {
                             <span className="material-symbols-outlined text-[18px]">
                               {wishlistIds.includes(product.id) ? 'favorite' : 'favorite_border'}
                             </span>
-                          </button>
+                          </span>
                         </div>
                         <p className="text-[11px] text-[#64748B] font-sans mb-2">{material}</p>
                         <p className="text-base font-serif font-bold text-[#0F172A] mt-auto">{priceText}</p>
@@ -1247,11 +1304,9 @@ export default function HomePage() {
                       return (
                         <button
                           key={occ.id}
-                          onClick={() => {
-                            setSelectedOccasion(occ.id);
-                            setIsOccasionPaused(true);
-                          }}
+                          onClick={() => setSelectedOccasion(occ.id)}
                           type="button"
+                          suppressHydrationWarning
                           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 border font-sans cursor-pointer ${
                             isSelected
                               ? 'bg-[#008080] text-white border-[#008080] shadow-sm translate-x-1'
@@ -1275,10 +1330,10 @@ export default function HomePage() {
 
                 {/* Explore Occasion CTA Button */}
                 <Link
-                  href={`/shop/?occasion=${selectedOccasion}`}
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] text-white hover:bg-[#006666] py-3 px-4 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow transition-all font-sans"
+                  href={OCCASIONS.find(o => o.id === selectedOccasion)?.ctaLink || `/shop/?occasion=${selectedOccasion}`}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#008080] text-white hover:bg-[#006666] py-3 px-4 rounded-lg font-bold uppercase tracking-widest text-xs shadow-sm hover:shadow transition-all font-sans cursor-pointer"
                 >
-                  <span>{OCCASIONS.find(o => o.id === selectedOccasion)?.ctaText || 'Jodhpur Jewellery'}</span>
+                  <span>{OCCASIONS.find(o => o.id === selectedOccasion)?.ctaText || 'Explore Jodhpur Jewellery'}</span>
                   <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                 </Link>
               </div>
@@ -1336,14 +1391,15 @@ export default function HomePage() {
                               <h4 className="text-sm md:text-base font-medium text-[#0F172A] truncate pr-2 group-hover:text-[#008080] transition-colors font-serif">
                                 {product.name}
                               </h4>
-                              <button
-                                type="button"
+                              <span
+                                role="button"
+                                tabIndex={0}
                                 onClick={async (e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
                                   await toggleWishlistItem(product.id, token);
                                 }}
-                                className={`shrink-0 p-0.5 transition-colors ${wishlistIds.includes(product.id)
+                                className={`shrink-0 p-0.5 transition-colors cursor-pointer ${wishlistIds.includes(product.id)
                                     ? 'text-red-500 hover:text-red-600'
                                     : 'text-slate-300 hover:text-[#008080]'
                                   }`}
@@ -1352,7 +1408,7 @@ export default function HomePage() {
                                 <span className="material-symbols-outlined text-[18px]">
                                   {wishlistIds.includes(product.id) ? 'favorite' : 'favorite_border'}
                                 </span>
-                              </button>
+                              </span>
                             </div>
                             <p className="text-[11px] text-[#64748B] font-sans mb-2">{material}</p>
                             <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
@@ -1373,49 +1429,47 @@ export default function HomePage() {
               <div className="lg:col-span-4 flex flex-col h-full">
                 {showOfferSection && (
                   <Link
-                    href={campaignCtaLink || (campaignProductSlug ? `/products/${campaignProductSlug}/` : `/shop/?occasion=${selectedOccasion}`)}
-                    className="group block relative w-full h-full min-h-[300px] md:min-h-[340px] rounded-xl overflow-hidden border-2 border-[#D4AF37]/50 shadow-md hover:shadow-xl hover:scale-[1.01] transition-all duration-300"
+                    href="/offers"
+                    className="group cursor-pointer flex flex-col h-full bg-white p-3.5 md:p-4 rounded-xl border-2 border-[#D4AF37]/50 shadow-xs hover:shadow-lg hover:border-[#008080] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                   >
-                    {heroVideoUrl || campaignVideoUrl ? (
-                      (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
-                        <iframe
-                          src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
-                          title="Campaign Offer Video"
-                          className="absolute inset-0 w-full h-full object-cover border-0 pointer-events-none"
-                        />
+                    <div className="relative aspect-[4/3.8] bg-[#F8F8F7] mb-3 overflow-hidden rounded-lg">
+                      {/* Top Offer Badge */}
+                      <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
+                        <span className="bg-gradient-to-r from-[#B89758] via-[#D4AF37] to-[#B89758] text-white text-[10px] md:text-[11px] px-2.5 py-1 tracking-wider uppercase font-bold rounded-lg font-sans shadow-md flex items-center gap-1.5 border border-white/20">
+                          <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
+                          {campaignBadgeText || "MOTHER'S DAY & FESTIVE OFFER"}
+                        </span>
+                      </div>
+
+                      {heroVideoUrl || campaignVideoUrl ? (
+                        (heroVideoUrl || campaignVideoUrl).includes('youtube.com') || (heroVideoUrl || campaignVideoUrl).includes('youtu.be') ? (
+                          <iframe
+                            src={getYouTubeEmbedUrl(heroVideoUrl || campaignVideoUrl)}
+                            title="Campaign Offer Video"
+                            className="absolute inset-0 w-full h-full object-cover border-0 pointer-events-none"
+                          />
+                        ) : (
+                          <video
+                            src={heroVideoUrl || campaignVideoUrl}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                        )
                       ) : (
-                        <video
-                          src={heroVideoUrl || campaignVideoUrl}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="absolute inset-0 w-full h-full object-cover"
+                        <div
+                          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                          style={{ backgroundImage: `url('${campaignImageUrl || '/images/mother-daughter-jewellery-banner.jpg'}')` }}
                         />
-                      )
-                    ) : (
-                      <div
-                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-                        style={{ backgroundImage: `url('${campaignImageUrl || '/images/kolkata-howrah-jewellery-banner.jpg'}')` }}
-                      />
-                    )}
-                    
-                    {/* Top Offer Badge */}
-                    <div className="absolute top-2.5 left-2.5 z-10 pointer-events-none">
-                      <span className="bg-gradient-to-r from-[#B89758] via-[#D4AF37] to-[#B89758] text-white text-[10px] md:text-[11px] px-2.5 py-1 tracking-wider uppercase font-bold rounded-lg font-sans shadow-md flex items-center gap-1.5 border border-white/20">
-                        <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
-                        {campaignBadgeText || (campaignFestival ? `${campaignFestival.replace('_', ' ').toUpperCase()} OFFER` : "MOTHER'S DAY & FESTIVE OFFER")}
-                      </span>
+                      )}
                     </div>
 
-                    {/* Subtle bottom gradient with tag */}
-                    <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex items-center justify-between text-white pointer-events-none">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-amber-300 font-sans flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        {campaignTagText || "Exclusive Festive Edit"}
-                      </span>
-                      <span className="text-[10px] font-bold text-white uppercase tracking-wider bg-white/20 backdrop-blur-xs px-2 py-0.5 rounded font-sans flex items-center gap-0.5 group-hover:bg-[#008080] transition-colors">
-                        Shop Offer <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
+                    {/* Bottom Action Area: Clean Centered SHOP OFFER Box Button */}
+                    <div className="mt-auto flex items-center justify-center pt-2 pb-1">
+                      <span className="px-8 py-2 bg-white border border-[#CBD5E1] text-[#0F172A] font-bold text-xs uppercase tracking-widest rounded-lg shadow-sm group-hover:bg-[#008080] group-hover:text-white group-hover:border-[#008080] transition-all font-sans">
+                        SHOP OFFER
                       </span>
                     </div>
                   </Link>
@@ -1577,67 +1631,70 @@ export default function HomePage() {
         </section>
 
         {/* Section 7: FAQs & Book an Appointment (2-Column Interactive Section) */}
-        <section className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6">
+        <section id="appointment-section" className="bg-[#FAFAFA] border-b border-[#E5E7EB] py-4 md:py-6 scroll-mt-20">
           <div className="max-w-[1280px] mx-auto px-5 md:px-12">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch">
               
               {/* Left Column (7 cols): Frequently Asked Questions Accordion */}
-              <div className="lg:col-span-7 flex flex-col text-left">
-                <div className="mb-3 md:mb-4">
-                  <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
-                    Frequently Asked Questions (FAQ)
-                  </h2>
-                  <p className="text-xs md:text-sm text-[#64748B] font-sans">
-                    Have questions about quality, hallmark certification, or express delivery? Find instant answers below.
-                  </p>
-                </div>
+              <div className="lg:col-span-7 flex flex-col text-left justify-between h-full">
+                <div>
+                  <div className="mb-3 md:mb-4">
+                    <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-1">
+                      Frequently Asked Questions (FAQ)
+                    </h2>
+                    <p className="text-xs md:text-sm text-[#64748B] font-sans">
+                      Have questions about quality, hallmark certification, or express delivery? Find instant answers below.
+                    </p>
+                  </div>
 
-                <div className="space-y-2">
-                  {faqs.map((faq, index) => {
-                    const isOpen = openFaq === index;
-                    return (
-                      <div
-                        key={index}
-                        className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition-all duration-200 shadow-xs hover:border-[#008080]/50"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setOpenFaq(isOpen ? null : index)}
-                          className="w-full text-left p-3 md:p-3.5 flex items-center justify-between gap-3 cursor-pointer focus:outline-none"
-                        >
-                          <h3 className="font-serif text-sm md:text-base font-medium text-[#0F172A] m-0">
-                            {faq.q}
-                          </h3>
-                          <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#008080] text-white' : 'bg-[#FAFAFA] text-[#008080]'}`}>
-                            <span className="material-symbols-outlined text-[18px]">
-                              expand_more
-                            </span>
-                          </div>
-                        </button>
+                  <div className="space-y-2.5">
+                    {faqs.map((faq, index) => {
+                      const isOpen = openFaq === index;
+                      return (
                         <div
-                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                            isOpen ? 'max-h-60 opacity-100 px-3 md:px-3.5 pb-3.5 pt-0.5' : 'max-h-0 opacity-0 px-3 md:px-3.5'
-                          }`}
+                          key={index}
+                          className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden transition-all duration-200 shadow-xs hover:border-[#008080]/50"
                         >
-                          <p className="text-xs md:text-sm text-[#64748B] font-normal leading-relaxed border-t border-[#E5E7EB]/60 pt-2 font-sans">
-                            {faq.a}
-                          </p>
+                          <button
+                            type="button"
+                            suppressHydrationWarning
+                            onClick={() => setOpenFaq(isOpen ? null : index)}
+                            className="w-full text-left p-3.5 flex items-center justify-between gap-3 cursor-pointer focus:outline-none"
+                          >
+                            <h3 className="font-serif text-sm md:text-base font-medium text-[#0F172A] m-0">
+                              {faq.q}
+                            </h3>
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 bg-[#008080] text-white' : 'bg-[#FAFAFA] text-[#008080]'}`}>
+                              <span className="material-symbols-outlined text-[18px]">
+                                expand_more
+                              </span>
+                            </div>
+                          </button>
+                          <div
+                            className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                              isOpen ? 'max-h-60 opacity-100 px-3.5 pb-3.5 pt-0.5' : 'max-h-0 opacity-0 px-3.5'
+                            }`}
+                          >
+                            <p className="text-xs md:text-sm text-[#64748B] font-normal leading-relaxed border-t border-[#E5E7EB]/60 pt-2 font-sans">
+                              {faq.a}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
               {/* Right Column (5 cols): Sterling Silver Personalized Jewelry - Book an Appointment Form Card */}
               {showVipForm && (
-                <div className="lg:col-span-5">
-                  <div className="bg-gradient-to-b from-white via-[#FCFDFD] to-[#F4F9F8] p-5 md:p-6 rounded-2xl border-2 border-[#008080]/40 shadow-xl hover:border-[#008080] hover:shadow-2xl transition-all relative overflow-hidden">
+                <div className="lg:col-span-5 flex flex-col h-full">
+                  <div className="bg-gradient-to-b from-white via-[#FCFDFD] to-[#F4F9F8] p-4 sm:p-5 rounded-2xl border-2 border-[#008080]/40 shadow-xl hover:border-[#008080] hover:shadow-2xl transition-all relative overflow-hidden flex flex-col justify-between h-full">
                     {/* Luxury Top Accent Shimmer Bar */}
                     <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#008080] via-[#D4AF37] to-[#008080]" />
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#D4AF37]/10 via-[#008080]/5 to-transparent rounded-bl-full pointer-events-none" />
                     
-                    <div className="mb-4 pt-1">
+                    <div className="mb-2 pt-0.5">
                       <h3 className="font-serif text-lg md:text-xl font-medium text-[#0F172A] leading-snug">
                         {vipTitle || "Sterling Silver Personalized Jewelry"}
                       </h3>
@@ -1650,78 +1707,78 @@ export default function HomePage() {
                           {vipFreeTag || "✨ 100% Free"}
                         </span>
                       </div>
-
-                      <p className="text-xs text-[#64748B] font-sans mt-1 leading-relaxed">
-                        {vipSubtitle || "Connect with our master jewellery atelier for custom initials, bridal silverware, or private video consultation."}
-                      </p>
                     </div>
 
                     {appointmentSuccess && (
-                      <div className="mb-4 p-3 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-sans flex items-start gap-2 shadow-xs">
+                      <div className="mb-2.5 p-2 bg-emerald-50 border border-emerald-300 text-emerald-900 rounded-xl text-xs font-sans flex items-start gap-2 shadow-xs">
                         <span className="material-symbols-outlined text-[18px] text-emerald-600 shrink-0">check_circle</span>
                         <span className="font-medium">{appointmentSuccess}</span>
                       </div>
                     )}
 
                     {appointmentError && (
-                      <div className="mb-4 p-3 bg-red-50 border border-red-300 text-red-800 rounded-xl text-xs font-sans flex items-start gap-2 shadow-xs">
+                      <div className="mb-2.5 p-2 bg-red-50 border border-red-300 text-red-800 rounded-xl text-xs font-sans flex items-start gap-2 shadow-xs">
                         <span className="material-symbols-outlined text-[18px] text-red-500 shrink-0">error</span>
                         <span className="font-medium">{appointmentError}</span>
                       </div>
                     )}
 
-                    <form onSubmit={handleBookAppointment} className="space-y-3">
+                    <form onSubmit={handleBookAppointment} className="space-y-2 flex-1 flex flex-col justify-between" suppressHydrationWarning>
                       <div>
-                        <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans flex items-center justify-between">
+                        <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans flex items-center justify-between">
                           <span>Full Name *</span>
                           <span className="text-[10px] text-slate-400 font-normal normal-case">Required</span>
                         </label>
                         <input
                           type="text"
                           required
+                          suppressHydrationWarning
                           value={appointmentName}
                           onChange={(e) => setAppointmentName(e.target.value)}
                           placeholder="e.g. Debjani Mukherjee"
-                          className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
+                          className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
                         />
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans">
                             WhatsApp / Phone *
                           </label>
                           <input
                             type="tel"
                             required
+                            suppressHydrationWarning
                             value={appointmentPhone}
                             onChange={(e) => setAppointmentPhone(e.target.value)}
                             placeholder="+91 98765 43210"
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
+                            className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans">
                             Preferred Date
                           </label>
                           <input
                             type="date"
+                            suppressHydrationWarning
                             value={appointmentDate}
                             onChange={(e) => setAppointmentDate(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
+                            className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
                           />
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
-                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans">
                             Time Slot
                           </label>
                           <select
+                            suppressHydrationWarning
                             value={appointmentTime}
                             onChange={(e) => setAppointmentTime(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs cursor-pointer"
+                            className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs cursor-pointer"
                           >
                             <option value="11:00 AM - 01:00 PM">11:00 AM - 01:00 PM</option>
                             <option value="02:00 PM - 05:00 PM">02:00 PM - 05:00 PM</option>
@@ -1729,13 +1786,14 @@ export default function HomePage() {
                           </select>
                         </div>
                         <div>
-                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans">
+                          <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans">
                             Consultation Type
                           </label>
                           <select
+                            suppressHydrationWarning
                             value={appointmentType}
                             onChange={(e) => setAppointmentType(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs cursor-pointer"
+                            className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs cursor-pointer"
                           >
                             <option value="video_call">Live Video Call</option>
                             <option value="in_store">In-Store Atelier Visit</option>
@@ -1745,25 +1803,27 @@ export default function HomePage() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-1 font-sans">
-                          Jewelry Interest / Message
+                        <label className="block text-[11px] font-bold text-[#334155] uppercase tracking-wider mb-0.5 font-sans">
+                          Message
                         </label>
                         <input
                           type="text"
+                          suppressHydrationWarning
                           value={appointmentNotes}
                           onChange={(e) => setAppointmentNotes(e.target.value)}
                           placeholder="e.g. Personalized Silver Pendant with name engraving"
-                          className="w-full px-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
+                          className="w-full px-3 py-1.5 bg-white border border-[#CBD5E1] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:border-[#008080] focus:ring-2 focus:ring-[#008080]/15 transition-all font-sans shadow-2xs"
                         />
                       </div>
 
                       <button
                         type="submit"
+                        suppressHydrationWarning
                         disabled={appointmentLoading}
-                        className="w-full py-3 bg-gradient-to-r from-[#008080] via-[#006666] to-[#004d4d] hover:from-[#006666] hover:to-[#003333] text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] transition-all font-sans flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 mt-2"
+                        className="w-full py-2.5 bg-gradient-to-r from-[#008080] via-[#006666] to-[#004d4d] hover:from-[#006666] hover:to-[#003333] text-white font-bold uppercase tracking-widest text-xs rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] transition-all font-sans flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 mt-2"
                       >
                         <span className="material-symbols-outlined text-[18px] text-amber-300">verified</span>
-                        <span>{appointmentLoading ? 'Scheduling...' : (vipButtonText || 'Confirm VIP Appointment')}</span>
+                        <span>{appointmentLoading ? 'Scheduling...' : 'Book Now!'}</span>
                         <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
                       </button>
                     </form>
@@ -1778,42 +1838,53 @@ export default function HomePage() {
         {/* Section 8: Company Registered Address & Google Maps */}
         <section className="bg-[#FAFAFA] py-4 md:py-6 border-b border-[#E5E7EB]">
           <div className="max-w-[1280px] mx-auto px-5 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-center">
-            <div className="w-full h-[320px] md:h-[360px] bg-white border border-[#E5E7EB] rounded-2xl overflow-hidden relative shadow-lg ring-1 ring-[#B89758]/20">
+            <div className="w-full h-[320px] md:h-[360px] bg-slate-100 border border-[#E5E7EB] rounded-2xl overflow-hidden relative shadow-lg ring-1 ring-[#008080]/20 group">
               <iframe
-                title="Vanity Kolkata Location"
-                src="https://maps.google.com/maps?q=Padmini%20Apartment%2044%2F19%20Durgapur%20Lane%20Kala%20Bagan%2C%20Chetla%2C%20Kolkata%20700027&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                title="Vanity Kolkata Location Map"
+                src="https://maps.google.com/maps?q=22.5218,88.3375&hl=en&z=15&output=embed"
                 className="w-full h-full border-0"
                 allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
               />
+              
+              {/* Luxury Floating Pin Badge */}
+              <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-md border border-[#008080]/30 flex items-center gap-2.5 z-10 pointer-events-none">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#008080] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#008080]"></span>
+                </span>
+                <div>
+                  <p className="text-[11px] font-bold text-[#0F172A] font-sans">Vanity Silver Jewels</p>
+                  <p className="text-[10px] text-[#64748B] font-sans">Chetla, Kolkata 700027</p>
+                </div>
+              </div>
             </div>
             <div>
               <h2 className="font-serif text-2xl md:text-[28px] text-[#0F172A] font-normal tracking-tight mb-4">Address</h2>
               <div className="space-y-3 mb-6 text-sm">
                 <div className="flex items-start gap-3">
-                  <div className="w-7 h-7 rounded-full bg-white border border-[#B89758]/30 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="material-symbols-outlined text-[#B89758] text-[16px]">location_on</span>
+                  <div className="w-7 h-7 rounded-full bg-white border border-[#008080]/30 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="material-symbols-outlined text-[#008080] text-[16px]">location_on</span>
                   </div>
                   <p className="text-[#475569] text-xs md:text-sm leading-relaxed font-sans pt-0.5">{storeSettings.store_address || 'Padmini Apartment 44/19 Durgapur Lane Kala Bagan, Chetla, Kolkata 700027'}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-white border border-[#B89758]/30 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[#B89758] text-[16px]">schedule</span>
+                  <div className="w-7 h-7 rounded-full bg-white border border-[#008080]/30 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[#008080] text-[16px]">schedule</span>
                   </div>
                   <p className="text-[#475569] text-xs md:text-sm font-sans">Customer Support: Mon - Sat, 11:00 AM - 8:00 PM</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full bg-white border border-[#B89758]/30 flex items-center justify-center shrink-0">
-                    <span className="material-symbols-outlined text-[#B89758] text-[16px]">mark_email_read</span>
+                  <div className="w-7 h-7 rounded-full bg-white border border-[#008080]/30 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-[#008080] text-[16px]">mark_email_read</span>
                   </div>
-                  <a href="mailto:info@thevanityjewels.com" className="text-[#475569] hover:text-[#B89758] transition-colors text-xs md:text-sm font-sans">
+                  <a href="mailto:info@thevanityjewels.com" className="text-[#475569] hover:text-[#008080] transition-colors text-xs md:text-sm font-sans">
                     info@thevanityjewels.com
                   </a>
                 </div>
               </div>
               <a
-                className="border-2 border-[#0F172A] bg-[#0F172A] text-white hover:bg-transparent hover:text-[#0F172A] px-6 py-2.5 transition-all inline-block text-center w-full md:w-auto text-xs font-bold uppercase tracking-widest rounded-lg shadow-sm font-sans"
+                className="border-2 border-[#008080] bg-[#008080] text-white hover:bg-[#006666] hover:border-[#006666] px-6 py-2.5 transition-all inline-block text-center w-full md:w-auto text-xs font-bold uppercase tracking-widest rounded-lg shadow-sm font-sans cursor-pointer"
                 href={`https://maps.google.com/?q=${encodeURIComponent(storeSettings.store_address || 'Padmini Apartment 44/19 Durgapur Lane Kala Bagan, Chetla, Kolkata 700027')}`}
                 target="_blank"
                 rel="noopener noreferrer"

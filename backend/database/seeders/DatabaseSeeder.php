@@ -367,7 +367,7 @@ class DatabaseSeeder extends Seeder
         HeroSlide::firstOrCreate(
             ['headline' => 'Online jewellery shopping in Kolkata'],
             [
-                'image_path' => 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?auto=format&fit=crop&w=1920&q=85',
+                'image_path' => '/images/hero-vanity-banner.jpg',
                 'subtext' => 'Silver, brass, precious & semi-precious stone jewellery with CZ diamonds — delivered across Kolkata and West Bengal.',
                 'cta_text' => 'Shop now',
                 'cta_link' => '/shop',
@@ -378,7 +378,7 @@ class DatabaseSeeder extends Seeder
         HeroSlide::firstOrCreate(
             ['headline' => 'The Festive Edit — Now Live'],
             [
-                'image_path' => 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1920&q=85',
+                'image_path' => '/images/kolkata-howrah-jewellery-banner.jpg',
                 'subtext' => 'Discover handcrafted silver ornaments for every occasion. BIS Hallmarked 925 Sterling Silver.',
                 'cta_text' => 'Explore Collection',
                 'cta_link' => '/collections',

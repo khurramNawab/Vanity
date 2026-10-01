@@ -193,7 +193,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
           </Link>
 
           {/* Center — Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 xl:gap-7">
             {navLinks.map(link => {
               const active = getIsActive(link.href);
               return (
@@ -220,6 +220,7 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
             >
               <button
                 type="button"
+                suppressHydrationWarning
                 aria-expanded={aboutOpen}
                 aria-haspopup="true"
                 className={`font-body-md text-body-md transition-all duration-200 pb-1 flex items-center gap-1 ${
@@ -263,9 +264,38 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
           </div>
 
           {/* Right — Action Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-3.5 ml-4 md:ml-6 lg:ml-8">
+            {/* 3D Eye-Catching "Book a Free Appointment" Button */}
+            <Link
+              href="/#appointment-section"
+              className="relative group inline-flex items-center gap-1.5 px-3 py-1.5 md:px-3.5 md:py-1.5 rounded-full font-sans text-[11px] md:text-xs font-bold tracking-wider uppercase text-white bg-gradient-to-b from-[#00A896] via-[#008080] to-[#005757] border border-[#38ef7d]/40 shadow-[0_3px_0_#003838,0_5px_12px_rgba(0,128,128,0.4)] hover:shadow-[0_1.5px_0_#003838,0_3px_6px_rgba(0,128,128,0.3)] hover:translate-y-[1.5px] active:translate-y-[3px] active:shadow-none transition-all duration-150 overflow-hidden shrink-0 select-none mr-1 md:mr-2"
+              title="Book a Free VIP Consultation"
+            >
+              {/* 3D Glass Surface Highlight */}
+              <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/35 to-transparent rounded-t-full pointer-events-none" />
+              
+              {/* Animated Light Sweep Shimmer */}
+              <div className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg] -translate-x-[150%] group-hover:translate-x-[350%] transition-transform duration-1000 ease-out pointer-events-none" />
+
+              {/* Pulsing indicator & icon */}
+              <span className="relative flex items-center justify-center">
+                <span className="material-symbols-outlined text-[15px] text-[#FDE047] drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]">calendar_month</span>
+                <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-300 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400"></span>
+                </span>
+              </span>
+
+              <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.7)] font-bold text-white tracking-wide">
+                <span className="hidden sm:inline">Book a Free Appointment</span>
+                <span className="sm:hidden">Book Free</span>
+              </span>
+            </Link>
+
             {/* Mobile menu toggle */}
             <button
+              type="button"
+              suppressHydrationWarning
               className="md:hidden text-on-surface-variant hover:text-primary transition-colors focus:outline-none"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
@@ -366,6 +396,18 @@ export default function StorefrontNavbar({ activePath = '' }: { activePath?: str
                   </Link>
                 ))}
               </div>
+            </div>
+
+            {/* Mobile Appointment 3D Button */}
+            <div className="border-t border-outline-variant/10 pt-3 pb-2">
+              <Link
+                href="/#appointment-section"
+                className="w-full relative group flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-gradient-to-b from-[#00A896] via-[#008080] to-[#005757] border border-[#38ef7d]/40 shadow-[0_3px_0_#003838,0_4px_10px_rgba(0,128,128,0.3)] active:translate-y-[2px] active:shadow-none"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <span className="material-symbols-outlined text-[16px] text-[#FDE047]">calendar_month</span>
+                <span>Book a Free Appointment</span>
+              </Link>
             </div>
 
             {/* Mobile-only links */}
