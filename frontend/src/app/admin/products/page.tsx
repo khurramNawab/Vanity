@@ -290,7 +290,7 @@ export default function AdminProductsPage() {
   const [metaKeywords, setMetaKeywords] = useState('');
   const [canonicalUrl, setCanonicalUrl] = useState('');
   const [serpPreviewDevice, setSerpPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
-  const [showGuideCard, setShowGuideCard] = useState(true);
+  const [showGuideCard, setShowGuideCard] = useState(false);
 
   // Bulk Import States
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -900,22 +900,22 @@ export default function AdminProductsPage() {
       {/* Main Content */}
       <main className="p-5 md:p-12 max-w-[1600px] mx-auto space-y-8">
         {/* Admin Visual Upload & SEO Guide Card */}
-        <div className="bg-gradient-to-r from-slate-900 via-primary to-neutral-900 text-white rounded-xl p-6 shadow-md border border-slate-700 space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-white/10">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center font-bold text-lg">
+        <div className={`bg-gradient-to-r from-slate-900 via-primary to-neutral-900 text-white rounded-xl p-4 md:p-5 shadow-md border border-slate-700 transition-all ${showGuideCard ? 'space-y-4' : ''}`}>
+          <div className={`flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 ${showGuideCard ? 'pb-3 border-b border-white/10' : ''}`}>
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center font-bold text-base shrink-0">
                 📖
               </div>
-              <div>
-                <h3 className="font-bold text-base text-amber-200">Admin Guide: Single &amp; Bulk Product + SEO Upload Instructions</h3>
-                <p className="text-xs text-slate-300">Complete visual reference for adding products manually or via 16-column CSV with Google SEO metadata.</p>
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm md:text-base text-amber-200 truncate">Admin Guide: Single &amp; Bulk Product + SEO Upload</h3>
+                <p className="text-xs text-slate-300 truncate">Visual reference for manual form uploads &amp; 16-column CSV/Excel catalog imports.</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap lg:flex-nowrap items-center gap-2 shrink-0 w-full lg:w-auto">
               <button
                 type="button"
                 onClick={handleDownloadSampleExcel}
-                className="px-3.5 py-1.5 bg-emerald-500 text-white hover:bg-emerald-600 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="flex-1 lg:flex-initial px-3 py-1.5 bg-emerald-500 text-white hover:bg-emerald-600 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-sm">grid_on</span>
                 Download Excel (.xlsx)
@@ -923,7 +923,7 @@ export default function AdminProductsPage() {
               <button
                 type="button"
                 onClick={handleDownloadSampleCsv}
-                className="px-3.5 py-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="flex-1 lg:flex-initial px-3 py-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
                 Download CSV (.csv)
@@ -931,9 +931,10 @@ export default function AdminProductsPage() {
               <button
                 type="button"
                 onClick={() => setShowGuideCard(!showGuideCard)}
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-lg text-slate-200 transition-colors font-medium cursor-pointer"
+                className="flex-1 lg:flex-initial px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-lg text-slate-200 transition-colors font-semibold cursor-pointer flex items-center justify-center gap-1 whitespace-nowrap border border-white/10"
               >
-                {showGuideCard ? 'Hide Details ▲' : 'Show Details ▼'}
+                <span className="material-symbols-outlined text-sm">{showGuideCard ? 'expand_less' : 'expand_more'}</span>
+                {showGuideCard ? 'Hide Guide' : 'Show Guide'}
               </button>
             </div>
           </div>
