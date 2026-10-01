@@ -58,31 +58,31 @@ Route::get('/hero-slides', [HeroSlideController::class, 'publicIndex']);
 
 // Public Settings
 Route::get('/settings/public', function () {
-     = [
+    $keys = [
         'social_instagram', 'social_facebook', 'social_pinterest', 'social_linkedin', 'social_email', 'whatsapp_number',
         'store_address', 'contact_address', 'contact_email', 'contact_phone',
         'campaign_active_festival', 'campaign_active_text', 'campaign_active_code',
         'campaign_active_product_id', 'campaign_active_video_url', 'campaign_active_image_url',
         'campaign_show_video_card'
     ];
-     = \App\Models\Setting::whereIn('key', )->pluck('value', 'key');
+    $settings = \App\Models\Setting::whereIn('key', $keys)->pluck('value', 'key');
     
-     = ->get('campaign_active_product_id');
-     = null;
-     = null;
-    if () {
-         = \App\Models\Product::with('primaryImage')->find();
-        if () {
-             = ->primaryImage ? ->primaryImage->image_path : null;
-             = ->slug;
+    $productId = $settings->get('campaign_active_product_id');
+    $productImage = null;
+    $productSlug = null;
+    if ($productId) {
+        $product = \App\Models\Product::with('primaryImage')->find($productId);
+        if ($product) {
+            $productImage = $product->primaryImage ? $product->primaryImage->image_path : null;
+            $productSlug = $product->slug;
         }
     }
     
     return response()->json([
         'success' => true,
-        'settings' => ,
-        'campaign_product_image' => ,
-        'campaign_product_slug' => 
+        'settings' => $settings,
+        'campaign_product_image' => $productImage,
+        'campaign_product_slug' => $productSlug
     ]);
 });
 
@@ -144,20 +144,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
     Route::get('/user/orders', [CheckoutController::class, 'userOrders']);
     
-    Route::get('/user', function (Request ) {
+    Route::get('/user', function (Request $request) {
         return response()->json([
             'success' => true,
             'user' => [
-                'id' => ->user()->id,
-                'name' => ->user()->name,
-                'email' => ->user()->email,
-                'role' => ->user()->role,
-                'phone' => ->user()->phone,
-                'address_line1' => ->user()->address_line1,
-                'address_line2' => ->user()->address_line2,
-                'city' => ->user()->city,
-                'state' => ->user()->state,
-                'pincode' => ->user()->pincode,
+                'id' => $request->user()->id,
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'role' => $request->user()->role,
+                'phone' => $request->user()->phone,
+                'address_line1' => $request->user()->address_line1,
+                'address_line2' => $request->user()->address_line2,
+                'city' => $request->user()->city,
+                'state' => $request->user()->state,
+                'pincode' => $request->user()->pincode,
             ]
         ]);
     });
