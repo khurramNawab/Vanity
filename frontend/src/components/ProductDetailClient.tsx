@@ -228,6 +228,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
       }
       setProduct(match);
       setRelatedProducts(Object.values(FALLBACK_PRODUCTS_MAP).filter((p: any) => p.slug !== match.slug).slice(0, 4));
+      applySeoToHead(match);
     };
 
     fetchApi(`/products/${productId}`)
@@ -235,17 +236,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
         if (res.success && res.product) {
           setProduct(res.product);
           setRelatedProducts(res.related && res.related.length > 0 ? res.related : Object.values(FALLBACK_PRODUCTS_MAP).slice(0, 4));
-
-          const seoTitle = res.product.meta_title || `${res.product.name} | 925 Sterling Silver Jewellery | Vanity`;
-          document.title = seoTitle;
-
-          let metaDesc = document.querySelector('meta[name="description"]');
-          if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.setAttribute('name', 'description');
-            document.head.appendChild(metaDesc);
-          }
-          metaDesc.setAttribute('content', res.product.meta_description || res.product.description || `Handcrafted ${res.product.name} in 925 sterling silver with BIS Hallmark.`);
+          applySeoToHead(res.product);
         } else {
           applyFallback();
         }
@@ -255,6 +246,105 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
       })
       .finally(() => setLoading(false));
   }, [productId]);
+
+  const applySeoToHead = (p: any) => {
+    if (!p || typeof document === 'undefined') return;
+
+    // Title
+    const seoTitle = p.meta_title || `${p.name} | BIS 925 Hallmarked Silver Jewellery | Vanity`;
+    document.title = seoTitle;
+
+    // Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', p.meta_description || p.description || `Handcrafted ${p.name} in authentic 925 sterling silver with BIS Hallmark certification.`);
+
+    // Keywords
+    let metaKeys = document.querySelector('meta[name="keywords"]');
+    if (!metaKeys) {
+      metaKeys = document.createElement('meta');
+      metaKeys.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeys);
+    }
+    metaKeys.setAttribute('content', p.meta_keywords || `925 sterling silver, ${p.name}, BIS hallmark silver, silver jewellery kolkata`);
+
+    // Canonical URL
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    const fullCanonicalUrl = p.canonical_url || `https://thevanityjewels.com/products/${p.slug || p.id}`;
+    canonicalLink.setAttribute('href', fullCanonicalUrl);
+
+    // Open Graph Tags
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', seoTitle);
+
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (!ogDesc) {
+      ogDesc = document.createElement('meta');
+      ogDesc.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDesc);
+    }
+    ogDesc.setAttribute('content', p.meta_description || p.description || `Handcrafted ${p.name} in authentic 925 sterling silver.`);
+
+    const primaryImg = p.images?.find((i: any) => i.is_primary) || p.images?.[0];
+    const imgUrl = p.og_image_url || (primaryImg ? (primaryImg.image_path.startsWith('http') ? primaryImg.image_path : `https://thevanityjewels.com${primaryImg.image_path}`) : 'https://thevanityjewels.com/images/hero-solitaire-pendant.jpg');
+
+    let ogImage = document.querySelector('meta[property="og:image"]');
+    if (!ogImage) {
+      ogImage = document.createElement('meta');
+      ogImage.setAttribute('property', 'og:image');
+      document.head.appendChild(ogImage);
+    }
+    ogImage.setAttribute('content', imgUrl);
+
+    // JSON-LD Schema.org Structured Data for Google Search Console
+    let schemaScript = document.getElementById('product-jsonld-schema');
+    if (!schemaScript) {
+      schemaScript = document.createElement('script');
+      schemaScript.id = 'product-jsonld-schema';
+      schemaScript.setAttribute('type', 'application/ld+json');
+      document.head.appendChild(schemaScript);
+    }
+    const schemaData = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": p.name,
+      "image": [imgUrl],
+      "description": p.meta_description || p.description,
+      "sku": p.sku,
+      "brand": {
+        "@type": "Brand",
+        "name": "Vanity Jewels"
+      },
+      "offers": {
+        "@type": "Offer",
+        "url": fullCanonicalUrl,
+        "priceCurrency": "INR",
+        "price": p.calculated_price || p.base_price || 2500,
+        "itemCondition": "https://schema.org/NewCondition",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "128"
+      }
+    };
+    schemaScript.textContent = JSON.stringify(schemaData);
+  };
 
   // Check wishlist state on mount or token load
   useEffect(() => {

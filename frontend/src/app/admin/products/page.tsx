@@ -290,6 +290,7 @@ export default function AdminProductsPage() {
   const [metaKeywords, setMetaKeywords] = useState('');
   const [canonicalUrl, setCanonicalUrl] = useState('');
   const [serpPreviewDevice, setSerpPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [showGuideCard, setShowGuideCard] = useState(true);
 
   // Bulk Import States
   const [showBulkModal, setShowBulkModal] = useState(false);
@@ -889,6 +890,81 @@ export default function AdminProductsPage() {
 
       {/* Main Content */}
       <main className="p-5 md:p-12 max-w-[1600px] mx-auto space-y-8">
+        {/* Admin Visual Upload & SEO Guide Card */}
+        <div className="bg-gradient-to-r from-slate-900 via-primary to-neutral-900 text-white rounded-xl p-6 shadow-md border border-slate-700 space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-white/10">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center font-bold text-lg">
+                📖
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-amber-200">Admin Guide: Single &amp; Bulk Product + SEO Upload Instructions</h3>
+                <p className="text-xs text-slate-300">Complete visual reference for adding products manually or via 16-column CSV with Google SEO metadata.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadSampleCsv}
+                className="px-3.5 py-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+              >
+                <span className="material-symbols-outlined text-sm">download</span>
+                Download Sample CSV
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowGuideCard(!showGuideCard)}
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-lg text-slate-200 transition-colors font-medium"
+              >
+                {showGuideCard ? 'Hide Details ▲' : 'Show Details ▼'}
+              </button>
+            </div>
+          </div>
+
+          {showGuideCard && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2 text-xs">
+              {/* Box 1: Single Product Upload with SEO */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2 text-amber-300 font-bold uppercase tracking-wide text-[11px]">
+                  <span className="material-symbols-outlined text-sm">edit_note</span>
+                  Option 1: Single Product Upload (Form Modal)
+                </div>
+                <ol className="space-y-2 text-slate-200 list-decimal list-inside leading-relaxed">
+                  <li>Click <strong className="text-white bg-primary px-1.5 py-0.5 rounded">+ Add Product</strong> at top right.</li>
+                  <li><strong className="text-amber-200">Tab 1 (Basic Specs):</strong> Fill Name, SKU (e.g. <code className="bg-black/50 px-1 py-0.5 rounded text-amber-300 font-mono">VNT-RNG-101</code>), Category, Weight in grams, and Stock.</li>
+                  <li><strong className="text-amber-200">Tab 2 (Pricing &amp; Media):</strong> Enter Making Charge (₹), Base Price (optional override), and Primary Image URL + <code className="bg-black/50 px-1 py-0.5 rounded text-amber-300">Image Alt Text</code> for Google Images ranking.</li>
+                  <li><strong className="text-amber-200">Tab 3 (SEO &amp; SERP Preview):</strong> Fill Meta Title (50–60 chars), Meta Description (140–160 chars), and Keywords. Check the live <strong className="text-emerald-300">Desktop / Mobile Google SERP Simulator</strong> preview.</li>
+                  <li>Click <strong className="text-white bg-emerald-700 px-2 py-0.5 rounded font-medium">Add Product with SEO</strong> to save directly into DB &amp; storefront.</li>
+                </ol>
+              </div>
+
+              {/* Box 2: Bulk CSV Upload with SEO */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-4 space-y-3">
+                <div className="flex items-center gap-2 text-amber-300 font-bold uppercase tracking-wide text-[11px]">
+                  <span className="material-symbols-outlined text-sm">upload_file</span>
+                  Option 2: Bulk Upload via CSV (16 SEO Columns)
+                </div>
+                <p className="text-slate-200 leading-relaxed">
+                  Upload 100+ products at once! Download our verified sample CSV containing all 16 columns:
+                </p>
+                <div className="bg-black/60 p-2.5 rounded-lg font-mono text-[10.5px] text-amber-300 overflow-x-auto border border-white/10">
+                  sku, name, category_name, silver_purity, silver_weight, making_charge, making_charge_type, base_price, discount_percent, stock_quantity, image_url, <span className="text-emerald-300 font-bold">image_alt_text</span>, <span className="text-emerald-300 font-bold">meta_title</span>, <span className="text-emerald-300 font-bold">meta_description</span>, <span className="text-emerald-300 font-bold">meta_keywords</span>, description
+                </div>
+                <div className="flex items-center justify-between text-[11px] pt-1">
+                  <span className="text-slate-300">✓ All SEO fields dynamically indexed in Google Search Console</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowBulkModal(true)}
+                    className="text-amber-300 underline hover:text-amber-200 font-bold"
+                  >
+                    Open Bulk Import Modal →
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Products Table */}
         <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
@@ -1467,6 +1543,20 @@ export default function AdminProductsPage() {
               {/* TAB 3: Dynamic SEO Management & Live SERP Simulator */}
               {modalTab === 'seo' && (
                 <div className="space-y-6">
+                  {/* Google SEO Best Practice Checklist Banner */}
+                  <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl space-y-1.5 text-xs">
+                    <div className="flex items-center gap-2 text-emerald-800 font-bold">
+                      <span className="material-symbols-outlined text-sm text-emerald-700">task_alt</span>
+                      Google Search &amp; SERP Ranking Checklist
+                    </div>
+                    <ul className="text-emerald-900/90 list-disc list-inside space-y-1 text-[11.5px] leading-relaxed">
+                      <li><strong className="text-emerald-950">Title Tag:</strong> Keep between 50–60 characters. Format: <i>[Product Name] | [Metal Purity] | Vanity</i>.</li>
+                      <li><strong className="text-emerald-950">Meta Description:</strong> Keep between 140–160 characters. Compelling summary with target keywords.</li>
+                      <li><strong className="text-emerald-950">Image Alt-Text:</strong> Specific descriptive keyword for Google Images ranking (set in Tab 2).</li>
+                      <li><strong className="text-emerald-950">Structured Data:</strong> Automatically injected as Schema.org <code className="bg-emerald-100 text-emerald-950 px-1 py-0.5 rounded font-mono">Product</code> JSON-LD for rich snippets (price, stock, rating).</li>
+                    </ul>
+                  </div>
+
                   {/* Google SERP Live Simulator */}
                   <div className="p-4 bg-white border border-outline-variant/40 rounded-xl shadow-sm space-y-2">
                     <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20">
@@ -1492,30 +1582,68 @@ export default function AdminProductsPage() {
                       </div>
                     </div>
 
-                    {/* Google Search Card Preview */}
-                    <div className={`pt-2 ${serpPreviewDevice === 'mobile' ? 'max-w-sm' : 'max-w-xl'}`}>
-                      <div className="flex items-center gap-2 text-xs text-[#202124] mb-1">
-                        <div className="w-4 h-4 rounded-full bg-[#1A1A1A] text-[#9A7E44] flex items-center justify-center text-[10px] font-bold">V</div>
-                        <span className="text-[12px] text-[#202124] font-medium truncate">thevanityjewels.com › products › {effectiveSlug}</span>
-                      </div>
-                      <h4 className="text-[#1a0dab] hover:underline text-[18px] font-normal leading-snug cursor-pointer line-clamp-1">
-                        {effectiveTitle}
-                      </h4>
-                      <p className="text-[13px] text-[#4d5156] leading-relaxed mt-1 line-clamp-2">
-                        {effectiveDesc}
-                      </p>
-                      {/* Rich Snippet Badges */}
-                      <div className="flex items-center gap-3 text-[12px] text-[#70757a] mt-2 pt-1.5 border-t border-[#f1f3f4]">
-                        <span className="flex items-center gap-0.5 text-[#e37400]">
-                          ★ ★ ★ ★ ★ <strong className="text-[#3c4043] ml-1">4.9</strong> (128)
-                        </span>
-                        <span>·</span>
-                        <span className="font-semibold text-[#3c4043]">₹{basePrice || '2,500'}</span>
-                        <span>·</span>
-                        <span className="text-[#137333] font-medium">In stock</span>
-                        <span>·</span>
-                        <span>BIS 925 Hallmark</span>
-                      </div>
+                    {/* Google Search Card Preview (Desktop vs Mobile Realistic View) */}
+                    <div className="pt-2">
+                      {serpPreviewDevice === 'mobile' ? (
+                        /* Realistic Mobile Google Search Result Card */
+                        <div className="max-w-[350px] p-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm space-y-2 font-sans mx-auto transition-all">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-[#1A1A1A] text-[#B89758] flex items-center justify-center text-[10px] font-bold shrink-0">V</div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[12px] text-[#202124] font-semibold leading-tight truncate">Vanity Jewels</span>
+                              <span className="text-[11px] text-[#4d5156] truncate">thevanityjewels.com › products › {effectiveSlug}</span>
+                            </div>
+                          </div>
+                          <h4 className="text-[#1558d6] hover:underline text-[16px] font-medium leading-snug cursor-pointer line-clamp-2">
+                            {effectiveTitle}
+                          </h4>
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="text-[12.5px] text-[#4d5156] leading-relaxed line-clamp-3 flex-1">
+                              {effectiveDesc}
+                            </p>
+                            {imageUrl && (
+                              <img src={imageUrl} alt={imageAltText || name} className="w-16 h-16 rounded-xl object-cover shrink-0 border border-slate-100 shadow-2xs" />
+                            )}
+                          </div>
+                          {/* Rich Snippet Badges */}
+                          <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#70757a] pt-2 border-t border-slate-100 mt-1">
+                            <span className="flex items-center gap-0.5 text-[#e37400] font-medium">
+                              ★ ★ ★ ★ ★ <strong className="text-[#3c4043] ml-0.5">4.9</strong> (128)
+                            </span>
+                            <span>·</span>
+                            <span className="font-semibold text-[#202124]">₹{basePrice || '2,500'}</span>
+                            <span>·</span>
+                            <span className="text-[#137333] font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">In stock</span>
+                            <span>·</span>
+                            <span className="text-slate-600">BIS 925 Hallmark</span>
+                          </div>
+                        </div>
+                      ) : (
+                        /* Realistic Desktop Google Search Result Card */
+                        <div className="max-w-xl space-y-1 font-sans">
+                          <div className="flex items-center gap-2 text-xs text-[#202124] mb-1">
+                            <div className="w-4 h-4 rounded-full bg-[#1A1A1A] text-[#9A7E44] flex items-center justify-center text-[10px] font-bold">V</div>
+                            <span className="text-[12px] text-[#202124] font-medium truncate">thevanityjewels.com › products › {effectiveSlug}</span>
+                          </div>
+                          <h4 className="text-[#1a0dab] hover:underline text-[18px] font-normal leading-snug cursor-pointer line-clamp-1">
+                            {effectiveTitle}
+                          </h4>
+                          <p className="text-[13px] text-[#4d5156] leading-relaxed mt-1 line-clamp-2">
+                            {effectiveDesc}
+                          </p>
+                          <div className="flex items-center gap-3 text-[12px] text-[#70757a] mt-2 pt-1.5 border-t border-[#f1f3f4]">
+                            <span className="flex items-center gap-0.5 text-[#e37400]">
+                              ★ ★ ★ ★ ★ <strong className="text-[#3c4043] ml-1">4.9</strong> (128)
+                            </span>
+                            <span>·</span>
+                            <span className="font-semibold text-[#3c4043]">₹{basePrice || '2,500'}</span>
+                            <span>·</span>
+                            <span className="text-[#137333] font-medium">In stock</span>
+                            <span>·</span>
+                            <span>BIS 925 Hallmark</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
