@@ -1515,6 +1515,20 @@ export default function AdminProductsPage() {
                           }}
                         />
                       </label>
+                      {imageUrl && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageUrl('');
+                            setImageAltText('');
+                          }}
+                          className="bg-error/15 text-error hover:bg-error hover:text-white border border-error/30 px-3.5 py-2 rounded text-xs font-bold transition-all flex items-center justify-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+                          title="Delete / Remove Image"
+                        >
+                          <span className="material-symbols-outlined text-sm">delete</span>
+                          Delete Image
+                        </button>
+                      )}
                     </div>
 
                     {/* Dedicated Image Alt-Text input */}
