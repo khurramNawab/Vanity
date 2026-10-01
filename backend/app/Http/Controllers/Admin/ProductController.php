@@ -484,6 +484,34 @@ class ProductController extends Controller
     }
 
     /**
+     * Download a sample XLSX Excel file for bulk product imports.
+     */
+    public function downloadSampleExcel()
+    {
+        $path = public_path('vanity_products_import_sample.xlsx');
+        if (file_exists($path)) {
+            return response()->download($path, 'vanity_products_import_sample.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        }
+        return $this->downloadSampleCsv();
+    }
+
+    /**
+     * Download a sample XLSX Excel file for bulk product imports.
+     */
+    public function downloadSampleExcel()
+    {
+        $path = public_path('vanity_products_import_sample.xlsx');
+        if (file_exists($path)) {
+            return response()->download($path, 'vanity_products_import_sample.xlsx', [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
+        }
+        return $this->downloadSampleCsv();
+    }
+
+    /**
      * Parse XLSX file into array of rows using PHP ZipArchive & SimpleXML.
      */
     private function parseXlsxRows($filePath)

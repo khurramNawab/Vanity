@@ -95,6 +95,7 @@ Route::middleware('admin')->prefix('admin')->group(function () {
     Route::apiResource('categories', CategoryController::class);
     Route::post('/products/import', [ProductController::class, 'import']);
     Route::get('/products/sample-csv', [ProductController::class, 'downloadSampleCsv']);
+    Route::get('/products/sample-excel', [ProductController::class, 'downloadSampleExcel']);
     Route::apiResource('products', ProductController::class);
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index']);
     Route::get('/customers', [\App\Http\Controllers\Admin\CustomerController::class, 'index']);

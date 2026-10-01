@@ -315,6 +315,15 @@ export default function AdminProductsPage() {
   // Cloudinary / Image Upload States
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  const handleDownloadSampleExcel = () => {
+    const a = document.createElement('a');
+    a.href = '/vanity_products_import_sample.xlsx';
+    a.download = 'vanity_products_import_sample.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const handleDownloadSampleCsv = () => {
     const a = document.createElement('a');
     a.href = '/vanity_products_import_sample.csv';
@@ -902,19 +911,27 @@ export default function AdminProductsPage() {
                 <p className="text-xs text-slate-300">Complete visual reference for adding products manually or via 16-column CSV with Google SEO metadata.</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={handleDownloadSampleExcel}
+                className="px-3.5 py-1.5 bg-emerald-500 text-white hover:bg-emerald-600 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-sm">grid_on</span>
+                Download Excel (.xlsx)
+              </button>
               <button
                 type="button"
                 onClick={handleDownloadSampleCsv}
-                className="px-3.5 py-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3.5 py-1.5 bg-amber-400 text-black hover:bg-amber-300 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <span className="material-symbols-outlined text-sm">download</span>
-                Download Sample CSV
+                Download CSV (.csv)
               </button>
               <button
                 type="button"
                 onClick={() => setShowGuideCard(!showGuideCard)}
-                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-lg text-slate-200 transition-colors font-medium"
+                className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-xs rounded-lg text-slate-200 transition-colors font-medium cursor-pointer"
               >
                 {showGuideCard ? 'Hide Details ▲' : 'Show Details ▼'}
               </button>
@@ -1843,14 +1860,24 @@ export default function AdminProductsPage() {
                       </h4>
                       <p className="text-xs text-on-surface-variant mt-0.5">Download our verified sample template with complete SEO columns.</p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleDownloadSampleCsv}
-                      className="bg-primary text-on-primary hover:bg-inverse-surface px-4 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0"
-                    >
-                      <span className="material-symbols-outlined text-sm">download</span>
-                      Download Sample CSV
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleDownloadSampleExcel}
+                        className="bg-emerald-700 text-white hover:bg-emerald-800 px-3.5 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <span className="material-symbols-outlined text-sm">grid_on</span>
+                        Download Sample Excel (.xlsx)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleDownloadSampleCsv}
+                        className="bg-primary text-on-primary hover:bg-inverse-surface px-3.5 py-2 rounded text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-sm"
+                      >
+                        <span className="material-symbols-outlined text-sm">download</span>
+                        Download Sample CSV (.csv)
+                      </button>
+                    </div>
                   </div>
 
                   <div className="overflow-x-auto text-xs">
