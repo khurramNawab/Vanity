@@ -282,6 +282,7 @@ export default function AdminProductsPage() {
   const [discountPercent, setDiscountPercent] = useState('0');
   const [imageUrl, setImageUrl] = useState('');
   const [imageAltText, setImageAltText] = useState('');
+  const [editingProductImages, setEditingProductImages] = useState<ProductImage[]>([]);
 
   // Form States - SEO Engine
   const [slug, setSlug] = useState('');
@@ -1546,12 +1547,26 @@ export default function AdminProductsPage() {
                     </div>
 
                     {imageUrl && (
-                      <div className="mt-2 flex items-center gap-3 p-2 bg-surface rounded border border-outline-variant/30">
-                        <img src={imageUrl} alt={imageAltText || name} className="w-14 h-14 object-cover rounded border border-outline-variant/30" />
-                        <div className="overflow-hidden">
-                          <p className="text-xs font-medium text-primary truncate">{imageAltText || 'No Alt Text set yet'}</p>
-                          <span className="text-[11px] text-on-surface-variant truncate font-mono block">{imageUrl}</span>
+                      <div className="mt-2 flex items-center justify-between gap-3 p-2.5 bg-surface rounded-lg border border-outline-variant/30">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <img src={imageUrl} alt={imageAltText || name} className="w-14 h-14 object-cover rounded border border-outline-variant/30 shrink-0" />
+                          <div className="overflow-hidden">
+                            <p className="text-xs font-semibold text-primary truncate">{imageAltText || 'No Alt Text set yet'}</p>
+                            <span className="text-[11px] text-on-surface-variant truncate font-mono block">{imageUrl}</span>
+                          </div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setImageUrl('');
+                            setImageAltText('');
+                          }}
+                          className="px-3 py-1.5 bg-error/10 text-error hover:bg-error hover:text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+                          title="Delete / Remove image from product form"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
+                          Delete Image
+                        </button>
                       </div>
                     )}
                   </div>
