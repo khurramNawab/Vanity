@@ -282,7 +282,8 @@ export default function AdminProductsPage() {
   const [discountPercent, setDiscountPercent] = useState('0');
   const [imageUrl, setImageUrl] = useState('');
   const [imageAltText, setImageAltText] = useState('');
-  const [editingProductImages, setEditingProductImages] = useState<ProductImage[]>([]);
+  const [galleryImages, setGalleryImages] = useState<Array<{ id?: number; url: string; alt_text: string; is_primary: boolean }>>([]);
+  const [newGalleryUrl, setNewGalleryUrl] = useState('');
 
   // Form States - SEO Engine
   const [slug, setSlug] = useState('');
@@ -395,6 +396,110 @@ export default function AdminProductsPage() {
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  const handleUploadGalleryPhotos = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+    setUploadingImage(true);
+
+    try {
+      const formData = new FormData();
+      fileArray.forEach(file => {
+        formData.append('images[]', file);
+      });
+
+      let res = await fetchApi('/admin/products/bulk-upload-images', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.success) {
+        res = await fetchApi('/products/bulk-upload-images', {
+          method: 'POST',
+          body: formData,
+        });
+      }
+
+      if (res.success && res.images && res.images.length > 0) {
+        const uploadedItems = res.images.map((img: any) => ({
+          url: img.url,
+          alt_text: `${name || 'Jewellery'} - Angle Photo`,
+          is_primary: false
+        }));
+
+        if (!imageUrl && uploadedItems.length > 0) {
+          setImageUrl(uploadedItems[0].url);
+          setImageAltText(uploadedItems[0].alt_text);
+          setGalleryImages(prev => [...prev, ...uploadedItems.slice(1)]);
+        } else {
+          setGalleryImages(prev => [...prev, ...uploadedItems]);
+        }
+        alert(`✓ ${uploadedItems.length} product gallery photo(s) uploaded!`);
+      } else {
+        fileArray.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const url = e.target?.result as string;
+            setGalleryImages(prev => [...prev, {
+              url,
+              alt_text: `${name || 'Jewellery'} - Angle Photo`,
+              is_primary: false
+            }]);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+    } catch (err: any) {
+      console.error('Error uploading gallery photos:', err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleAddGalleryUrl = () => {
+    const trimmed = newGalleryUrl.trim();
+    if (!trimmed) return;
+    if (!imageUrl) {
+      setImageUrl(trimmed);
+      setImageAltText(`${name || 'Jewellery'} - Primary View`);
+    } else {
+      setGalleryImages(prev => [...prev, {
+        url: trimmed,
+        alt_text: `${name || 'Jewellery'} - Angle Photo ${prev.length + 2}`,
+        is_primary: false
+      }]);
+    }
+    setNewGalleryUrl('');
+  };
+
+  const handleRemoveGalleryImage = async (index: number, imageId?: number) => {
+    if (imageId) {
+      try {
+        await fetchApi(`/admin/products/images/${imageId}`, { method: 'DELETE' });
+      } catch (e) {
+        console.warn('API image delete warning:', e);
+      }
+    }
+    setGalleryImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSetAsPrimary = (index: number) => {
+    const target = galleryImages[index];
+    if (!target) return;
+
+    const oldPrimaryUrl = imageUrl;
+    const oldPrimaryAlt = imageAltText;
+
+    setImageUrl(target.url);
+    setImageAltText(target.alt_text || `${name || 'Jewellery'} - Primary View`);
+
+    const updated = galleryImages.filter((_, i) => i !== index);
+    if (oldPrimaryUrl) {
+      updated.push({ url: oldPrimaryUrl, alt_text: oldPrimaryAlt || `${name || 'Jewellery'} - Angle View`, is_primary: false });
+    }
+
+    setGalleryImages(updated);
   };
 
   const handleBulkUploadImages = async (e: React.FormEvent) => {
@@ -588,6 +693,8 @@ export default function AdminProductsPage() {
     setOccasion('everyday');
     setImageUrl('');
     setImageAltText('');
+    setGalleryImages([]);
+    setNewGalleryUrl('');
     setSlug('');
     setMetaTitle('');
     setMetaDescription('');
@@ -692,8 +799,24 @@ export default function AdminProductsPage() {
     setIsNewArrival(product.is_new_arrival);
     setStatus(product.status);
     setOccasion(product.occasion || 'everyday');
-    setImageUrl(product.images?.[0]?.image_path || '');
-    setImageAltText(product.images?.[0]?.alt_text || '');
+
+    const imgs = product.images || [];
+    if (imgs.length > 0) {
+      const primary = imgs.find(i => i.is_primary) || imgs[0];
+      setImageUrl(primary.image_path || '');
+      setImageAltText(primary.alt_text || '');
+      setGalleryImages(imgs.filter(i => i.id !== primary.id).map(i => ({
+        id: i.id,
+        url: i.image_path,
+        alt_text: i.alt_text || '',
+        is_primary: false
+      })));
+    } else {
+      setImageUrl('');
+      setImageAltText('');
+      setGalleryImages([]);
+    }
+
     setSlug(product.slug || '');
     setMetaTitle(product.meta_title || '');
     setMetaDescription(product.meta_description || '');
@@ -738,6 +861,22 @@ export default function AdminProductsPage() {
     const safeStock = stock && !isNaN(parseInt(stock)) ? Math.max(0, parseInt(stock)) : 0;
     const safeDiscount = discountPercent && !isNaN(parseFloat(discountPercent)) ? Math.min(100, Math.max(0, parseFloat(discountPercent))) : 0;
 
+    const combinedUrls: string[] = [];
+    const combinedAltTexts: string[] = [];
+
+    if (imageUrl && imageUrl.trim()) {
+      combinedUrls.push(imageUrl.trim());
+      combinedAltTexts.push(imageAltText.trim() || `${name} - Primary View`);
+    }
+
+    galleryImages.forEach(g => {
+      const u = g.url.trim();
+      if (u && !combinedUrls.includes(u)) {
+        combinedUrls.push(u);
+        combinedAltTexts.push(g.alt_text.trim() || `${name} - Angle Photo`);
+      }
+    });
+
     const payload = {
       sku: sku.trim(),
       name: name.trim(),
@@ -760,7 +899,8 @@ export default function AdminProductsPage() {
       is_new_arrival: Boolean(isNewArrival),
       status: status || 'active',
       occasion: occasion || 'everyday',
-      image_urls: imageUrl ? [imageUrl.trim()] : [],
+      image_urls: combinedUrls,
+      image_alt_texts: combinedAltTexts,
       image_alt_text: imageAltText ? imageAltText.trim() : undefined,
     };
 
@@ -1582,6 +1722,112 @@ export default function AdminProductsPage() {
                           Delete Image
                         </button>
                       </div>
+                    )}
+                  </div>
+
+                  {/* Product Multi-Angle Photo Gallery Section */}
+                  <div className="p-4 bg-surface-container-low border border-outline-variant/30 rounded-lg space-y-4">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-outline-variant/20">
+                      <div>
+                        <label className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-secondary text-base">collections</span>
+                          Product Multi-Angle Gallery Photos ({1 + galleryImages.length})
+                        </label>
+                        <p className="text-[11px] text-on-surface-variant">Upload multiple photos (Front, Side view, Model worn shot, BIS Hallmark close-up) for full 360° view.</p>
+                      </div>
+                      
+                      <label className="cursor-pointer bg-primary text-on-primary hover:bg-inverse-surface px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 shrink-0 shadow-xs">
+                        <span className="material-symbols-outlined text-sm">add_photo_alternate</span>
+                        {uploadingImage ? 'Uploading Photos...' : '+ Upload Gallery Photos'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          disabled={uploadingImage}
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files.length > 0) {
+                              handleUploadGalleryPhotos(e.target.files);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Quick Add Gallery Image URL Input */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="url"
+                        className="flex-1 border border-outline-variant/50 rounded px-3 py-1.5 text-xs focus:outline-none focus:border-primary bg-surface-container-lowest font-mono"
+                        value={newGalleryUrl}
+                        onChange={(e) => setNewGalleryUrl(e.target.value)}
+                        placeholder="Or paste extra angle photo URL (e.g. side-view.jpg)..."
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleAddGalleryUrl();
+                          }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddGalleryUrl}
+                        disabled={!newGalleryUrl.trim()}
+                        className="bg-secondary text-on-secondary hover:bg-primary px-3.5 py-1.5 rounded text-xs font-semibold transition-colors disabled:opacity-40 whitespace-nowrap cursor-pointer"
+                      >
+                        + Add Photo URL
+                      </button>
+                    </div>
+
+                    {/* Gallery Photos Cards List */}
+                    {galleryImages.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                        {galleryImages.map((img, idx) => (
+                          <div key={idx} className="p-2.5 bg-surface border border-outline-variant/30 rounded-lg space-y-2 relative group hover:border-primary/50 transition-colors">
+                            <div className="flex items-center gap-3">
+                              <img src={img.url} alt={img.alt_text} className="w-14 h-14 object-cover rounded border border-outline-variant/30 shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-1 mb-1">
+                                  <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">Angle View #{idx + 2}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSetAsPrimary(idx)}
+                                    className="text-[10px] font-bold text-primary hover:underline"
+                                  >
+                                    ★ Make Main
+                                  </button>
+                                </div>
+                                <input
+                                  type="text"
+                                  className="w-full border border-outline-variant/40 rounded px-2 py-1 text-[11px] bg-surface-container-lowest focus:outline-none focus:border-primary"
+                                  value={img.alt_text}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setGalleryImages(prev => {
+                                      const copy = [...prev];
+                                      copy[idx].alt_text = val;
+                                      return copy;
+                                    });
+                                  }}
+                                  placeholder="SEO Alt-Text (e.g. Side angle photo)"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveGalleryImage(idx, img.id)}
+                                className="p-1.5 text-error hover:bg-error/10 rounded-lg transition-colors shrink-0"
+                                title="Delete this angle photo"
+                              >
+                                <span className="material-symbols-outlined text-[18px]">delete</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-on-surface-variant italic pt-1">
+                        No extra angle photos added yet. Click &quot;+ Upload Gallery Photos&quot; to add side view, back view, or worn model photos!
+                      </p>
                     )}
                   </div>
                 </div>

@@ -189,6 +189,43 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Zoom & Lightbox States
+  const [isHoveredZoom, setIsHoveredZoom] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [showLightbox, setShowLightbox] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxScale, setLightboxScale] = useState(1);
+  const [lightboxPan, setLightboxPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setZoomPos({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  };
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setLightboxScale(1);
+    setLightboxPan({ x: 0, y: 0 });
+    setShowLightbox(true);
+  };
+
+  const handleZoomIn = () => setLightboxScale(s => Math.min(s + 0.5, 4));
+  const handleZoomOut = () => {
+    setLightboxScale(s => {
+      const next = Math.max(s - 0.5, 1);
+      if (next === 1) setLightboxPan({ x: 0, y: 0 });
+      return next;
+    });
+  };
+  const handleResetZoom = () => {
+    setLightboxScale(1);
+    setLightboxPan({ x: 0, y: 0 });
+  };
+
   const productId = initialId || (params?.id ? (Array.isArray(params.id) ? params.id[0] : params.id) : '1');
 
   useEffect(() => {
@@ -424,13 +461,16 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
   const priceText = `₹${Number(product.calculated_price).toLocaleString('en-IN')}`;
   const basePriceText = `₹${(Number(product.calculated_price) * 1.25).toLocaleString('en-IN')}`;
 
-  // Build image thumbnails array
-  const productThumbnails = [
-    imgUrl,
-    'https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1630019852942-f89202989a59?auto=format&fit=crop&w=600&q=80',
-    'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
-  ];
+  // Build image thumbnails array dynamically from product images
+  const productThumbnails = (product.images && product.images.length > 0)
+    ? product.images.map((img: any) => ({
+        url: img.image_path,
+        alt: img.alt_text || product.name || 'Vanity 925 Silver Jewellery'
+      }))
+    : [{ url: imgUrl, alt: effectiveAlt }];
+
+  const activeThumbIndex = selectedThumb < productThumbnails.length ? selectedThumb : 0;
+  const activeImage = productThumbnails[activeThumbIndex] || productThumbnails[0];
 
   // Google Rich Snippets JSON-LD Structured Data
   const jsonLdSchema = {
@@ -500,31 +540,55 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
           <div className="lg:col-span-7 flex flex-col md:flex-row gap-4">
             {/* Thumbnail strip */}
             <div className="flex md:flex-col gap-3 order-2 md:order-1 overflow-x-auto md:overflow-visible pb-2 md:pb-0">
-              {productThumbnails.map((src, i) => (
+              {productThumbnails.map((item: any, i: number) => (
                 <button
                   key={i}
                   onClick={() => setSelectedThumb(i)}
-                  className={`w-20 h-24 flex-shrink-0 border transition-all bg-surface-container-low ${
-                    selectedThumb === i ? 'border-primary' : 'border-outline-variant/20 opacity-60 hover:opacity-100'
+                  className={`w-20 h-24 flex-shrink-0 border transition-all bg-surface-container-low overflow-hidden rounded ${
+                    activeThumbIndex === i ? 'border-primary ring-1 ring-primary' : 'border-outline-variant/20 opacity-60 hover:opacity-100'
                   }`}
                 >
-                  <img src={src} alt={`${effectiveAlt} view ${i + 1}`} className="w-full h-full object-cover" />
+                  <img src={item.url} alt={item.alt} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
 
-            {/* Main image */}
-            <div className="flex-grow order-1 md:order-2 bg-surface-container-lowest border border-outline-variant/20 relative group">
+            {/* Main image with Magnifier Zoom */}
+            <div
+              className="flex-grow order-1 md:order-2 bg-surface-container-lowest border border-outline-variant/20 relative group overflow-hidden cursor-zoom-in rounded"
+              onMouseEnter={() => setIsHoveredZoom(true)}
+              onMouseLeave={() => setIsHoveredZoom(false)}
+              onMouseMove={handleMouseMove}
+              onClick={() => openLightbox(activeThumbIndex)}
+            >
               <img
-                src={productThumbnails[selectedThumb]}
-                alt={effectiveAlt}
-                className="w-full aspect-[4/5] object-cover object-center"
+                src={activeImage.url}
+                alt={activeImage.alt}
+                className={`w-full aspect-[4/5] object-cover object-center transition-opacity duration-200 ${isHoveredZoom ? 'opacity-0 md:opacity-0' : 'opacity-100'}`}
               />
-              <div className="absolute top-4 left-4 flex flex-col gap-2">
+
+              {/* Live Desktop Magnifier Zoom Lens */}
+              {isHoveredZoom && (
+                <div
+                  className="hidden md:block absolute inset-0 w-full h-full pointer-events-none bg-no-repeat"
+                  style={{
+                    backgroundImage: `url(${activeImage.url})`,
+                    backgroundPosition: `${zoomPos.x}% ${zoomPos.y}%`,
+                    backgroundSize: '250%'
+                  }}
+                />
+              )}
+
+              <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
                 <span className="bg-[#6B1111] text-white font-label-upper text-[10px] px-2 py-1 uppercase tracking-wider">Sale</span>
                 {product.is_new_arrival && (
                   <span className="bg-surface-container-high text-on-surface font-label-upper text-[10px] px-2 py-1 uppercase tracking-wider border border-outline-variant">New</span>
                 )}
+              </div>
+
+              <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-[11px] font-medium flex items-center gap-1.5 opacity-90 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                <span className="material-symbols-outlined text-sm">zoom_in</span>
+                <span>Hover to Zoom &bull; Click to Expand</span>
               </div>
             </div>
           </div>
@@ -641,6 +705,143 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
           </section>
         )}
       </main>
+
+      {/* Fullscreen HD Lightbox Zoom Modal */}
+      {showLightbox && (
+        <div 
+          className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-lg flex flex-col justify-between p-4 md:p-8 select-none"
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowLightbox(false);
+            if (e.key === 'ArrowRight') setLightboxIndex(i => (i + 1) % productThumbnails.length);
+            if (e.key === 'ArrowLeft') setLightboxIndex(i => (i - 1 + productThumbnails.length) % productThumbnails.length);
+          }}
+          tabIndex={0}
+        >
+          {/* Lightbox Header Bar */}
+          <div className="flex items-center justify-between z-20">
+            <div className="text-white text-xs md:text-sm font-medium flex items-center gap-2">
+              <span className="font-serif italic text-amber-200/90">{product.name}</span>
+              <span className="text-white/40">|</span>
+              <span className="text-white/70">View {lightboxIndex + 1} of {productThumbnails.length}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {/* Zoom Controls */}
+              <div className="flex items-center bg-white/10 rounded-full border border-white/20 p-1">
+                <button
+                  onClick={handleZoomOut}
+                  disabled={lightboxScale <= 1}
+                  className="p-1.5 text-white hover:text-amber-200 disabled:opacity-30 rounded-full transition"
+                  title="Zoom Out (-)"
+                >
+                  <span className="material-symbols-outlined text-lg">zoom_out</span>
+                </button>
+                <span className="px-2 text-xs font-mono text-white/80">{Math.round(lightboxScale * 100)}%</span>
+                <button
+                  onClick={handleZoomIn}
+                  disabled={lightboxScale >= 4}
+                  className="p-1.5 text-white hover:text-amber-200 disabled:opacity-30 rounded-full transition"
+                  title="Zoom In (+)"
+                >
+                  <span className="material-symbols-outlined text-lg">zoom_in</span>
+                </button>
+                {lightboxScale > 1 && (
+                  <button
+                    onClick={handleResetZoom}
+                    className="ml-1 text-[10px] px-2 py-0.5 bg-white/20 hover:bg-white/30 text-white rounded uppercase tracking-wider"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
+
+              {/* Close Modal Button */}
+              <button
+                onClick={() => setShowLightbox(false)}
+                className="p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition ml-2 border border-white/20"
+                title="Close (Esc)"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Lightbox Main Image Area with Pan & Drag */}
+          <div 
+            className="relative flex-grow flex items-center justify-center overflow-hidden my-4 cursor-grab active:cursor-grabbing"
+            onMouseDown={(e) => {
+              if (lightboxScale > 1) {
+                setIsDragging(true);
+                setDragStart({ x: e.clientX - lightboxPan.x, y: e.clientY - lightboxPan.y });
+              }
+            }}
+            onMouseMove={(e) => {
+              if (isDragging && lightboxScale > 1) {
+                setLightboxPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+              }
+            }}
+            onMouseUp={() => setIsDragging(false)}
+            onMouseLeave={() => setIsDragging(false)}
+          >
+            {/* Prev Navigation Button */}
+            {productThumbnails.length > 1 && (
+              <button
+                onClick={() => {
+                  setLightboxIndex(i => (i - 1 + productThumbnails.length) % productThumbnails.length);
+                  handleResetZoom();
+                }}
+                className="absolute left-2 md:left-6 z-20 p-3 bg-black/60 hover:bg-white/20 text-white rounded-full border border-white/20 transition"
+                title="Previous Image"
+              >
+                <span className="material-symbols-outlined text-2xl">chevron_left</span>
+              </button>
+            )}
+
+            {/* Main Lightbox Display Image */}
+            <img
+              src={productThumbnails[lightboxIndex]?.url}
+              alt={productThumbnails[lightboxIndex]?.alt}
+              className="max-h-[78vh] max-w-[90vw] object-contain transition-transform duration-100 ease-out"
+              style={{
+                transform: `scale(${lightboxScale}) translate(${lightboxPan.x / lightboxScale}px, ${lightboxPan.y / lightboxScale}px)`
+              }}
+              draggable={false}
+            />
+
+            {/* Next Navigation Button */}
+            {productThumbnails.length > 1 && (
+              <button
+                onClick={() => {
+                  setLightboxIndex(i => (i + 1) % productThumbnails.length);
+                  handleResetZoom();
+                }}
+                className="absolute right-2 md:right-6 z-20 p-3 bg-black/60 hover:bg-white/20 text-white rounded-full border border-white/20 transition"
+                title="Next Image"
+              >
+                <span className="material-symbols-outlined text-2xl">chevron_right</span>
+              </button>
+            )}
+          </div>
+
+          {/* Lightbox Bottom Thumbnail Bar */}
+          <div className="z-20 flex justify-center items-center gap-3 overflow-x-auto py-2">
+            {productThumbnails.map((thumb: any, idx: number) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setLightboxIndex(idx);
+                  handleResetZoom();
+                }}
+                className={`w-14 h-16 rounded border transition-all overflow-hidden flex-shrink-0 ${
+                  lightboxIndex === idx ? 'border-amber-400 scale-105 ring-2 ring-amber-400/50' : 'border-white/30 opacity-50 hover:opacity-100'
+                }`}
+              >
+                <img src={thumb.url} alt={thumb.alt} className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <StorefrontFooter />
     </div>
