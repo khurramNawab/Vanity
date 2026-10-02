@@ -961,85 +961,116 @@ export default function AdminProductsPage() {
   return (
     <div className="bg-surface min-h-screen">
       {/* Sticky Top Action Bar */}
-      <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-outline-variant/30 px-5 md:px-12 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur-sm border-b border-outline-variant/30 px-5 md:px-12 py-3.5 flex flex-wrap justify-between items-center gap-4">
         <div>
-          <h2 className="font-headline-lg text-headline-lg font-bold text-primary">Products</h2>
-          <p className="text-on-surface-variant text-sm mt-1">Manage catalog and customize SEO metadata per item</p>
+          <div className="flex items-center gap-3">
+            <h2 className="font-headline-lg text-headline-lg font-bold text-primary">Products</h2>
+            <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full border border-primary/20">
+              {products.length} Items
+            </span>
+          </div>
+          <p className="text-on-surface-variant text-xs md:text-sm mt-0.5">Manage catalog and customize SEO metadata per item</p>
         </div>
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-          {/* Search */}
-          <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-64">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-xl">search</span>
-            <input
-              className="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant/50 rounded text-sm focus:ring-1 focus:ring-primary focus:border-primary transition-all"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              type="text"
-            />
-          </form>
-          {/* Category filter */}
-          <select
-            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-outline-variant/50 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors text-sm font-medium"
-            value={selectedCategory}
-            onChange={(e) => {
-              setSelectedCategory(e.target.value);
-              setCurrentPage(1);
-            }}
+
+        {/* Top Right Primary Action Buttons — Highly visible, shrink-0 */}
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0 ml-auto">
+          {/* Add Product Button (PRIMARY HIGH-VISIBILITY BUTTON) */}
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center justify-center gap-2 px-4 py-2 bg-[#6B1111] hover:bg-[#801414] text-white rounded-lg font-label-upper text-xs font-bold shadow-md transition-all cursor-pointer ring-2 ring-[#6B1111]/30"
           >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          {/* Occasion filter */}
-          <select
-            className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border border-outline-variant/50 rounded bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors text-sm font-medium"
-            value={selectedOccasionFilter}
-            onChange={(e) => {
-              setSelectedOccasionFilter(e.target.value);
-              setCurrentPage(1);
-            }}
+            <span className="material-symbols-outlined text-base">add_circle</span>
+            <span>+ Add Product</span>
+          </button>
+
+          {/* Bulk Import Button */}
+          <button
+            onClick={() => setShowBulkModal(true)}
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2 border border-secondary text-secondary hover:bg-secondary/10 rounded-lg font-label-upper text-xs font-semibold transition-all cursor-pointer bg-surface"
           >
-            <option value="">All Occasions</option>
-            <option value="festive">Festive Shopping</option>
-            <option value="wedding">Wedding Season</option>
-            <option value="everyday">Everyday Elegance</option>
-            <option value="gifting">Gifting</option>
-            <option value="party">Party & Galas</option>
-            <option value="puja">Puja & Devotional</option>
-          </select>
+            <span className="material-symbols-outlined text-sm">upload_file</span>
+            <span>Bulk CSV</span>
+          </button>
+
           {/* Sync Catalog Button */}
           <button
             onClick={handleSeedCatalog}
             type="button"
-            className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 rounded text-xs font-semibold tracking-wider uppercase transition-colors shadow-sm"
-            title="Populate and refresh default luxury jewellory catalog"
+            className="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-50 text-emerald-800 border border-emerald-300 hover:bg-emerald-100 rounded-lg text-xs font-semibold tracking-wider uppercase transition-colors shadow-xs cursor-pointer"
+            title="Populate and refresh default luxury jewellery catalog"
           >
             <span className="material-symbols-outlined text-base">sync</span>
-            SYNC CATALOG
-          </button>
-          {/* Bulk Import Button */}
-          <button
-            onClick={() => setShowBulkModal(true)}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-secondary text-secondary hover:bg-secondary/10 rounded font-label-upper text-label-upper text-xs transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">upload_file</span>
-            Bulk CSV
-          </button>
-          {/* Add Product Button */}
-          <button
-            onClick={handleOpenCreate}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-on-primary hover:bg-inverse-surface rounded font-label-upper text-label-upper text-xs transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">add</span>
-            Add Product
+            <span>Sync Catalog</span>
           </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="p-5 md:p-12 max-w-[1600px] mx-auto space-y-8">
+      <main className="p-5 md:p-12 max-w-[1600px] mx-auto space-y-6">
+        {/* Dedicated Search & Filter Toolbar */}
+        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto flex-grow">
+            {/* Search */}
+            <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-72">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-lg">search</span>
+              <input
+                className="w-full pl-9 pr-4 py-2 bg-surface border border-outline-variant/50 rounded-lg text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Search products by name, SKU..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                type="text"
+              />
+            </form>
+
+            {/* Category filter */}
+            <select
+              className="w-full sm:w-auto px-3.5 py-2 border border-outline-variant/50 rounded-lg bg-surface text-on-surface hover:bg-surface-container-low transition-colors text-xs font-medium"
+              value={selectedCategory}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">All Categories</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+
+            {/* Occasion filter */}
+            <select
+              className="w-full sm:w-auto px-3.5 py-2 border border-outline-variant/50 rounded-lg bg-surface text-on-surface hover:bg-surface-container-low transition-colors text-xs font-medium"
+              value={selectedOccasionFilter}
+              onChange={(e) => {
+                setSelectedOccasionFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+            >
+              <option value="">All Occasions</option>
+              <option value="festive">Festive Shopping</option>
+              <option value="wedding">Wedding Season</option>
+              <option value="everyday">Everyday Elegance</option>
+              <option value="gifting">Gifting</option>
+              <option value="party">Party & Galas</option>
+              <option value="puja">Puja & Devotional</option>
+            </select>
+          </div>
+
+          {(searchTerm || selectedCategory || selectedOccasionFilter) && (
+            <button
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedCategory('');
+                setSelectedOccasionFilter('');
+                setCurrentPage(1);
+              }}
+              className="text-xs text-secondary hover:underline font-semibold flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-sm">filter_alt_off</span>
+              Clear Filters
+            </button>
+          )}
+        </div>
         {/* Admin Visual Upload & SEO Guide Card */}
         <div className={`bg-gradient-to-r from-slate-900 via-primary to-neutral-900 text-white rounded-xl p-4 md:p-5 shadow-md border border-slate-700 transition-all ${showGuideCard ? 'space-y-4' : ''}`}>
           <div className={`flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 ${showGuideCard ? 'pb-3 border-b border-white/10' : ''}`}>
@@ -1126,6 +1157,19 @@ export default function AdminProductsPage() {
 
         {/* Products Table */}
         <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-3.5 border-b border-outline-variant/30 flex flex-wrap items-center justify-between gap-3 bg-surface-container-low/40">
+            <div>
+              <h3 className="font-bold text-primary text-base">Product Directory</h3>
+              <p className="text-xs text-on-surface-variant">Showing {products.length} products</p>
+            </div>
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#6B1111] hover:bg-[#801414] text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-sm">add_circle</span>
+              <span>+ Add New Product</span>
+            </button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
