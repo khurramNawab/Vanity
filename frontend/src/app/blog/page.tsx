@@ -45,7 +45,7 @@ export default function BlogListPage() {
             The Vanity Silver Journal
           </h1>
           <p className="text-on-surface-variant text-sm md:text-base leading-relaxed">
-            Expert insights on 925 sterling silver purity, BIS hallmarking standards, Kolkata artisan craftsmanship, live market pricing, and styling guides.
+            Expert insights on 925 sterling silver purity, Kolkata artisan craftsmanship, live market pricing, and styling guides.
           </p>
         </div>
 

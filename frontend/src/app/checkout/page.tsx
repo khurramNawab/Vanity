@@ -529,7 +529,7 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-center p-3 bg-surface border border-[#9A7E44]/20 rounded">
                 <span className="material-symbols-outlined text-[#9A7E44] mr-2">verified</span>
                 <span className="text-[10px] font-semibold text-[#9A7E44] tracking-wider uppercase">
-                  BIS HALLMARKED EXCELLENCE GUARANTEED
+                  925 STERLING SILVER EXCELLENCE GUARANTEED
                 </span>
               </div>
             </div>

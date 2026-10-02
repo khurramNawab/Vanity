@@ -44,7 +44,7 @@ const FALLBACK_JODHPUR_PRODUCTS: Product[] = [
     id: 902,
     name: 'Marwar Heritage Antique Silver Jhumkas',
     slug: 'marwar-heritage-antique-silver-jhumkas',
-    description: 'Traditional Jodhpur double-dome silver jhumkas with hanging micro-pearl droplets and hand-engraved floral motifs. 100% BIS Hallmarked 925 Sterling Silver.',
+    description: 'Traditional Jodhpur double-dome silver jhumkas with hanging micro-pearl droplets and hand-engraved floral motifs. 100% 925 Sterling Silver.',
     silver_purity: '925',
     calculated_price: 5999,
     base_price: 7200,
@@ -89,7 +89,7 @@ const FALLBACK_JODHPUR_PRODUCTS: Product[] = [
     id: 905,
     name: 'Jodhpuri Royal Hasli Silver Collar Choker',
     slug: 'jodhpuri-royal-hasli-silver-choker',
-    description: 'Rigid torque style silver choker handcrafted with repousse peacock carvings and ruby-accented center floral medallion. BIS Hallmarked.',
+    description: 'Rigid torque style silver choker handcrafted with repousse peacock carvings and ruby-accented center floral medallion. 925 Sterling Silver.',
     silver_purity: '925',
     calculated_price: 14999,
     base_price: 17500,
@@ -241,7 +241,7 @@ export default function JodhpurJewelleryPage() {
             <div className="flex flex-wrap items-center gap-4 mt-6 text-xs text-teal-100 font-sans">
               <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/10">
                 <span className="material-symbols-outlined text-[16px] text-amber-300">verified</span>
-                <span>100% BIS Hallmarked 925 Silver</span>
+                <span>100% Certified 925 Silver</span>
               </div>
               <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-xs px-3 py-1.5 rounded-lg border border-white/10">
                 <span className="material-symbols-outlined text-[16px] text-amber-300">local_shipping</span>
@@ -448,7 +448,7 @@ export default function JodhpurJewelleryPage() {
               The Legend of Jodhpur Silver Artistry
             </h2>
             <p className="text-xs md:text-sm text-[#64748B] leading-relaxed font-sans mb-6">
-              Jodhpur, the Sun City of Rajasthan, is celebrated globally for its centuries-old traditions of royal metalsmithing. Each silver ornament in our Jodhpur Collection is crafted using authentic Marwari silversmith techniques — featuring intricate hand-carved motifs, antique oxidizing patinas, and certified 925 BIS Hallmarked purity.
+              Jodhpur, the Sun City of Rajasthan, is celebrated globally for its centuries-old traditions of royal metalsmithing. Each silver ornament in our Jodhpur Collection is crafted using authentic Marwari silversmith techniques — featuring intricate hand-carved motifs, antique oxidizing patinas, and certified 925 Sterling Silver purity.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
               <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] shadow-2xs">
@@ -458,8 +458,8 @@ export default function JodhpurJewelleryPage() {
               </div>
               <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] shadow-2xs">
                 <span className="material-symbols-outlined text-[#008080] text-[24px] mb-2">verified_user</span>
-                <h4 className="font-serif text-sm font-medium text-[#0F172A] mb-1">BIS 925 Certified</h4>
-                <p className="text-[11px] text-[#64748B] font-sans leading-relaxed">Every individual piece undergoes government-approved BIS hallmarking before shipping.</p>
+                <h4 className="font-serif text-sm font-medium text-[#0F172A] mb-1">925 Certified</h4>
+                <p className="text-[11px] text-[#64748B] font-sans leading-relaxed">Every individual piece undergoes quality checking for certified 925 purity before shipping.</p>
               </div>
               <div className="bg-white p-4 rounded-xl border border-[#E5E7EB] shadow-2xs">
                 <span className="material-symbols-outlined text-[#008080] text-[24px] mb-2">local_shipping</span>

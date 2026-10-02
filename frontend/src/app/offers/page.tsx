@@ -160,7 +160,7 @@ export default function OffersPage() {
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#E5E7EB]">
           <div>
             <h2 className="font-serif text-2xl text-[#0F172A]">Featured Offer Collection</h2>
-            <p className="text-xs text-[#64748B] font-sans">Direct discounts applied on authentic 925 BIS Hallmarked pieces.</p>
+            <p className="text-xs text-[#64748B] font-sans">Direct discounts applied on authentic 925 sterling silver pieces.</p>
           </div>
           <Link
             href="/shop"
@@ -229,7 +229,7 @@ export default function OffersPage() {
                     </button>
                   </div>
 
-                  <p className="text-[11px] text-[#64748B] font-sans mb-2">925 Sterling Silver • BIS Hallmarked</p>
+                  <p className="text-[11px] text-[#64748B] font-sans mb-2">925 Sterling Silver • Certified Purity</p>
 
                   <div className="mt-auto flex items-center justify-between pt-2 border-t border-slate-100">
                     <div>

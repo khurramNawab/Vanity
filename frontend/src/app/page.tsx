@@ -360,7 +360,7 @@ const TESTIMONIALS = [
     location: 'Ballygunge, Kolkata',
     rating: 5,
     date: 'Verified Buyer',
-    text: 'Ordered the 925 Sterling Silver Royal Kada for Durga Puja. The craftsmanship is breathtaking, and the BIS hallmark certificate gives absolute peace of mind. Delivery was prompt within 24 hours!',
+    text: 'Ordered the 925 Sterling Silver Royal Kada for Durga Puja. The craftsmanship is breathtaking, and the authenticity certificate gives absolute peace of mind. Delivery was prompt within 24 hours!',
     product: 'Royal Silver Bangle Kada',
   },
   {
@@ -522,7 +522,7 @@ export default function HomePage() {
   const faqs = [
     {
       q: 'Is it safe to buy jewellery online from Vanity?',
-      a: 'Yes. Vanity uses secure payment gateways and verifies every product for quality and BIS Hallmarking before dispatch, so you can shop with confidence.',
+      a: 'Yes. Vanity uses secure payment gateways and verifies every product for quality and purity before dispatch, so you can shop with confidence.',
     },
     {
       q: 'Does Vanity deliver jewellery across Kolkata and other cities?',
@@ -569,7 +569,7 @@ export default function HomePage() {
       id: 1,
       image_path: '/images/luxury-hero-banner.jpg',
       headline: 'Heritage Silver & CZ Diamond Heirlooms',
-      subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & BIS Hallmarked.',
+      subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & Certified Purity.',
       cta_text: 'Shop now',
       cta_link: '/shop',
     },
@@ -577,7 +577,7 @@ export default function HomePage() {
       id: 2,
       image_path: '/images/kolkata-howrah-jewellery-banner.jpg',
       headline: 'Online Jewellery Shopping in Kolkata',
-      subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
+      subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & Certified Purity.',
       cta_text: 'Shop now',
       cta_link: '/shop',
     }
@@ -607,7 +607,7 @@ export default function HomePage() {
             id: 'featured-luxury-banner',
             image_path: '/images/luxury-hero-banner.jpg',
             headline: 'Heritage Silver & CZ Diamond Heirlooms',
-            subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & BIS Hallmarked.',
+            subtext: 'Handcrafted 925 sterling silver bridal sets, chokers, and royal filigree jewellery — authentic 925 Sterling Silver & Certified Purity.',
             cta_text: 'Shop now',
             cta_link: '/shop',
           },
@@ -615,7 +615,7 @@ export default function HomePage() {
             id: 'featured-howrah-banner',
             image_path: '/images/kolkata-howrah-jewellery-banner.jpg',
             headline: 'Online Jewellery Shopping in Kolkata',
-            subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & BIS Hallmarked.',
+            subtext: 'Necklace, Earrings, Bracelet, Bangle, Pendant, Tops, Malas — authentic 925 Sterling Silver & Certified Purity.',
             cta_text: 'Shop now',
             cta_link: '/shop',
           },
@@ -1135,11 +1135,11 @@ export default function HomePage() {
                     Quality you can verify
                   </h4>
                   <p className="text-xs text-[#475569] leading-relaxed font-sans">
-                    Every piece goes through stringent quality checks and BIS Hallmarking certificate before it reaches your doorstep.
+                    Every piece goes through stringent quality checks and purity certification before it reaches your doorstep.
                   </p>
                 </div>
                 <div className="pt-3.5 mt-3 border-t border-[#D97706]/20 flex items-center gap-1.5 text-[10px] font-bold text-[#B45309] uppercase tracking-wider">
-                  <span>925 BIS Hallmarked</span>
+                  <span>925 Certified Silver</span>
                 </div>
               </div>
 

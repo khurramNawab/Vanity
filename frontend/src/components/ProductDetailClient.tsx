@@ -39,7 +39,7 @@ const FALLBACK_PRODUCTS_MAP: Record<string, any> = {
     name: 'Royal Floral Heritage CZ Bangle',
     slug: 'royal-floral-heritage-cz-bangle',
     sku: 'VNT-BNG-202',
-    description: 'Intricately handcrafted 925 sterling silver bridal bangle adorned with precision-cut CZ diamonds and ruby accents. BIS Hallmarked for pure peace of mind.',
+    description: 'Intricately handcrafted 925 sterling silver bridal bangle adorned with precision-cut CZ diamonds and ruby accents.',
     silver_purity: '925',
     calculated_price: 7899,
     base_price: 9500,
@@ -124,7 +124,7 @@ const FALLBACK_PRODUCTS_MAP: Record<string, any> = {
     name: 'Marwar Heritage Antique Silver Jhumkas',
     slug: 'marwar-heritage-antique-silver-jhumkas',
     sku: 'VNT-JOD-902',
-    description: 'Traditional Jodhpur double-dome silver jhumkas with micro-pearl droplets and hand-engraved motifs. 100% BIS Hallmarked.',
+    description: 'Traditional Jodhpur double-dome silver jhumkas with micro-pearl droplets and hand-engraved motifs. 100% 925 Sterling Silver.',
     silver_purity: '925',
     calculated_price: 5999,
     base_price: 7200,
@@ -250,7 +250,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
           name: formattedName || '925 Sterling Silver Jewellery',
           slug: cleanKey,
           sku: `VNT-${cleanKey.slice(0, 6).toUpperCase()}`,
-          description: `Handcrafted 925 Sterling Silver ${formattedName} with authentic BIS Hallmarking. Designed for timeless elegance.`,
+          description: `Handcrafted 925 Sterling Silver ${formattedName}. Designed for timeless elegance.`,
           silver_purity: '925',
           calculated_price: 4999,
           base_price: 5999,
@@ -288,7 +288,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
     if (!p || typeof document === 'undefined') return;
 
     // Title
-    const seoTitle = p.meta_title || `${p.name} | BIS 925 Hallmarked Silver Jewellery | Vanity`;
+    const seoTitle = p.meta_title || `${p.name} | 925 Sterling Silver Jewellery | Vanity`;
     document.title = seoTitle;
 
     // Description
@@ -298,7 +298,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
       metaDesc.setAttribute('name', 'description');
       document.head.appendChild(metaDesc);
     }
-    metaDesc.setAttribute('content', p.meta_description || p.description || `Handcrafted ${p.name} in authentic 925 sterling silver with BIS Hallmark certification.`);
+    metaDesc.setAttribute('content', p.meta_description || p.description || `Handcrafted ${p.name} in authentic 925 sterling silver.`);
 
     // Keywords
     let metaKeys = document.querySelector('meta[name="keywords"]');
@@ -307,7 +307,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
       metaKeys.setAttribute('name', 'keywords');
       document.head.appendChild(metaKeys);
     }
-    metaKeys.setAttribute('content', p.meta_keywords || `925 sterling silver, ${p.name}, BIS hallmark silver, silver jewellery kolkata`);
+    metaKeys.setAttribute('content', p.meta_keywords || `925 sterling silver, ${p.name}, silver jewellery kolkata`);
 
     // Canonical URL
     let canonicalLink = document.querySelector('link[rel="canonical"]');
@@ -620,7 +620,7 @@ export default function ProductDetailClient({ initialId }: { initialId?: string 
               </div>
               <div className="flex justify-between text-on-surface-variant">
                 <span>Silver Purity</span>
-                <span className="font-medium text-primary">{product.silver_purity} (BIS Standard)</span>
+                <span className="font-medium text-primary">{product.silver_purity} (92.5% Fine Silver)</span>
               </div>
               <div className="flex justify-between text-on-surface-variant">
                 <span>Making Charges</span>

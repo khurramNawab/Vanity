@@ -33,7 +33,7 @@ export default function ResourcesPage() {
             },
             {
               title: 'Silver Purity Certification',
-              desc: 'Understand what BIS Hallmarking stands for, and how to verify the authenticity of your silver ornaments.',
+              desc: 'Understand 925 silver purity standards, and how to verify the authenticity of your silver ornaments.',
               icon: 'verified',
               link: '/purity',
             },

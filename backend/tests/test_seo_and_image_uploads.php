@@ -59,7 +59,7 @@ $category = Category::firstOrCreate(['slug' => 'necklaces'], ['name' => 'Necklac
 $testSku = 'VNT-TEST-' . time();
 $testSlug = 'festive-choker-' . time();
 $testMetaTitle = 'Royal Festive 925 Silver Choker | Vanity Kolkata';
-$testMetaDesc = 'Buy handcrafted 925 sterling silver royal festive choker in Kolkata with BIS hallmark certified purity.';
+$testMetaDesc = 'Buy handcrafted 925 sterling silver royal festive choker in Kolkata with certified purity.';
 $testMetaKeywords = 'silver choker kolkata, 925 silver necklace, festive silver jewellery';
 $testAltText = 'Royal Festive 925 Silver Choker Top View Handcrafted in Kolkata Atelier';
 

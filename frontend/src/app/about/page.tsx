@@ -28,11 +28,11 @@ export default function AboutPage() {
             <h1 className="font-headline-lg text-[36px] md:text-[52px] leading-tight text-white max-w-2xl mb-4 font-bold">
               Crafting Modern<br />Heirlooms Since 2010
             </h1>
-            <p className="text-white/75 max-w-lg text-base leading-relaxed">Vanity brings the finest BIS hallmarked silver jewellery to Kolkata and beyond — where tradition meets contemporary design.</p>
+            <p className="text-white/75 max-w-lg text-base leading-relaxed">Vanity brings the finest 925 sterling silver jewellery to Kolkata and beyond — where tradition meets contemporary design.</p>
             <div className="flex items-center gap-6 mt-8">
               <div className="flex items-center gap-2 border border-[#9A7E44] px-3 py-2">
                 <span className="material-symbols-outlined text-[#9A7E44] text-[18px]">verified</span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9A7E44]">BIS Hallmarked</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9A7E44]">925 Certified</span>
               </div>
               <span className="text-white/50 text-sm">Est. 2010 · Kolkata</span>
             </div>
@@ -45,10 +45,10 @@ export default function AboutPage() {
             <span className="font-label-upper text-label-upper text-secondary text-xs mb-3 block">Our Mission</span>
             <h2 className="font-headline-lg text-headline-lg text-primary mb-4">Transparent Pricing. Authentic Silver.</h2>
             <p className="text-on-surface-variant mb-4">We believe jewellery should be priced fairly. That's why every Vanity piece is priced using live MCX silver rates — no hidden markups, no guesswork.</p>
-            <p className="text-on-surface-variant mb-6">Every piece is BIS hallmarked and comes with an authenticity certificate. Because trust is the most precious metal of all.</p>
+            <p className="text-on-surface-variant mb-6">Every piece is crafted in pure 925 sterling silver and comes with an authenticity certificate. Because trust is the most precious metal of all.</p>
             <div className="flex flex-wrap gap-6">
               {[
-                { icon: 'verified', label: 'BIS Hallmarked', sub: 'Every piece certified' },
+                { icon: 'verified', label: '925 Certified', sub: 'Every piece certified' },
                 { icon: 'trending_up', label: 'MCX Pricing', sub: 'Live market rates' },
                 { icon: 'local_shipping', label: 'Pan India', sub: 'Free shipping ₹5k+' },
               ].map(({ icon, label, sub }) => (

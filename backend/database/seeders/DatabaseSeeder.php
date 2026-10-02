@@ -379,7 +379,7 @@ class DatabaseSeeder extends Seeder
             ['headline' => 'The Festive Edit — Now Live'],
             [
                 'image_path' => '/images/kolkata-howrah-jewellery-banner.jpg',
-                'subtext' => 'Discover handcrafted silver ornaments for every occasion. BIS Hallmarked 925 Sterling Silver.',
+                'subtext' => 'Discover handcrafted silver ornaments for every occasion. Authentic 925 Sterling Silver.',
                 'cta_text' => 'Explore Collection',
                 'cta_link' => '/collections',
                 'sort_order' => 1,

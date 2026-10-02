@@ -9,7 +9,7 @@ const PURITY_TYPES = [
   {
     purity: '92.5',
     name: '925 Sterling Silver',
-    desc: 'The most popular choice for fine jewellery. 92.5% pure silver alloyed with copper for strength. BIS Hallmarked.',
+    desc: 'The most popular choice for fine jewellery. 92.5% pure silver alloyed with copper for strength. Certified 925 Pure.',
     badge: 'Most Popular',
     products: 126,
     img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBSmmoM7xBQHRSQEuKF3-JakT5oYaeo2D94tz1eq9IBy47xxhRT6-5DuaRvIhS-9eo5Ix252z9EaDM71kNJjiXoZLeJJDA_1BuPFVnv3tbTdes3rjSlFnRRxHyXf3bOP32f9wlQ8gI3yJCEzqTeXvTSkqkjLX1alZUPRRgkkdssT0C-kLk4urdUKTTGrBDQr2DSnX5zjWIzWoUwa_m9Dfl1yDKSAmIIyXmCKxhTm2DThdxfc_U1u4k',
@@ -129,7 +129,7 @@ export default function PurityPage() {
           <div className="flex items-center gap-4">
             <span className="material-symbols-outlined text-[#9A7E44] text-[40px]">verified</span>
             <div>
-              <h3 className="font-headline-md text-headline-md text-white">All silver is BIS Hallmarked</h3>
+              <h3 className="font-headline-md text-headline-md text-white">All silver is 925 Certified Pure</h3>
               <p className="text-white/60 text-sm mt-1">Pricing is based on live MCX silver rates. No hidden markups.</p>
             </div>
           </div>

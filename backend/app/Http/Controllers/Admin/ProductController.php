@@ -447,7 +447,7 @@ class ProductController extends Controller
                 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=600&q=80',
                 'Handcrafted 925 sterling silver emerald cut solitaire ring for women',
                 'Emerald Cut Solitaire Silver Ring | 925 Sterling Silver | Vanity',
-                'Buy handcrafted 925 sterling silver solitaire ring featuring premium emerald-cut cubic zirconia. BIS Hallmarked with lifetime authenticity.',
+                'Buy handcrafted 925 sterling silver solitaire ring featuring premium emerald-cut cubic zirconia. Certified 925 silver with lifetime authenticity.',
                 'silver ring, emerald cut ring, 925 silver solitaire, kolkata silver jewellery',
                 'Handcrafted sterling silver ring with emerald cut center CZ stone.'
             ],
@@ -465,7 +465,7 @@ class ProductController extends Controller
                 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=600&q=80',
                 'Traditional royal Kolkata oxidised 925 sterling silver statement haar necklace',
                 'Chandi Haar Statement Silver Necklace | Modern Heirlooms | Vanity',
-                'Explore the royal Kolkata oxidised silver statement necklace. Handcrafted in 925 sterling silver with BIS hallmark certified quality.',
+                'Explore the royal Kolkata oxidised silver statement necklace. Handcrafted in 925 sterling silver with certified quality.',
                 'silver necklace, chandi haar, oxidised silver jewellery, bridal silver necklace',
                 'Traditional royal Kolkata oxidised silver statement necklace.'
             ]

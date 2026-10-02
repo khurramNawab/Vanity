@@ -39,8 +39,8 @@ export default function TermsPage() {
               content: 'Placing an order on our website constitutes an offer to purchase the product at the listed price. We accept payment via major credit/debit cards, UPI, net banking, and select EMI options. All transactions are secured via SSL encryption. Order confirmation does not guarantee product availability; we will notify you of any cancellations.',
             },
             {
-              title: '4. BIS Hallmarking and Authenticity',
-              content: 'All Vanity silver products are BIS hallmarked as per Bureau of Indian Standards guidelines. An authenticity certificate is included with every purchase. Vanity does not guarantee BIS compliance for products purchased from unauthorised resellers.',
+              title: '4. Product Authenticity and Purity',
+              content: 'All Vanity silver products are crafted in authentic 925 sterling silver with guaranteed purity. An authenticity certificate is included with every purchase. Vanity does not guarantee quality or authenticity for products purchased from unauthorised resellers.',
             },
             {
               title: '5. Intellectual Property',

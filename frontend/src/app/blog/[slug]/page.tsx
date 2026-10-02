@@ -227,7 +227,7 @@ export default async function BlogPostPage({ params }: Props) {
                     Artisan Craftsmanship
                   </span>
                   <h4 className="font-headline-md text-xl font-bold text-primary mt-1 mb-2">
-                    Experience BIS Hallmarked Kolkata Jewellery
+                    Experience Certified 925 Kolkata Jewellery
                   </h4>
                   <p className="text-xs text-on-surface-variant max-w-md">
                     Explore our certified 925 sterling silver, CZ diamond embellished pieces, and handcrafted filigree chokers with doorstep delivery across Kolkata.

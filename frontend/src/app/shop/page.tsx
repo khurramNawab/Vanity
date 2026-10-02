@@ -99,7 +99,7 @@ const INITIAL_FALLBACK_PRODUCTS = [
     sku: 'VNT-TOP-006',
     name: 'Imperial Ruby & Pearl Drop Tops',
     slug: 'imperial-ruby-pearl-drop-tops',
-    description: 'Everyday understated luxury CZ tops embedded with hand-cut pavé stones and certified BIS 925 authenticity.',
+    description: 'Everyday understated luxury CZ tops embedded with hand-cut pavé stones and certified 925 silver purity.',
     silver_purity: '925',
     calculated_price: 5999,
     base_price: 5999,

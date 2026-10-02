@@ -713,7 +713,7 @@ export default function AdminProductsPage() {
     if (!name) return;
     const cat = categories.find(c => c.id.toString() === categoryId)?.name || 'Silver Jewellery';
     const excerpt = description ? description.slice(0, 75).trim() + '. ' : '';
-    setMetaDescription(`Buy handcrafted ${name} in 925 sterling silver. ${excerpt}Certified BIS Hallmark with lifetime authenticity from Vanity.`);
+    setMetaDescription(`Buy handcrafted ${name} in 925 sterling silver. ${excerpt}Certified 925 purity with lifetime authenticity from Vanity.`);
   };
 
   const autoGenerateSlug = () => {
@@ -955,7 +955,7 @@ export default function AdminProductsPage() {
   };
 
   const effectiveTitle = metaTitle || (name ? `${name} | 925 Sterling Silver | Vanity` : 'Product Title | Vanity Jewels');
-  const effectiveDesc = metaDescription || (description ? description.slice(0, 155) : 'Discover handcrafted 925 sterling silver jewellery with BIS hallmarking.');
+  const effectiveDesc = metaDescription || (description ? description.slice(0, 155) : 'Discover handcrafted 925 sterling silver jewellery.');
   const effectiveSlug = slug || (name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'product-slug');
 
   return (
@@ -1733,7 +1733,7 @@ export default function AdminProductsPage() {
                           <span className="material-symbols-outlined text-secondary text-base">collections</span>
                           Product Multi-Angle Gallery Photos ({1 + galleryImages.length})
                         </label>
-                        <p className="text-[11px] text-on-surface-variant">Upload multiple photos (Front, Side view, Model worn shot, BIS Hallmark close-up) for full 360° view.</p>
+                        <p className="text-[11px] text-on-surface-variant">Upload multiple photos (Front, Side view, Model worn shot, Close-up detail) for full 360° view.</p>
                       </div>
                       
                       <label className="cursor-pointer bg-primary text-on-primary hover:bg-inverse-surface px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1.5 shrink-0 shadow-xs">
@@ -1908,7 +1908,7 @@ export default function AdminProductsPage() {
                             <span>·</span>
                             <span className="text-[#137333] font-semibold bg-emerald-50 px-1.5 py-0.5 rounded">In stock</span>
                             <span>·</span>
-                            <span className="text-slate-600">BIS 925 Hallmark</span>
+                            <span className="text-slate-600">925 Sterling Silver</span>
                           </div>
                         </div>
                       ) : (
@@ -1933,7 +1933,7 @@ export default function AdminProductsPage() {
                             <span>·</span>
                             <span className="text-[#137333] font-medium">In stock</span>
                             <span>·</span>
-                            <span>BIS 925 Hallmark</span>
+                            <span>925 Sterling Silver</span>
                           </div>
                         </div>
                       )}
@@ -1966,7 +1966,7 @@ export default function AdminProductsPage() {
                         className="w-full border border-outline-variant/50 rounded px-3 py-2 text-sm focus:outline-none focus:border-primary bg-surface-container-lowest"
                         value={metaTitle}
                         onChange={(e) => setMetaTitle(e.target.value)}
-                        placeholder="e.g. Royal Peacock Silver Necklace | BIS 925 Hallmark | Vanity"
+                        placeholder="e.g. Royal Peacock Silver Necklace | 925 Sterling Silver | Vanity"
                       />
                       <p className="text-[11px] text-on-surface-variant mt-1">Optimal length: 50–60 characters. Appears as the main clickable headline in search engines.</p>
                     </div>

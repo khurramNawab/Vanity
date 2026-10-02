@@ -6,7 +6,7 @@ export interface BlogPost {
   metaDescription: string;
   keywords: string[];
   canonicalUrl: string;
-  category: 'Purity & Hallmarks' | 'Styling & Trends' | 'Buying Guides' | 'Silver Rates & Care';
+  category: 'Purity & Certification' | 'Styling & Trends' | 'Buying Guides' | 'Silver Rates & Care';
   publishedAt: string;
   modifiedAt: string;
   author: {
@@ -26,10 +26,10 @@ export const BLOG_POSTS: BlogPost[] = [
   {
     slug: 'ultimate-guide-925-sterling-silver-jewellery-kolkata',
     title: 'The Ultimate Guide to Buying 925 Sterling Silver Jewellery in Kolkata (2026)',
-    excerpt: 'Discover the artistry of authentic 925 sterling silver jewellery in Kolkata. Learn hallmark verification, Kolkata artisan heritage, transparent pricing, and smart online buying tips.',
+    excerpt: 'Discover the artistry of authentic 925 sterling silver jewellery in Kolkata. Learn purity verification, Kolkata artisan heritage, transparent pricing, and smart online buying tips.',
     metaTitle: 'Buy 925 Sterling Silver Jewellery Kolkata | Vanity Modern Heirlooms',
-    metaDescription: 'Complete 2026 buying guide for 925 sterling silver jewellery in Kolkata. Explore BIS hallmarked silver, artisan filigree craft, daily wear chokers, and online delivery across West Bengal.',
-    keywords: ['silver jewellery kolkata', '925 sterling silver online', 'buy silver jewellery kolkata', 'bis hallmarked silver kolkata', 'vanity silver jewels'],
+    metaDescription: 'Complete 2026 buying guide for 925 sterling silver jewellery in Kolkata. Explore certified 925 silver, artisan filigree craft, daily wear chokers, and online delivery across West Bengal.',
+    keywords: ['silver jewellery kolkata', '925 sterling silver online', 'buy silver jewellery kolkata', 'certified 925 silver kolkata', 'vanity silver jewels'],
     canonicalUrl: 'https://thevanityjewels.com/blog/ultimate-guide-925-sterling-silver-jewellery-kolkata',
     category: 'Buying Guides',
     publishedAt: '2026-08-15',
@@ -44,7 +44,7 @@ export const BLOG_POSTS: BlogPost[] = [
     imageAlt: 'Handcrafted 925 sterling silver necklace in Kolkata studio',
     tags: ['Kolkata Jewellery', '925 Sterling Silver', 'Buying Guide', 'Artisan Craft'],
     relatedSlugs: [
-      'how-to-verify-bis-hallmark-on-silver-jewellery',
+      'how-to-verify-925-purity-on-silver-jewellery',
       'understanding-mcx-live-silver-rate-and-making-charges',
       'modern-bridal-silver-jewellery-trends-bengali-weddings',
     ],
@@ -78,14 +78,13 @@ Explore our curated [Silver Jewellery Collection](file:///c:/Users/khurr/Vanity/
 
 ---
 
-## 3. How to Check Purity & Hallmarking
+## 3. How to Check Purity & Authentication
 
-Never compromise on certification. In India, always inspect the piece for three mandatory hallmarks:
-1. **The BIS Logo**: The official triangular Bureau of Indian Standards emblem.
-2. **Purity Grade**: The stamp **'925'** or **'S925'** engraved cleanly on the clasp, backplate, or inner band.
-3. **Six-Digit HUID (Hallmark Unique Identification)**: Provides complete traceability to accredited assay laboratories.
+Never compromise on certification. In India, always inspect the piece for purity hallmarks:
+1. **The Purity Stamp**: The stamp **'925'** or **'S925'** engraved cleanly on the clasp, backplate, or inner band.
+2. **Quality Verification**: Assures certified 92.5% elemental silver composition.
 
-At Vanity, every piece is independently assayed and laser-engraved with certified purity stamps. Learn more about our authentication standards in our [BIS Hallmark Verification Guide](file:///c:/Users/khurr/Vanity/frontend/src/app/blog/how-to-verify-bis-hallmark-on-silver-jewellery).
+At Vanity, every piece is independently assayed and laser-engraved with certified purity stamps.
 
 ---
 
@@ -116,14 +115,14 @@ Whether you reside in Salt Lake, New Town, Alipore, Ballygunge, or North Kolkata
     `
   },
   {
-    slug: 'how-to-verify-bis-hallmark-on-silver-jewellery',
-    title: 'How to Verify BIS Hallmark & Purity on Silver Jewellery in India (2026 Guide)',
-    excerpt: 'Protect your precious metal investments. Step-by-step tutorial on identifying genuine BIS hallmark stamps, 925 purity codes, and using the BIS Care App in India.',
-    metaTitle: 'How to Verify BIS Hallmark on Silver Jewellery | Vanity Guide',
-    metaDescription: 'Step-by-step guide to verifying BIS Hallmark, 925 stamp, and HUID on silver jewellery in India. Avoid fake silver and ensure authentic 92.5% purity.',
-    keywords: ['bis hallmark silver', 'verify 925 silver', 'bis care app silver', 'silver purity test india', 'hallmarked silver jewellery'],
-    canonicalUrl: 'https://thevanityjewels.com/blog/how-to-verify-bis-hallmark-on-silver-jewellery',
-    category: 'Purity & Hallmarks',
+    slug: 'how-to-verify-925-purity-on-silver-jewellery',
+    title: 'How to Verify 925 Silver Purity & Authenticity in India (2026 Guide)',
+    excerpt: 'Protect your precious metal investments. Step-by-step tutorial on identifying genuine 925 purity codes and authentication standards in India.',
+    metaTitle: 'How to Verify 925 Silver Purity | Vanity Guide',
+    metaDescription: 'Step-by-step guide to verifying 925 stamp, silver purity, and authentic silver jewellery in India. Avoid fake silver and ensure authentic 92.5% purity.',
+    keywords: ['verify 925 silver', 'silver purity test india', 'certified silver jewellery', '925 silver stamp'],
+    canonicalUrl: 'https://thevanityjewels.com/blog/how-to-verify-925-purity-on-silver-jewellery',
+    category: 'Purity & Certification',
     publishedAt: '2026-08-20',
     modifiedAt: '2026-09-08',
     author: {
@@ -133,46 +132,44 @@ Whether you reside in Salt Lake, New Town, Alipore, Ballygunge, or North Kolkata
     },
     readTime: '5 min read',
     coverImage: 'https://images.unsplash.com/photo-1611591475155-4286fa7c2e7f?auto=format&fit=crop&w=1200&q=85',
-    imageAlt: 'Microscopic inspection of BIS hallmark stamp on silver jewellery',
-    tags: ['BIS Hallmark', 'Purity Testing', 'Consumer Rights', 'Quality Assurance'],
+    imageAlt: 'Microscopic inspection of 925 purity stamp on silver jewellery',
+    tags: ['925 Purity', 'Purity Testing', 'Consumer Rights', 'Quality Assurance'],
     relatedSlugs: [
       'ultimate-guide-925-sterling-silver-jewellery-kolkata',
       'understanding-mcx-live-silver-rate-and-making-charges',
       'how-to-clean-and-prevent-tarnishing-sterling-silver',
     ],
     content: `
-# How to Verify BIS Hallmark & Purity on Silver Jewellery in India
+# How to Verify 925 Purity & Quality on Silver Jewellery in India
 
-With silver gaining immense popularity as a sophisticated, affordable alternative to gold, counterfeit and under-karatage silver pieces have flooded unorganized local markets. Knowing how to verify **BIS (Bureau of Indian Standards) Hallmarking** is your foremost shield against purchasing adulterated or low-grade alloys.
-
----
-
-## 1. What is BIS Silver Hallmarking?
-
-The Bureau of Indian Standards (BIS) is the National Standards Body of India responsible for the harmonious development of marking and quality certification of precious metals. When silver jewellery is hallmarked, it signifies that an independent government-accredited **Assaying and Hallmarking Centre (AHC)** has tested the metal and certified its exact purity.
+With silver gaining immense popularity as a sophisticated, affordable alternative to gold, counterfeit and under-karatage silver pieces have flooded unorganized local markets. Knowing how to verify **925 Silver Purity Certification** is your foremost shield against purchasing adulterated or low-grade alloys.
 
 ---
 
-## 2. The 3 Essential Hallmark Marks on Real 925 Silver
+## 1. What is 925 Silver Purity Certification?
 
-When you inspect a genuine piece of sterling silver jewellery under a jeweler’s loupe (10x magnifying glass), you must see these three distinct laser-engraved hallmarks:
+925 Sterling Silver certification signifies that an independent laboratory assay testing has verified that the metal contains at least 92.5% pure elemental silver. When silver jewellery is certified, it assures customers of exact precious metal content.
 
-| Hallmark Element | Description | Meaning |
+---
+
+## 2. Essential Marks on Real 925 Silver
+
+When you inspect a genuine piece of sterling silver jewellery under a jeweler’s loupe (10x magnifying glass), you must see these key laser-engraved indicators:
+
+| Element | Description | Meaning |
 | :--- | :--- | :--- |
-| **1. BIS Triangular Logo** | Official BIS hallmark symbol | Certified by a government-licensed assay centre |
-| **2. Purity Mark (925)** | Numerical stamp ('925' or '999') | Contains 92.5% pure elemental silver |
-| **3. Assayer Identification** | Unique alphanumeric identification code | Traceable batch verification code |
+| **1. Purity Stamp (925)** | Numerical stamp ('925' or 'S925') | Contains 92.5% pure elemental silver |
+| **2. Brand Seal / Logo** | Official manufacturer stamp | Certified by authentic artisan atelier |
+| **3. Batch Identification** | Unique alphanumeric serial code | Traceable quality verification code |
 
 ---
 
-## 3. How to Use the Official BIS Care App
+## 3. How to Verify Authenticity Certificates
 
-The Government of India provides a free consumer utility called **BIS Care App** (available on iOS and Android). Here is how you can verify your hallmarked jewellery:
-
-1. Download and launch the **BIS Care App**.
-2. Select **'Verify HUID / Hallmark'** from the main dashboard.
-3. Enter the alphanumeric code engraved on your certificate or jewellery tag.
-4. The app displays the **Jeweler Registration Details**, **Assaying Centre Name**, **Date of Hallmarking**, and **Tested Purity Grade**.
+Every genuine silver ornament should come with a certified purity card detailing:
+1. **Manufacturer / Brand Registration Details**.
+2. **Date of Assay & Quality Inspection**.
+3. **Exact Tested Purity Grade (925 / 999)**.
 
 ---
 
@@ -184,7 +181,7 @@ While laboratory assay testing is the gold standard, here are 3 reliable home ve
 - **The Ice Cube Melt Test**: Silver is the best thermal conductor among all precious metals. Place an ice cube directly on the silver piece — genuine sterling silver causes the ice to melt immediately at an accelerated rate.
 - **The Ring Tone Test**: When gently tapped against another metal, genuine silver emits a high-pitched, clear ringing chime, unlike the dull thud of brass or zinc alloys.
 
-Explore Vanity’s 100% BIS-compliant catalogue in our [All Jewellery Shop](file:///c:/Users/khurr/Vanity/frontend/src/app/shop).
+Explore Vanity’s 100% 925 certified catalogue in our [All Jewellery Shop](file:///c:/Users/khurr/Vanity/frontend/src/app/shop).
     `
   },
   {
@@ -314,7 +311,7 @@ Explore our [Chokers & Necklaces](file:///c:/Users/khurr/Vanity/frontend/src/app
     tags: ['Silver Rates', 'MCX India', 'Transparent Pricing', 'Finance & Investment'],
     relatedSlugs: [
       'ultimate-guide-925-sterling-silver-jewellery-kolkata',
-      'how-to-verify-bis-hallmark-on-silver-jewellery',
+      'how-to-verify-925-purity-on-silver-jewellery',
       'silver-vs-brass-vs-gold-plated-jewellery-buying-guide',
     ],
     content: `
@@ -431,7 +428,7 @@ Explore our [CZ Embellished Collection](file:///c:/Users/khurr/Vanity/frontend/s
     imageAlt: 'Polishing silver jewellery with microfiber anti tarnish cloth',
     tags: ['Silver Care', 'DIY Cleaning', 'Maintenance', 'Anti Tarnish'],
     relatedSlugs: [
-      'how-to-verify-bis-hallmark-on-silver-jewellery',
+      'how-to-verify-925-purity-on-silver-jewellery',
       'ultimate-guide-925-sterling-silver-jewellery-kolkata',
       'silver-vs-brass-vs-gold-plated-jewellery-buying-guide',
     ],
@@ -566,11 +563,11 @@ Find your dream neckpiece in our [Shop Catalogue](file:///c:/Users/khurr/Vanity/
     `
   },
   {
-    slug: 'why-hallmarked-sterling-silver-is-the-best-modern-heirloom-gift',
-    title: 'Why Hallmarked Sterling Silver is the Best Modern Heirloom & Festive Gift',
+    slug: 'why-certified-sterling-silver-is-the-best-modern-heirloom-gift',
+    title: 'Why Certified Sterling Silver is the Best Modern Heirloom & Festive Gift',
     excerpt: 'Looking for a memorable gift for weddings, anniversaries, or Diwali? Discover why certified 925 silver is the most cherished present in modern India.',
     metaTitle: 'Why 925 Sterling Silver is the Best Heirloom Gift | Vanity',
-    metaDescription: 'Discover why BIS hallmarked 925 sterling silver jewellery is the perfect gift for weddings, Diwali, Durga Puja, and milestones. Timeless luxury that appreciates.',
+    metaDescription: 'Discover why 925 sterling silver jewellery is the perfect gift for weddings, Diwali, Durga Puja, and milestones. Timeless luxury that appreciates.',
     keywords: ['silver jewellery gift', 'festive gifts india', 'heirloom silver gift', 'luxury gifts kolkata', 'wedding gift ideas silver'],
     canonicalUrl: 'https://thevanityjewels.com/blog/why-hallmarked-sterling-silver-is-the-best-modern-heirloom-gift',
     category: 'Buying Guides',
@@ -587,11 +584,11 @@ Find your dream neckpiece in our [Shop Catalogue](file:///c:/Users/khurr/Vanity/
     tags: ['Gifting', 'Heirloom Jewellery', 'Festivals', 'Diwali & Puja Gifts'],
     relatedSlugs: [
       'ultimate-guide-925-sterling-silver-jewellery-kolkata',
-      'how-to-verify-bis-hallmark-on-silver-jewellery',
+      'how-to-verify-925-purity-on-silver-jewellery',
       'top-choker-and-statement-silver-necklace-designs',
     ],
     content: `
-# Why Hallmarked Sterling Silver is the Best Modern Heirloom & Festive Gift
+# Why Certified Sterling Silver is the Best Modern Heirloom & Festive Gift
 
 When celebrating birthdays, milestone anniversaries, bridal showers, or auspicious festivals like Dhanteras, Diwali, and Durga Puja, gifting is an expression of deep affection and enduring reverence.
 
@@ -604,7 +601,7 @@ While perishable gifts and fast fashion fade, **certified 925 Sterling Silver je
 1. **Precious Metal Permanence**: Silver is a noble precious metal that lasts for lifetimes and can be passed down as an heirloom.
 2. **Emotional Resonance**: Every time your loved one wears the choker or bracelet, they carry a tangible memory of your bond.
 3. **Universally Cherished**: Silver suits all skin tones, age groups, and styling preferences.
-4. **BIS Certified Authenticity**: Arrives in bespoke Vanity velvet packaging with an authenticated hallmark certificate.
+4. **Certified Authenticity**: Arrives in bespoke Vanity velvet packaging with an authenticated purity certificate.
 
 Shop curated gift pieces in our [Catalogue](file:///c:/Users/khurr/Vanity/frontend/src/app/shop) or save your favourites to your [Wishlist](file:///c:/Users/khurr/Vanity/frontend/src/app/wishlist).
     `
@@ -616,5 +613,5 @@ export function getBlogBySlug(slug: string): BlogPost | undefined {
 }
 
 export function getAllCategories(): string[] {
-  return ['All', 'Purity & Hallmarks', 'Styling & Trends', 'Buying Guides', 'Silver Rates & Care'];
+  return ['All', 'Purity & Certification', 'Styling & Trends', 'Buying Guides', 'Silver Rates & Care'];
 }

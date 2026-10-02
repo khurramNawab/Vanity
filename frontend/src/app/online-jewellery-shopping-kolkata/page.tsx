@@ -3,7 +3,7 @@ import HomePage from '../page';
 
 export const metadata: Metadata = {
   title: 'Online Jewellery Shopping Kolkata | Vanity Jewels - 925 Sterling Silver',
-  description: 'Looking for a trusted online jewellery brand in Kolkata? Vanity offers online jewellery shopping in Kolkata with authentic 925 Sterling Silver, BIS Hallmarked necklaces, earrings, bangles, bracelets, pendants, and malas.',
+  description: 'Looking for a trusted online jewellery brand in Kolkata? Vanity offers online jewellery shopping in Kolkata with authentic 925 Sterling Silver necklaces, earrings, bangles, bracelets, pendants, and malas.',
   keywords: [
     'online jewellery shopping kolkata',
     'silver jewellery online kolkata',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Online Jewellery Shopping Kolkata | Vanity Jewels',
-    description: 'Authentic 925 Sterling Silver & BIS Hallmarked jewellery delivered across Kolkata and India.',
+    description: 'Authentic 925 Sterling Silver certified jewellery delivered across Kolkata and India.',
     images: ['/images/hero-vanity-banner.jpg'],
   },
 };
